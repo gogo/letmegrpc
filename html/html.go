@@ -72,7 +72,7 @@ func (p *html) w(s string) {
 
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
 	//fileDescriptorSet := p.AllFiles()
-	p.P(`s := "<form action=\"" + this.prefix + "/`, method.GetName(), `\" method=\"GET\">"`)
+	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\">"`)
 	p.P(`w.Write([]byte(s))`)
 	p.In()
 	p.w(`Json for ` + servName + `(` + method.GetInputType() + `):<br>`)
@@ -96,26 +96,25 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.In()
 		p.P(`client `, servName, `Client`)
 		p.P(`stringer func(interface{}) ([]byte, error)`)
-		p.P(`prefix string`)
 		p.P(`port string`)
 		p.Out()
 		p.P(`}`)
 
-		p.P(`func NewHTML`, servName, `Server(prefix string, client `, servName, `Client, stringer func(interface{}) ([]byte, error)) *html`, servName, ` {`)
+		p.P(`func NewHTML`, servName, `Server(client `, servName, `Client, stringer func(interface{}) ([]byte, error)) *html`, servName, ` {`)
 		p.In()
 		p.P(`if stringer == nil {`)
 		p.In()
 		p.P(`stringer = `, jsonPkg.Use(), `.Marshal`)
 		p.Out()
 		p.P(`}`)
-		p.P(`return &html`, servName, `{client, stringer, prefix, ":8080"}`)
+		p.P(`return &html`, servName, `{client, stringer, ":8080"}`)
 		p.Out()
 		p.P(`}`)
 
 		p.P(`func (this *html`, servName, `) Serve(addr string) error {`)
 		p.In()
 		for _, m := range s.GetMethod() {
-			p.P(httpPkg.Use(), `.HandleFunc(this.prefix + "/`, m.GetName(), `", this.`, m.GetName(), `)`)
+			p.P(httpPkg.Use(), `.HandleFunc("/`, servName, `/`, m.GetName(), `", this.`, m.GetName(), `)`)
 		}
 		p.P(`_, port, err := `, netPkg.Use(), `.SplitHostPort(addr)`)
 		p.P(`if err != nil {`)

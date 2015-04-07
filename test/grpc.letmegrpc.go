@@ -25,21 +25,20 @@ import golang_org_x_net_context "golang.org/x/net/context"
 type htmlMyTest struct {
 	client   MyTestClient
 	stringer func(interface{}) ([]byte, error)
-	prefix   string
 	port     string
 }
 
-func NewHTMLMyTestServer(prefix string, client MyTestClient, stringer func(interface{}) ([]byte, error)) *htmlMyTest {
+func NewHTMLMyTestServer(client MyTestClient, stringer func(interface{}) ([]byte, error)) *htmlMyTest {
 	if stringer == nil {
 		stringer = encoding_json.Marshal
 	}
-	return &htmlMyTest{client, stringer, prefix, ":8080"}
+	return &htmlMyTest{client, stringer, ":8080"}
 }
 func (this *htmlMyTest) Serve(addr string) error {
-	net_http.HandleFunc(this.prefix+"/UnaryCall", this.UnaryCall)
-	net_http.HandleFunc(this.prefix+"/Downstream", this.Downstream)
-	net_http.HandleFunc(this.prefix+"/Upstream", this.Upstream)
-	net_http.HandleFunc(this.prefix+"/Bidi", this.Bidi)
+	net_http.HandleFunc("/MyTest/UnaryCall", this.UnaryCall)
+	net_http.HandleFunc("/MyTest/Downstream", this.Downstream)
+	net_http.HandleFunc("/MyTest/Upstream", this.Upstream)
+	net_http.HandleFunc("/MyTest/Bidi", this.Bidi)
 	_, port, err := net.SplitHostPort(addr)
 	if err != nil {
 		return err
@@ -54,7 +53,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	if len(jsonString) == 0 {
-		s := "<form action=\"" + this.prefix + "/UnaryCall\" method=\"GET\">"
+		s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -98,7 +97,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	if len(jsonString) == 0 {
-		s := "<form action=\"" + this.prefix + "/Downstream\" method=\"GET\">"
+		s := "<form action=\"/MyTest/Downstream\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -152,7 +151,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	if len(jsonString) == 0 {
-		s := "<form action=\"" + this.prefix + "/Upstream\" method=\"GET\">"
+		s := "<form action=\"/MyTest/Upstream\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -212,7 +211,7 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	if len(jsonString) == 0 {
-		s := "<form action=\"" + this.prefix + "/Bidi\" method=\"GET\">"
+		s := "<form action=\"/MyTest/Bidi\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))

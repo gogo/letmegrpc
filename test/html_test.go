@@ -34,6 +34,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -103,15 +104,18 @@ func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, MyTestClient) {
 func TestHTML(t *testing.T) {
 	server, client := setup(t, &aServer{})
 	defer server.Stop()
-	htmlserver := NewHTMLMyTestServer("", client, nil)
+	htmlserver := NewHTMLMyTestServer(client, nil)
 	go htmlserver.Serve("localhost:8080")
-	resp, err := http.Get("http://localhost:8080/UnaryCall")
+	resp, err := http.Get("http://localhost:8080/MyTest/UnaryCall")
 	if err != nil {
 		t.Fatal(err)
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if strings.Contains(string(body), "404") {
+		t.Fatal("404")
 	}
 	t.Logf("%s", string(body))
 	want := int64(5)
@@ -120,13 +124,16 @@ func TestHTML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/UnaryCall?json=%s", string(data)))
+	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/MyTest/UnaryCall?json=%s", string(data)))
 	if err != nil {
 		t.Fatal(err)
 	}
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if strings.Contains(string(body), "404") {
+		t.Fatal("404")
 	}
 	t.Logf("%s", string(body))
 }
