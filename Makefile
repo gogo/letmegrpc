@@ -54,4 +54,4 @@ drone:
 	(cd $(GOPATH)/src/github.com/gogo/protobuf && git checkout proto3)
 	(cd $(GOPATH)/src/github.com/gogo/protobuf && make)
 	make install
-	make test
+	go test -v ./test/...
