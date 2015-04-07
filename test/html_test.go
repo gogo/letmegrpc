@@ -114,10 +114,13 @@ func TestHTML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("%s", string(body))
 	if strings.Contains(string(body), "404") {
 		t.Fatal("404")
 	}
-	t.Logf("%s", string(body))
+	if !strings.Contains(string(body), "<form") {
+		t.Fatal("no form")
+	}
 	want := int64(5)
 	req := &MyRequest{want}
 	data, err := json.Marshal(req)
@@ -132,8 +135,11 @@ func TestHTML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("%s", string(body))
 	if strings.Contains(string(body), "404") {
 		t.Fatal("404")
 	}
-	t.Logf("%s", string(body))
+	if !strings.Contains(string(body), `{"Value":5}`) {
+		t.Fatal("could not find json value")
+	}
 }
