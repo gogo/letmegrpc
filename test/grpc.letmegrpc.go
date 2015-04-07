@@ -21,6 +21,7 @@ import encoding_json "encoding/json"
 import io "io"
 import net "net"
 import golang_org_x_net_context "golang.org/x/net/context"
+import strings "strings"
 
 type htmlMyTest struct {
 	client   MyTestClient
@@ -52,79 +53,52 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte("<title>MyTest - UnaryCall</title>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
-	if len(jsonString) == 0 {
-		s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\">"
-		w.Write([]byte(s))
-		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
-		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
-		w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-		w.Write([]byte("</form>"))
-		w.Write([]byte("</html>"))
-		return
-	}
+	someValue := false
 	msg := &MyRequest{}
-	err := encoding_json.Unmarshal([]byte(jsonString), msg)
-	if err != nil {
-		if err == io.EOF {
+	if len(jsonString) > 0 {
+		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	reply, err := this.client.UnaryCall(golang_org_x_net_context.Background(), msg)
-	if err != nil {
-		if err == io.EOF {
-			return
+		someValue = true
+	} else {
+		fieldnames := []string{
+			"Value",
+			"Value2",
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	out, err := this.stringer(reply)
-	if err != nil {
-		if err == io.EOF {
-			return
+		fields := make([]string, 0, len(fieldnames))
+		for _, name := range fieldnames {
+			v := req.FormValue(name)
+			if len(v) > 0 {
+				someValue = true
+				fields = append(fields, "\""+name+"\":"+v)
+			}
+			if someValue {
+				s := "{" + strings.Join(fields, ",") + "}"
+				err := encoding_json.Unmarshal([]byte(s), msg)
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					w.Write([]byte(err.Error()))
+					return
+				}
+			}
 		}
-		w.Write([]byte(err.Error()))
-		return
 	}
-	w.Write(out)
-	w.Write([]byte("</html>"))
-}
-func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte("<html>"))
-	w.Write([]byte("<head>"))
-	w.Write([]byte("<title>MyTest - Downstream</title>"))
-	w.Write([]byte("</head>"))
-	jsonString := req.FormValue("json")
-	if len(jsonString) == 0 {
-		s := "<form action=\"/MyTest/Downstream\" method=\"GET\">"
-		w.Write([]byte(s))
-		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
-		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
-		w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-		w.Write([]byte("</form>"))
-		w.Write([]byte("</html>"))
-		return
-	}
-	msg := &MyRequest{}
-	err := encoding_json.Unmarshal([]byte(jsonString), msg)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	down, err := this.client.Downstream(golang_org_x_net_context.Background(), msg)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	for {
-		reply, err := down.Recv()
+	s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\">"
+	w.Write([]byte(s))
+	w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
+	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\"><br>"))
+	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
+	w.Write([]byte("</form>"))
+	if someValue {
+		reply, err := this.client.UnaryCall(golang_org_x_net_context.Background(), msg)
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -144,64 +118,173 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	}
 	w.Write([]byte("</html>"))
 }
+func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Request) {
+	w.Write([]byte("<html>"))
+	w.Write([]byte("<head>"))
+	w.Write([]byte("<title>MyTest - Downstream</title>"))
+	w.Write([]byte("</head>"))
+	jsonString := req.FormValue("json")
+	someValue := false
+	msg := &MyRequest{}
+	if len(jsonString) > 0 {
+		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
+			return
+		}
+		someValue = true
+	} else {
+		fieldnames := []string{
+			"Value",
+			"Value2",
+		}
+		fields := make([]string, 0, len(fieldnames))
+		for _, name := range fieldnames {
+			v := req.FormValue(name)
+			if len(v) > 0 {
+				someValue = true
+				fields = append(fields, "\""+name+"\":"+v)
+			}
+			if someValue {
+				s := "{" + strings.Join(fields, ",") + "}"
+				err := encoding_json.Unmarshal([]byte(s), msg)
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					w.Write([]byte(err.Error()))
+					return
+				}
+			}
+		}
+	}
+	s := "<form action=\"/MyTest/Downstream\" method=\"GET\">"
+	w.Write([]byte(s))
+	w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
+	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\"><br>"))
+	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
+	w.Write([]byte("</form>"))
+	if someValue {
+		down, err := this.client.Downstream(golang_org_x_net_context.Background(), msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
+			return
+		}
+		for {
+			reply, err := down.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return
+				}
+				w.Write([]byte(err.Error()))
+				return
+			}
+			out, err := this.stringer(reply)
+			if err != nil {
+				if err == io.EOF {
+					return
+				}
+				w.Write([]byte(err.Error()))
+				return
+			}
+			w.Write([]byte("<p>"))
+			w.Write(out)
+			w.Write([]byte("</p>"))
+			w.(net_http.Flusher).Flush()
+		}
+	}
+	w.Write([]byte("</html>"))
+}
 func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Upstream</title>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
-	if len(jsonString) == 0 {
-		s := "<form action=\"/MyTest/Upstream\" method=\"GET\">"
-		w.Write([]byte(s))
-		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
-		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
-		w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-		w.Write([]byte("</form>"))
-		w.Write([]byte("</html>"))
-		return
-	}
+	someValue := false
 	msg := &MyMsg{}
-	err := encoding_json.Unmarshal([]byte(jsonString), msg)
-	if err != nil {
-		if err == io.EOF {
+	if len(jsonString) > 0 {
+		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
+		someValue = true
+	} else {
+		fieldnames := []string{
+			"Value",
+		}
+		fields := make([]string, 0, len(fieldnames))
+		for _, name := range fieldnames {
+			v := req.FormValue(name)
+			if len(v) > 0 {
+				someValue = true
+				fields = append(fields, "\""+name+"\":"+v)
+			}
+			if someValue {
+				s := "{" + strings.Join(fields, ",") + "}"
+				err := encoding_json.Unmarshal([]byte(s), msg)
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					w.Write([]byte(err.Error()))
+					return
+				}
+			}
+		}
 	}
-	up, err := this.client.Upstream(golang_org_x_net_context.Background())
-	if err != nil {
-		if err == io.EOF {
+	s := "<form action=\"/MyTest/Upstream\" method=\"GET\">"
+	w.Write([]byte(s))
+	w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
+	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
+	w.Write([]byte("</form>"))
+	if someValue {
+		up, err := this.client.Upstream(golang_org_x_net_context.Background())
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	err = up.Send(msg)
-	if err != nil {
-		if err == io.EOF {
+		err = up.Send(msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	reply, err := up.CloseAndRecv()
-	if err != nil {
-		if err == io.EOF {
+		reply, err := up.CloseAndRecv()
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	out, err := this.stringer(reply)
-	if err != nil {
-		if err == io.EOF {
+		out, err := this.stringer(reply)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
+		w.Write(out)
 	}
-	w.Write(out)
 	w.Write([]byte("</html>"))
 }
 func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
@@ -210,57 +293,82 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<title>MyTest - Bidi</title>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
-	if len(jsonString) == 0 {
-		s := "<form action=\"/MyTest/Bidi\" method=\"GET\">"
-		w.Write([]byte(s))
-		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
-		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
-		w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-		w.Write([]byte("</form>"))
-		w.Write([]byte("</html>"))
-		return
-	}
+	someValue := false
 	msg := &MyMsg{}
-	err := encoding_json.Unmarshal([]byte(jsonString), msg)
-	if err != nil {
-		if err == io.EOF {
+	if len(jsonString) > 0 {
+		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
+		someValue = true
+	} else {
+		fieldnames := []string{
+			"Value",
+		}
+		fields := make([]string, 0, len(fieldnames))
+		for _, name := range fieldnames {
+			v := req.FormValue(name)
+			if len(v) > 0 {
+				someValue = true
+				fields = append(fields, "\""+name+"\":"+v)
+			}
+			if someValue {
+				s := "{" + strings.Join(fields, ",") + "}"
+				err := encoding_json.Unmarshal([]byte(s), msg)
+				if err != nil {
+					if err == io.EOF {
+						return
+					}
+					w.Write([]byte(err.Error()))
+					return
+				}
+			}
+		}
 	}
-	bidi, err := this.client.Bidi(golang_org_x_net_context.Background())
-	if err != nil {
-		if err == io.EOF {
+	s := "<form action=\"/MyTest/Bidi\" method=\"GET\">"
+	w.Write([]byte(s))
+	w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
+	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
+	w.Write([]byte("</form>"))
+	if someValue {
+		bidi, err := this.client.Bidi(golang_org_x_net_context.Background())
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	err = bidi.Send(msg)
-	if err != nil {
-		if err == io.EOF {
+		err = bidi.Send(msg)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	reply, err := bidi.Recv()
-	if err != nil {
-		if err == io.EOF {
+		reply, err := bidi.Recv()
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
-	}
-	out, err := this.stringer(reply)
-	if err != nil {
-		if err == io.EOF {
+		out, err := this.stringer(reply)
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+			w.Write([]byte(err.Error()))
 			return
 		}
-		w.Write([]byte(err.Error()))
-		return
+		w.Write(out)
 	}
-	w.Write(out)
 	w.Write([]byte("</html>"))
 }

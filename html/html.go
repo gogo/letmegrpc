@@ -28,12 +28,16 @@ package html
 import (
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	"strings"
 )
 
 type html struct {
 	*generator.Generator
 	generator.PluginImports
-	ioPkg generator.Single
+	ioPkg      generator.Single
+	reflectPkg generator.Single
+	stringsPkg generator.Single
+	jsonPkg    generator.Single
 }
 
 func New() *html {
@@ -70,13 +74,69 @@ func (p *html) w(s string) {
 	p.P(`w.Write([]byte("`, s, `"))`)
 }
 
+func formable(msg *descriptor.DescriptorProto) bool {
+	return true
+}
+
+func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descriptor.DescriptorProto {
+	fileDescriptorSet := p.AllFiles()
+	inputs := strings.Split(method.GetInputType(), ".")
+	packageName := inputs[1]
+	messageName := inputs[2]
+	msg := fileDescriptorSet.GetMessage(packageName, messageName)
+	if msg == nil {
+		p.Fail("could not find message ", method.GetInputType())
+	}
+	return msg
+}
+
+func (p *html) generateSets(servName string, method *descriptor.MethodDescriptorProto) {
+	msg := p.getInputType(method)
+	if !formable(msg) {
+		return
+	}
+	p.P(`fieldnames := []string{`)
+	p.In()
+	for _, f := range msg.GetField() {
+		p.P(`"`, f.GetName(), `",`)
+	}
+	p.Out()
+	p.P(`}`)
+	p.P(`fields := make([]string, 0, len(fieldnames))`)
+	p.P(`for _, name := range fieldnames {`)
+	p.In()
+	p.P(`v := req.FormValue(name)`)
+	p.P(`if len(v) > 0 {`)
+	p.In()
+	p.P(`someValue = true`)
+	p.P(`fields = append(fields, "\"" + name + "\":" + v)`)
+	p.Out()
+	p.P(`}`)
+	p.P(`if someValue {`)
+	p.In()
+	p.P(`s := "{" + `, p.stringsPkg.Use(), `.Join(fields, ",") + "}"`)
+	p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(s), msg)`)
+	p.writeError()
+	p.Out()
+	p.P(`}`)
+	p.Out()
+	p.P(`}`)
+}
+
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
-	//fileDescriptorSet := p.AllFiles()
+	msg := p.getInputType(method)
 	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\">"`)
 	p.P(`w.Write([]byte(s))`)
 	p.In()
 	p.w(`Json for ` + servName + `(` + method.GetInputType() + `):<br>`)
-	p.w(`<input name=\"json\" type=\"text\"><br>`)
+	if !formable(msg) {
+		panic("I don't think it is complicated")
+		p.w(`<input name=\"json\" type=\"text\"><br>`)
+	} else {
+		for _, f := range msg.GetField() {
+			p.w(f.GetName() + `: <input name=\"` + f.GetName() + `\" type=\"text\"><br>`)
+		}
+	}
 	p.w(`<input type=\"submit\" value=\"Submit\"/>`)
 	p.Out()
 	p.w(`</form>`)
@@ -85,10 +145,12 @@ func (p *html) generateForm(servName string, method *descriptor.MethodDescriptor
 func (p *html) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
 	httpPkg := p.NewImport("net/http")
-	jsonPkg := p.NewImport("encoding/json")
+	p.jsonPkg = p.NewImport("encoding/json")
 	p.ioPkg = p.NewImport("io")
 	netPkg := p.NewImport("net")
 	contextPkg := p.NewImport("golang.org/x/net/context")
+	p.reflectPkg = p.NewImport("reflect")
+	p.stringsPkg = p.NewImport("strings")
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
@@ -104,7 +166,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.In()
 		p.P(`if stringer == nil {`)
 		p.In()
-		p.P(`stringer = `, jsonPkg.Use(), `.Marshal`)
+		p.P(`stringer = `, p.jsonPkg.Use(), `.Marshal`)
 		p.Out()
 		p.P(`}`)
 		p.P(`return &html`, servName, `{client, stringer, ":8080"}`)
@@ -135,16 +197,22 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.w("<title>" + servName + " - " + m.GetName() + "</title>")
 			p.w("</head>")
 			p.P(`jsonString := req.FormValue("json")`)
-			p.P(`if len(jsonString) == 0 {`)
+			p.P(`someValue := false`)
+			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
+			p.P(`if len(jsonString) > 0 {`)
 			p.In()
-			p.generateForm(servName, m)
-			p.w("</html>")
-			p.P(`return`)
+			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
+			p.writeError()
+			p.P(`someValue = true`)
+			p.Out()
+			p.P(`} else {`)
+			p.In()
+			p.generateSets(servName, m)
 			p.Out()
 			p.P(`}`)
-			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
-			p.P(`err := `, jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
-			p.writeError()
+			p.generateForm(servName, m)
+			p.P(`if someValue {`)
+			p.In()
 			if !m.GetClientStreaming() {
 				if !m.GetServerStreaming() {
 					p.P(`reply, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
@@ -161,7 +229,10 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.writeError()
 					p.P(`out, err := this.stringer(reply)`)
 					p.writeError()
+					p.w(`<p>`)
 					p.P(`w.Write(out)`)
+					p.w(`</p>`)
+					p.P(`w.(`, httpPkg.Use(), `.Flusher).Flush()`)
 					p.Out()
 					p.P(`}`)
 				}
@@ -188,6 +259,8 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.P(`w.Write(out)`)
 				}
 			}
+			p.Out()
+			p.P(`}`)
 			p.w("</html>")
 			p.Out()
 			p.P(`}`)

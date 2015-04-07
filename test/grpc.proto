@@ -29,6 +29,7 @@ package grpc;
 
 message MyRequest {
 	int64 Value = 1;
+  int32 Value2 = 2;
 }
 
 message MyResponse {

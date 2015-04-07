@@ -31,7 +31,8 @@ var _ grpc1.ClientConn
 var _ = proto.Marshal
 
 type MyRequest struct {
-	Value int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
+	Value  int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
+	Value2 int32 `protobuf:"varint,2,opt,proto3" json:"Value2,omitempty"`
 }
 
 func (m *MyRequest) Reset()         { *m = MyRequest{} }

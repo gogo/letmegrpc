@@ -36,6 +36,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 )
 
 type aServer struct{}
@@ -89,7 +90,7 @@ func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, MyTestClient) {
 	if err != nil {
 		t.Fatalf("Failed to parse listener address: %v", err)
 	}
-	s := grpc.NewServer(grpc.MaxConcurrentStreams(1))
+	s := grpc.NewServer()
 	RegisterMyTestServer(s, mytest)
 	go s.Serve(lis)
 	addr := "localhost:" + port
@@ -122,7 +123,7 @@ func TestHTML(t *testing.T) {
 		t.Fatal("no form")
 	}
 	want := int64(5)
-	req := &MyRequest{want}
+	req := &MyRequest{want, 0}
 	data, err := json.Marshal(req)
 	if err != nil {
 		t.Fatal(err)
@@ -142,4 +143,14 @@ func TestHTML(t *testing.T) {
 	if !strings.Contains(string(body), `{"Value":5}`) {
 		t.Fatal("could not find json value")
 	}
+	for {
+		time.Sleep(30 * 1e9)
+	}
 }
+
+// func TestLetMeTest(t *testing.T) {
+// 	server, client := setup(t, &aServer{})
+// 	defer server.Stop()
+// 	htmlserver := NewHTMLMyTestServer(client, nil)
+// 	htmlserver.Serve("localhost:80")
+// }
