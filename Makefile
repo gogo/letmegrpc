@@ -52,4 +52,5 @@ drone:
 	git clone https://github.com/gogo/protobuf $(GOPATH)/src/github.com/gogo/protobuf
 	(cd $(GOPATH)/src/github.com/gogo/protobuf && git checkout proto3)
 	(cd $(GOPATH)/src/github.com/gogo/protobuf && make)
-	make all
+	make install
+	make test
