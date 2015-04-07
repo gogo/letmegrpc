@@ -34,3 +34,18 @@ Clicking Submit will send your newly populated message to your grpc server imple
 Open your webbrowser at
 
     http://localhost:8080/OnionSeller/OnlyOnce
+
+## Customization
+
+letmegrpc is just another protocol buffer code generation plugin.
+Simply run:
+
+    protoc -gogo_out=. grpc.proto
+    protoc -letmegrpc_out=. grpc.proto
+
+Now you can have the html generated code next to your generated message code.
+It contains a:
+  - The Serve function that is used to start the server.
+  - SetHtmlStringer function that lets you customize your html output for each returned message, this is json by default.  This might be useful to return more links and create an explorable web site.
+
+
