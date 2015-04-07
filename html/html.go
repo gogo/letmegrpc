@@ -133,21 +133,21 @@ func (p *html) generateSets(servName string, method *descriptor.MethodDescriptor
 
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
 	msg := p.getInputType(method)
-	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\">"`)
+	p.w(`<div class=\"container\"><div class=\"jumbotron\">`)
+	p.w(`<h3>` + servName + `.` + method.GetName() + `(` + method.GetInputType()[1:] + `)</h3>`)
+	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\" role=\"form\">"`)
 	p.P(`w.Write([]byte(s))`)
-	p.In()
-	p.w(`Json for ` + servName + `(` + method.GetInputType() + `):<br>`)
+	p.w(`<div class=\"form-group\">`)
 	if !formable(msg) {
 		panic("I don't think it is complicated")
-		p.w(`<input name=\"json\" type=\"text\"><br>`)
+		p.w(`Json: <input name=\"json\" type=\"text\"><br>`)
 	} else {
 		for _, f := range msg.GetField() {
-			p.w(f.GetName() + `: <input name=\"` + f.GetName() + `\" type=\"text\"><br>`)
+			p.w(f.GetName() + `: <input name=\"` + f.GetName() + `\" type=\"text\" class=\"form-control\"><br>`)
 		}
 	}
-	p.w(`<input type=\"submit\" value=\"Submit\"/>`)
-	p.Out()
-	p.w(`</form>`)
+	p.w(`</div>`)
+	p.w(`<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>`)
 }
 
 func (p *html) Generate(file *generator.FileDescriptor) {
@@ -163,7 +163,15 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 
 	p.P(`var htmlstringer = func(v interface{}) ([]byte, error) {`)
 	p.In()
-	p.P(`return `, p.jsonPkg.Use(), `.MarshalIndent(v, "", "\t")`)
+	p.P(`header := []byte("<div class=\"container\">")`)
+	p.P(`data, err := `, p.jsonPkg.Use(), `.MarshalIndent(v, "", "\t")`)
+	p.P(`if err != nil {`)
+	p.In()
+	p.P(`return nil, err`)
+	p.Out()
+	p.P(`}`)
+	p.P(`footer := []byte("</div>")`)
+	p.P(`return append(append(header, data...), footer...), nil`)
 	p.Out()
 	p.P(`}`)
 
@@ -219,6 +227,9 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.w("<html>")
 			p.w("<head>")
 			p.w("<title>" + servName + " - " + m.GetName() + "</title>")
+			p.w(`<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">`)
+			p.w(`<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>`)
+			p.w(`<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>`)
 			p.w("</head>")
 			p.P(`jsonString := req.FormValue("json")`)
 			p.P(`someValue := false`)

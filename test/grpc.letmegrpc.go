@@ -25,7 +25,13 @@ import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
 var htmlstringer = func(v interface{}) ([]byte, error) {
-	return encoding_json.MarshalIndent(v, "", "\t")
+	header := []byte("<div class=\"container\">")
+	data, err := encoding_json.MarshalIndent(v, "", "\t")
+	if err != nil {
+		return nil, err
+	}
+	footer := []byte("</div>")
+	return append(append(header, data...), footer...), nil
 }
 
 func SetHtmlStringer(s func(interface{}) ([]byte, error)) {
@@ -58,6 +64,9 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - UnaryCall</title>"))
+	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
+	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	someValue := false
@@ -97,13 +106,15 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 			}
 		}
 	}
-	s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\">"
+	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
+	w.Write([]byte("<h3>MyTest.UnaryCall(grpc.MyRequest)</h3>"))
+	s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
-	w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
-	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\"><br>"))
-	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-	w.Write([]byte("</form>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
 		reply, err := this.client.UnaryCall(golang_org_x_net_context.Background(), msg)
 		if err != nil {
@@ -129,6 +140,9 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Downstream</title>"))
+	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
+	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	someValue := false
@@ -168,13 +182,15 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 			}
 		}
 	}
-	s := "<form action=\"/MyTest/Downstream\" method=\"GET\">"
+	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
+	w.Write([]byte("<h3>MyTest.Downstream(grpc.MyRequest)</h3>"))
+	s := "<form action=\"/MyTest/Downstream\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
-	w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
-	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\"><br>"))
-	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-	w.Write([]byte("</form>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
 		down, err := this.client.Downstream(golang_org_x_net_context.Background(), msg)
 		if err != nil {
@@ -213,6 +229,9 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Upstream</title>"))
+	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
+	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	someValue := false
@@ -251,12 +270,14 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 			}
 		}
 	}
-	s := "<form action=\"/MyTest/Upstream\" method=\"GET\">"
+	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
+	w.Write([]byte("<h3>MyTest.Upstream(grpc.MyMsg)</h3>"))
+	s := "<form action=\"/MyTest/Upstream\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
-	w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
-	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-	w.Write([]byte("</form>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
 		up, err := this.client.Upstream(golang_org_x_net_context.Background())
 		if err != nil {
@@ -298,6 +319,9 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Bidi</title>"))
+	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
+	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
 	jsonString := req.FormValue("json")
 	someValue := false
@@ -336,12 +360,14 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 			}
 		}
 	}
-	s := "<form action=\"/MyTest/Bidi\" method=\"GET\">"
+	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
+	w.Write([]byte("<h3>MyTest.Bidi(grpc.MyMsg)</h3>"))
+	s := "<form action=\"/MyTest/Bidi\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
-	w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\"><br>"))
-	w.Write([]byte("<input type=\"submit\" value=\"Submit\"/>"))
-	w.Write([]byte("</form>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
 		bidi, err := this.client.Bidi(golang_org_x_net_context.Background())
 		if err != nil {
