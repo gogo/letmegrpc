@@ -72,7 +72,7 @@ func (p *html) w(s string) {
 
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
 	//fileDescriptorSet := p.AllFiles()
-	p.P(`s := "<form action=\"" + this.prefix + "/`, method.GetName(), `:" + this.port + " method=\"POST\">"`)
+	p.P(`s := "<form action=\"" + this.prefix + "/`, method.GetName(), `\" method=\"GET\">"`)
 	p.P(`w.Write([]byte(s))`)
 	p.In()
 	p.w(`Json for ` + servName + `(` + method.GetInputType() + `):<br>`)
@@ -85,7 +85,6 @@ func (p *html) generateForm(servName string, method *descriptor.MethodDescriptor
 func (p *html) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
 	httpPkg := p.NewImport("net/http")
-	ioutilPkg := p.NewImport("io/ioutil")
 	jsonPkg := p.NewImport("encoding/json")
 	p.ioPkg = p.NewImport("io")
 	netPkg := p.NewImport("net")
@@ -135,20 +134,17 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.w("<html>")
 			p.w("<head>")
 			p.w("<title>" + servName + " - " + m.GetName() + "</title>")
-			p.w(`<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>`)
 			p.w("</head>")
-			p.P(`if req.Method == "GET" {`)
+			p.P(`jsonString := req.FormValue("json")`)
+			p.P(`if len(jsonString) == 0 {`)
 			p.In()
 			p.generateForm(servName, m)
 			p.w("</html>")
 			p.P(`return`)
 			p.Out()
 			p.P(`}`)
-			p.P(`//assuming it is a POST which contains json`)
-			p.P(`data, err := `, ioutilPkg.Use(), `.ReadAll(req.Body)`)
-			p.writeError()
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
-			p.P(`err = `, jsonPkg.Use(), `.Unmarshal(data, msg)`)
+			p.P(`err := `, jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
 			p.writeError()
 			if !m.GetClientStreaming() {
 				if !m.GetServerStreaming() {

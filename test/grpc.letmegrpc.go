@@ -17,7 +17,6 @@ It has these top-level messages:
 package grpc
 
 import net_http "net/http"
-import io_ioutil "io/ioutil"
 import encoding_json "encoding/json"
 import io "io"
 import net "net"
@@ -52,10 +51,10 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - UnaryCall</title>"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>"))
 	w.Write([]byte("</head>"))
-	if req.Method == "GET" {
-		s := "<form action=\"" + this.prefix + "/UnaryCall:" + this.port + " method=\"POST\">"
+	jsonString := req.FormValue("json")
+	if len(jsonString) == 0 {
+		s := "<form action=\"" + this.prefix + "/UnaryCall\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -64,17 +63,8 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 		w.Write([]byte("</html>"))
 		return
 	}
-	//assuming it is a POST which contains json
-	data, err := io_ioutil.ReadAll(req.Body)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
 	msg := &MyRequest{}
-	err = encoding_json.Unmarshal(data, msg)
+	err := encoding_json.Unmarshal([]byte(jsonString), msg)
 	if err != nil {
 		if err == io.EOF {
 			return
@@ -105,10 +95,10 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Downstream</title>"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>"))
 	w.Write([]byte("</head>"))
-	if req.Method == "GET" {
-		s := "<form action=\"" + this.prefix + "/Downstream:" + this.port + " method=\"POST\">"
+	jsonString := req.FormValue("json")
+	if len(jsonString) == 0 {
+		s := "<form action=\"" + this.prefix + "/Downstream\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyRequest):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -117,17 +107,8 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 		w.Write([]byte("</html>"))
 		return
 	}
-	//assuming it is a POST which contains json
-	data, err := io_ioutil.ReadAll(req.Body)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
 	msg := &MyRequest{}
-	err = encoding_json.Unmarshal(data, msg)
+	err := encoding_json.Unmarshal([]byte(jsonString), msg)
 	if err != nil {
 		if err == io.EOF {
 			return
@@ -168,10 +149,10 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Upstream</title>"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>"))
 	w.Write([]byte("</head>"))
-	if req.Method == "GET" {
-		s := "<form action=\"" + this.prefix + "/Upstream:" + this.port + " method=\"POST\">"
+	jsonString := req.FormValue("json")
+	if len(jsonString) == 0 {
+		s := "<form action=\"" + this.prefix + "/Upstream\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -180,17 +161,8 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		w.Write([]byte("</html>"))
 		return
 	}
-	//assuming it is a POST which contains json
-	data, err := io_ioutil.ReadAll(req.Body)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
 	msg := &MyMsg{}
-	err = encoding_json.Unmarshal(data, msg)
+	err := encoding_json.Unmarshal([]byte(jsonString), msg)
 	if err != nil {
 		if err == io.EOF {
 			return
@@ -237,10 +209,10 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<html>"))
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Bidi</title>"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>"))
 	w.Write([]byte("</head>"))
-	if req.Method == "GET" {
-		s := "<form action=\"" + this.prefix + "/Bidi:" + this.port + " method=\"POST\">"
+	jsonString := req.FormValue("json")
+	if len(jsonString) == 0 {
+		s := "<form action=\"" + this.prefix + "/Bidi\" method=\"GET\">"
 		w.Write([]byte(s))
 		w.Write([]byte("Json for MyTest(.grpc.MyMsg):<br>"))
 		w.Write([]byte("<input name=\"json\" type=\"text\"><br>"))
@@ -249,17 +221,8 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		w.Write([]byte("</html>"))
 		return
 	}
-	//assuming it is a POST which contains json
-	data, err := io_ioutil.ReadAll(req.Body)
-	if err != nil {
-		if err == io.EOF {
-			return
-		}
-		w.Write([]byte(err.Error()))
-		return
-	}
 	msg := &MyMsg{}
-	err = encoding_json.Unmarshal(data, msg)
+	err := encoding_json.Unmarshal([]byte(jsonString), msg)
 	if err != nil {
 		if err == io.EOF {
 			return

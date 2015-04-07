@@ -26,8 +26,8 @@
 package grpc
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
@@ -120,8 +120,7 @@ func TestHTML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	buf := bytes.NewBuffer(data)
-	resp, err = http.Post("http://localhost:8080/UnaryCall", "application/json", buf)
+	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/UnaryCall?json=%s", string(data)))
 	if err != nil {
 		t.Fatal(err)
 	}
