@@ -24,13 +24,20 @@ import strings "strings"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
-func Serve(httpAddr, grpcAddr string) {
-	conn, err := google_golang_org_grpc.Dial(grpcAddr)
+var htmlstringer = func(v interface{}) ([]byte, error) {
+	return encoding_json.MarshalIndent(v, "", "\t")
+}
+
+func SetHtmlStringer(s func(interface{}) ([]byte, error)) {
+	htmlstringer = s
+}
+func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption) {
+	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
 	if err != nil {
 		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
 	}
 	MyTestClient := NewMyTestClient(conn)
-	MyTestServer := NewHTMLMyTestServer(MyTestClient, nil)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient)
 	net_http.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
 	net_http.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
 	net_http.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
@@ -41,15 +48,11 @@ func Serve(httpAddr, grpcAddr string) {
 }
 
 type htmlMyTest struct {
-	client   MyTestClient
-	stringer func(interface{}) ([]byte, error)
+	client MyTestClient
 }
 
-func NewHTMLMyTestServer(client MyTestClient, stringer func(interface{}) ([]byte, error)) *htmlMyTest {
-	if stringer == nil {
-		stringer = encoding_json.Marshal
-	}
-	return &htmlMyTest{client, stringer}
+func NewHTMLMyTestServer(client MyTestClient) *htmlMyTest {
+	return &htmlMyTest{client}
 }
 func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<html>"))
@@ -110,7 +113,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := this.stringer(reply)
+		out, err := htmlstringer(reply)
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -190,7 +193,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 				w.Write([]byte(err.Error()))
 				return
 			}
-			out, err := this.stringer(reply)
+			out, err := htmlstringer(reply)
 			if err != nil {
 				if err == io.EOF {
 					return
@@ -279,7 +282,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := this.stringer(reply)
+		out, err := htmlstringer(reply)
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -364,7 +367,7 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := this.stringer(reply)
+		out, err := htmlstringer(reply)
 		if err != nil {
 			if err == io.EOF {
 				return

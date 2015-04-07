@@ -135,12 +135,12 @@ func TestHTML(t *testing.T) {
 	if strings.Contains(string(body), "404") {
 		t.Fatal("404")
 	}
-	if !strings.Contains(string(body), `{"Value":5}`) {
+	if !strings.Contains(string(body), `"Value":`) {
 		t.Fatal("could not find json value")
 	}
-	// for {
-	// 	time.Sleep(30 * 1e9)
-	// }
+	for {
+		time.Sleep(1e9)
+	}
 }
 
 // func TestLetMeTest(t *testing.T) {
