@@ -81,7 +81,7 @@ func (this *aServer) Bidi(b MyTest_BidiServer) error {
 	return err
 }
 
-func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, MyTestClient) {
+func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, string) {
 	lis, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		t.Fatalf("Failed to listen: %v", err)
@@ -93,20 +93,15 @@ func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, MyTestClient) {
 	s := grpc.NewServer()
 	RegisterMyTestServer(s, mytest)
 	go s.Serve(lis)
-	addr := "localhost:" + port
-	conn, err := grpc.Dial(addr)
-	if err != nil {
-		t.Fatalf("Dial(%q) = %v", addr, err)
-	}
-	tc := NewMyTestClient(conn)
-	return s, tc
+	grpcAddr := "localhost:" + port
+	return s, grpcAddr
 }
 
 func TestHTML(t *testing.T) {
-	server, client := setup(t, &aServer{})
+	server, grpcAddr := setup(t, &aServer{})
 	defer server.Stop()
-	htmlserver := NewHTMLMyTestServer(client, nil)
-	go htmlserver.Serve("localhost:8080")
+	go Serve("localhost:8080", grpcAddr)
+	time.Sleep(1e9)
 	resp, err := http.Get("http://localhost:8080/MyTest/UnaryCall")
 	if err != nil {
 		t.Fatal(err)
@@ -143,9 +138,9 @@ func TestHTML(t *testing.T) {
 	if !strings.Contains(string(body), `{"Value":5}`) {
 		t.Fatal("could not find json value")
 	}
-	for {
-		time.Sleep(30 * 1e9)
-	}
+	// for {
+	// 	time.Sleep(30 * 1e9)
+	// }
 }
 
 // func TestLetMeTest(t *testing.T) {

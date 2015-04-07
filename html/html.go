@@ -75,6 +75,14 @@ func (p *html) w(s string) {
 }
 
 func formable(msg *descriptor.DescriptorProto) bool {
+	for _, f := range msg.GetField() {
+		if f.IsRepeated() {
+			return false
+		}
+		if f.IsMessage() {
+			return false
+		}
+	}
 	return true
 }
 
@@ -147,10 +155,37 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	httpPkg := p.NewImport("net/http")
 	p.jsonPkg = p.NewImport("encoding/json")
 	p.ioPkg = p.NewImport("io")
-	netPkg := p.NewImport("net")
 	contextPkg := p.NewImport("golang.org/x/net/context")
 	p.reflectPkg = p.NewImport("reflect")
 	p.stringsPkg = p.NewImport("strings")
+	logPkg := p.NewImport("log")
+	grpcPkg := p.NewImport("google.golang.org/grpc")
+
+	p.P(`func Serve(httpAddr, grpcAddr string) {`)
+	p.In()
+	p.P(`conn, err := `, grpcPkg.Use(), `.Dial(grpcAddr)`)
+	p.P(`if err != nil {`)
+	p.In()
+	p.P(logPkg.Use(), `.Fatalf("Dial(%q) = %v", grpcAddr, err)`)
+	p.Out()
+	p.P(`}`)
+	for _, s := range file.GetService() {
+		origServName := s.GetName()
+		servName := generator.CamelCase(origServName)
+		p.P(origServName, `Client := New`, servName, `Client(conn)`)
+		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, nil)`)
+		for _, m := range s.GetMethod() {
+			p.P(httpPkg.Use(), `.HandleFunc("/`, servName, `/`, m.GetName(), `", `, origServName, `Server.`, m.GetName(), `)`)
+		}
+	}
+	p.P(`if err := `, httpPkg.Use(), `.ListenAndServe(httpAddr, nil); err != nil {`)
+	p.In()
+	p.P(logPkg.Use(), `.Fatal(err)`)
+	p.Out()
+	p.P(`}`)
+	p.Out()
+	p.P(`}`)
+
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
@@ -158,7 +193,6 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.In()
 		p.P(`client `, servName, `Client`)
 		p.P(`stringer func(interface{}) ([]byte, error)`)
-		p.P(`port string`)
 		p.Out()
 		p.P(`}`)
 
@@ -169,23 +203,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.P(`stringer = `, p.jsonPkg.Use(), `.Marshal`)
 		p.Out()
 		p.P(`}`)
-		p.P(`return &html`, servName, `{client, stringer, ":8080"}`)
-		p.Out()
-		p.P(`}`)
-
-		p.P(`func (this *html`, servName, `) Serve(addr string) error {`)
-		p.In()
-		for _, m := range s.GetMethod() {
-			p.P(httpPkg.Use(), `.HandleFunc("/`, servName, `/`, m.GetName(), `", this.`, m.GetName(), `)`)
-		}
-		p.P(`_, port, err := `, netPkg.Use(), `.SplitHostPort(addr)`)
-		p.P(`if err != nil {`)
-		p.In()
-		p.P(`return err`)
-		p.Out()
-		p.P(`}`)
-		p.P(`this.port = port`)
-		p.P(`return `, httpPkg.Use(), `.ListenAndServe(addr, nil)`)
+		p.P(`return &html`, servName, `{client, stringer}`)
 		p.Out()
 		p.P(`}`)
 

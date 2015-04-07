@@ -19,33 +19,37 @@ package grpc
 import net_http "net/http"
 import encoding_json "encoding/json"
 import io "io"
-import net "net"
 import golang_org_x_net_context "golang.org/x/net/context"
 import strings "strings"
+import log "log"
+import google_golang_org_grpc "google.golang.org/grpc"
+
+func Serve(httpAddr, grpcAddr string) {
+	conn, err := google_golang_org_grpc.Dial(grpcAddr)
+	if err != nil {
+		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
+	}
+	MyTestClient := NewMyTestClient(conn)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient, nil)
+	net_http.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
+	net_http.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
+	net_http.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
+	net_http.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
+	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
+		log.Fatal(err)
+	}
+}
 
 type htmlMyTest struct {
 	client   MyTestClient
 	stringer func(interface{}) ([]byte, error)
-	port     string
 }
 
 func NewHTMLMyTestServer(client MyTestClient, stringer func(interface{}) ([]byte, error)) *htmlMyTest {
 	if stringer == nil {
 		stringer = encoding_json.Marshal
 	}
-	return &htmlMyTest{client, stringer, ":8080"}
-}
-func (this *htmlMyTest) Serve(addr string) error {
-	net_http.HandleFunc("/MyTest/UnaryCall", this.UnaryCall)
-	net_http.HandleFunc("/MyTest/Downstream", this.Downstream)
-	net_http.HandleFunc("/MyTest/Upstream", this.Upstream)
-	net_http.HandleFunc("/MyTest/Bidi", this.Bidi)
-	_, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return err
-	}
-	this.port = port
-	return net_http.ListenAndServe(addr, nil)
+	return &htmlMyTest{client, stringer}
 }
 func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<html>"))
