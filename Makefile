@@ -32,7 +32,7 @@ all:
 	make test
 
 install:
-	go install ./protoc-gen-letmegrpc
+	go install -v ./...
 
 test:
 	go test -v ./...
@@ -40,6 +40,7 @@ test:
 regenerate:
 	(cd test && protoc --gogo_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
 	(cd test && protoc --letmegrpc_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
+	(cd letmetestserver/serve && protoc --gogo_out=. --proto_path=. serve.proto)
 
 gofmt:
 	gofmt -l -s -w .
