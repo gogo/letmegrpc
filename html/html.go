@@ -23,7 +23,6 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//Experimental
 package html
 
 import (
@@ -37,7 +36,7 @@ type html struct {
 	ioPkg generator.Single
 }
 
-func NewHTML() *html {
+func New() *html {
 	return &html{}
 }
 
@@ -72,7 +71,7 @@ func (p *html) w(s string) {
 }
 
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
-	fileDescriptorSet := p.AllFiles()
+	//fileDescriptorSet := p.AllFiles()
 	p.P(`s := "<form action=\"" + this.prefix + "/`, method.GetName(), `:" + this.port + " method=\"POST\">"`)
 	p.P(`w.Write([]byte(s))`)
 	p.In()
@@ -199,8 +198,4 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`}`)
 		}
 	}
-}
-
-func init() {
-	generator.RegisterPlugin(NewHTML())
 }
