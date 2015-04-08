@@ -6,6 +6,9 @@ letmegrpc generates an html interface for a [grpc.io](http://www.grpc.io/) inter
 
 ## Installation
 
+    mkdir -p $GOPATH/src/github.com/gogo/protobuf
+    git clone https://github.com/gogo/protobuf $GOPATH/src/github.com/gogo/protobuf
+    (cd $GOPATH/src/github.com/gogo/protobuf && git checkout proto3)
     mkdir -p $GOPATH/src/github.com/gogo/letmegrpc
     git clone https://github.com/gogo/letmegrpc $GOPATH/src/github.com/gogo/letmegrpc
     (cd $GOPATH/src/github.com/gogo/letmegrpc && make install)
