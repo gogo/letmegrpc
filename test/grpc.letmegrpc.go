@@ -26,12 +26,12 @@ import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
 var htmlstringer = func(v interface{}) ([]byte, error) {
-	header := []byte("<div class=\"container\">")
+	header := []byte("<div class=\"container\"><pre>")
 	data, err := encoding_json.MarshalIndent(v, "", "\t")
 	if err != nil {
 		return nil, err
 	}
-	footer := []byte("</div>")
+	footer := []byte("</pre></div>")
 	return append(append(header, data...), footer...), nil
 }
 
