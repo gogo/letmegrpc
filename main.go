@@ -110,7 +110,6 @@ func main() {
 		}
 	}
 	gorun.Env = envs
-	log.Printf("Envs = %v", envs)
 	gorun.Dir = cmdDir
 	run(gorun)
 }

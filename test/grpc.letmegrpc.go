@@ -21,6 +21,7 @@ import encoding_json "encoding/json"
 import io "io"
 import golang_org_x_net_context "golang.org/x/net/context"
 import strings "strings"
+import strconv "strconv"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
@@ -86,12 +87,30 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 			"Value",
 			"Value2",
 		}
+		isString := []bool{
+			false,
+			false,
+		}
+		isBool := []bool{
+			false,
+			false,
+		}
 		fields := make([]string, 0, len(fieldnames))
-		for _, name := range fieldnames {
+		for i, name := range fieldnames {
 			v := req.FormValue(name)
 			if len(v) > 0 {
 				someValue = true
-				fields = append(fields, "\""+name+"\":"+v)
+				if isString[i] {
+					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
+				} else if isBool[i] {
+					if v == "on" {
+						fields = append(fields, "\""+name+"\":"+"true")
+					} else {
+						fields = append(fields, "\""+name+"\":"+"false")
+					}
+				} else {
+					fields = append(fields, "\""+name+"\":"+v)
+				}
 			}
 			if someValue {
 				s := "{" + strings.Join(fields, ",") + "}"
@@ -107,12 +126,16 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 		}
 	}
 	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest.UnaryCall(grpc.MyRequest)</h3>"))
+	w.Write([]byte("<h3>MyTest - UnaryCall</h3>"))
 	s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
 	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
-	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("<label for=\"Value\">Value</label>"))
+	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("<label for=\"Value2\">Value2</label>"))
+	w.Write([]byte("<input id=\"Value2\" name=\"Value2\" type=\"text\" class=\"form-control\"/><br>"))
 	w.Write([]byte("</div>"))
 	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
@@ -162,12 +185,30 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 			"Value",
 			"Value2",
 		}
+		isString := []bool{
+			false,
+			false,
+		}
+		isBool := []bool{
+			false,
+			false,
+		}
 		fields := make([]string, 0, len(fieldnames))
-		for _, name := range fieldnames {
+		for i, name := range fieldnames {
 			v := req.FormValue(name)
 			if len(v) > 0 {
 				someValue = true
-				fields = append(fields, "\""+name+"\":"+v)
+				if isString[i] {
+					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
+				} else if isBool[i] {
+					if v == "on" {
+						fields = append(fields, "\""+name+"\":"+"true")
+					} else {
+						fields = append(fields, "\""+name+"\":"+"false")
+					}
+				} else {
+					fields = append(fields, "\""+name+"\":"+v)
+				}
 			}
 			if someValue {
 				s := "{" + strings.Join(fields, ",") + "}"
@@ -183,12 +224,16 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 		}
 	}
 	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest.Downstream(grpc.MyRequest)</h3>"))
+	w.Write([]byte("<h3>MyTest - Downstream</h3>"))
 	s := "<form action=\"/MyTest/Downstream\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
 	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
-	w.Write([]byte("Value2: <input name=\"Value2\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("<label for=\"Value\">Value</label>"))
+	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
+	w.Write([]byte("</div>"))
+	w.Write([]byte("<div class=\"form-group\">"))
+	w.Write([]byte("<label for=\"Value2\">Value2</label>"))
+	w.Write([]byte("<input id=\"Value2\" name=\"Value2\" type=\"text\" class=\"form-control\"/><br>"))
 	w.Write([]byte("</div>"))
 	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
@@ -250,12 +295,28 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		fieldnames := []string{
 			"Value",
 		}
+		isString := []bool{
+			false,
+		}
+		isBool := []bool{
+			false,
+		}
 		fields := make([]string, 0, len(fieldnames))
-		for _, name := range fieldnames {
+		for i, name := range fieldnames {
 			v := req.FormValue(name)
 			if len(v) > 0 {
 				someValue = true
-				fields = append(fields, "\""+name+"\":"+v)
+				if isString[i] {
+					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
+				} else if isBool[i] {
+					if v == "on" {
+						fields = append(fields, "\""+name+"\":"+"true")
+					} else {
+						fields = append(fields, "\""+name+"\":"+"false")
+					}
+				} else {
+					fields = append(fields, "\""+name+"\":"+v)
+				}
 			}
 			if someValue {
 				s := "{" + strings.Join(fields, ",") + "}"
@@ -271,11 +332,12 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		}
 	}
 	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest.Upstream(grpc.MyMsg)</h3>"))
+	w.Write([]byte("<h3>MyTest - Upstream</h3>"))
 	s := "<form action=\"/MyTest/Upstream\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
 	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("<label for=\"Value\">Value</label>"))
+	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
 	w.Write([]byte("</div>"))
 	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {
@@ -340,12 +402,28 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		fieldnames := []string{
 			"Value",
 		}
+		isString := []bool{
+			false,
+		}
+		isBool := []bool{
+			false,
+		}
 		fields := make([]string, 0, len(fieldnames))
-		for _, name := range fieldnames {
+		for i, name := range fieldnames {
 			v := req.FormValue(name)
 			if len(v) > 0 {
 				someValue = true
-				fields = append(fields, "\""+name+"\":"+v)
+				if isString[i] {
+					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
+				} else if isBool[i] {
+					if v == "on" {
+						fields = append(fields, "\""+name+"\":"+"true")
+					} else {
+						fields = append(fields, "\""+name+"\":"+"false")
+					}
+				} else {
+					fields = append(fields, "\""+name+"\":"+v)
+				}
 			}
 			if someValue {
 				s := "{" + strings.Join(fields, ",") + "}"
@@ -361,11 +439,12 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		}
 	}
 	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest.Bidi(grpc.MyMsg)</h3>"))
+	w.Write([]byte("<h3>MyTest - Bidi</h3>"))
 	s := "<form action=\"/MyTest/Bidi\" method=\"GET\" role=\"form\">"
 	w.Write([]byte(s))
 	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("Value: <input name=\"Value\" type=\"text\" class=\"form-control\"><br>"))
+	w.Write([]byte("<label for=\"Value\">Value</label>"))
+	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
 	w.Write([]byte("</div>"))
 	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
 	if someValue {

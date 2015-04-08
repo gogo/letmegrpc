@@ -38,6 +38,7 @@ type html struct {
 	reflectPkg generator.Single
 	stringsPkg generator.Single
 	jsonPkg    generator.Single
+	strconvPkg generator.Single
 }
 
 func New() *html {
@@ -110,14 +111,56 @@ func (p *html) generateSets(servName string, method *descriptor.MethodDescriptor
 	}
 	p.Out()
 	p.P(`}`)
+	p.P(`isString := []bool{`)
+	p.In()
+	for _, f := range msg.GetField() {
+		if f.IsString() {
+			p.P(`true,`)
+		} else {
+			p.P(`false,`)
+		}
+	}
+	p.Out()
+	p.P(`}`)
+	p.P(`isBool := []bool{`)
+	p.In()
+	for _, f := range msg.GetField() {
+		if f.GetType() == descriptor.FieldDescriptorProto_TYPE_BOOL {
+			p.P(`true,`)
+		} else {
+			p.P(`false,`)
+		}
+	}
+	p.Out()
+	p.P(`}`)
 	p.P(`fields := make([]string, 0, len(fieldnames))`)
-	p.P(`for _, name := range fieldnames {`)
+	p.P(`for i, name := range fieldnames {`)
 	p.In()
 	p.P(`v := req.FormValue(name)`)
 	p.P(`if len(v) > 0 {`)
 	p.In()
 	p.P(`someValue = true`)
+	p.P(`if isString[i] {`)
+	p.In()
+	p.P(`fields = append(fields, "\"" + name + "\":" + `, p.strconvPkg.Use(), `.Quote(v))`)
+	p.Out()
+	p.P(`} else if isBool[i] {`)
+	p.In()
+	p.P(`if v == "on" {`)
+	p.In()
+	p.P(`fields = append(fields, "\"" + name + "\":" + "true")`)
+	p.Out()
+	p.P(`} else {`)
+	p.In()
+	p.P(`fields = append(fields, "\"" + name + "\":" + "false")`)
+	p.Out()
+	p.P(`}`)
+	p.Out()
+	p.P(`} else {`)
+	p.In()
 	p.P(`fields = append(fields, "\"" + name + "\":" + v)`)
+	p.Out()
+	p.P(`}`)
 	p.Out()
 	p.P(`}`)
 	p.P(`if someValue {`)
@@ -134,19 +177,30 @@ func (p *html) generateSets(servName string, method *descriptor.MethodDescriptor
 func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
 	msg := p.getInputType(method)
 	p.w(`<div class=\"container\"><div class=\"jumbotron\">`)
-	p.w(`<h3>` + servName + `.` + method.GetName() + `(` + method.GetInputType()[1:] + `)</h3>`)
+	p.w(`<h3>` + servName + ` - ` + method.GetName() + `</h3>`)
 	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\" role=\"form\">"`)
 	p.P(`w.Write([]byte(s))`)
-	p.w(`<div class=\"form-group\">`)
 	if !formable(msg) {
 		panic("I don't think it is complicated")
-		p.w(`Json: <input name=\"json\" type=\"text\"><br>`)
+		p.w(`<div class=\"form-group\">`)
+		p.w(`Json for ` + method.GetInputType()[1:] + ` : <input name=\"json\" type=\"text\"><br>`)
+		p.w(`</div>`)
 	} else {
 		for _, f := range msg.GetField() {
-			p.w(f.GetName() + `: <input name=\"` + f.GetName() + `\" type=\"text\" class=\"form-control\"><br>`)
+			if f.GetType() == descriptor.FieldDescriptorProto_TYPE_BOOL {
+				p.w(`<div class=\"checkbox\">`)
+				p.w(`<label for=\"` + f.GetName() + `\">`)
+				p.w(`<input id=\"` + f.GetName() + `\" name=\"` + f.GetName() + `\" type=\"checkbox\"/>`)
+				p.w(f.GetName())
+				p.w(`</label>`)
+			} else {
+				p.w(`<div class=\"form-group\">`)
+				p.w(`<label for=\"` + f.GetName() + `\">` + f.GetName() + `</label>`)
+				p.w(`<input id=\"` + f.GetName() + `\" name=\"` + f.GetName() + `\" type=\"text\" class=\"form-control\"/><br>`)
+			}
+			p.w(`</div>`)
 		}
 	}
-	p.w(`</div>`)
 	p.w(`<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>`)
 }
 
@@ -158,6 +212,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	contextPkg := p.NewImport("golang.org/x/net/context")
 	p.reflectPkg = p.NewImport("reflect")
 	p.stringsPkg = p.NewImport("strings")
+	p.strconvPkg = p.NewImport("strconv")
 	logPkg := p.NewImport("log")
 	grpcPkg := p.NewImport("google.golang.org/grpc")
 
