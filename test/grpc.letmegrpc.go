@@ -25,17 +25,17 @@ import strconv "strconv"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
-var htmlstringer = func(v interface{}) ([]byte, error) {
-	header := []byte("<div class=\"container\"><pre>")
-	data, err := encoding_json.MarshalIndent(v, "", "\t")
+var htmlstringer = func(req, resp interface{}) ([]byte, error) {
+	header := []byte("<p><div class=\"container\"><pre>")
+	data, err := encoding_json.MarshalIndent(resp, "", "\t")
 	if err != nil {
 		return nil, err
 	}
-	footer := []byte("</pre></div>")
+	footer := []byte("</pre></div></p>")
 	return append(append(header, data...), footer...), nil
 }
 
-func SetHtmlStringer(s func(interface{}) ([]byte, error)) {
+func SetHtmlStringer(s func(req, resp interface{}) ([]byte, error)) {
 	htmlstringer = s
 }
 func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption) {
@@ -147,7 +147,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := htmlstringer(reply)
+		out, err := htmlstringer(msg, reply)
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -254,7 +254,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 				w.Write([]byte(err.Error()))
 				return
 			}
-			out, err := htmlstringer(reply)
+			out, err := htmlstringer(msg, reply)
 			if err != nil {
 				if err == io.EOF {
 					return
@@ -262,9 +262,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 				w.Write([]byte(err.Error()))
 				return
 			}
-			w.Write([]byte("<p>"))
 			w.Write(out)
-			w.Write([]byte("</p>"))
 			w.(net_http.Flusher).Flush()
 		}
 	}
@@ -365,7 +363,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := htmlstringer(reply)
+		out, err := htmlstringer(msg, reply)
 		if err != nil {
 			if err == io.EOF {
 				return
@@ -472,7 +470,7 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 			w.Write([]byte(err.Error()))
 			return
 		}
-		out, err := htmlstringer(reply)
+		out, err := htmlstringer(msg, reply)
 		if err != nil {
 			if err == io.EOF {
 				return
