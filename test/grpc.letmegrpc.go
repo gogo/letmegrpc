@@ -66,9 +66,10 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - UnaryCall</title>"))
 	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
 	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
+	w.Write([]byte("<body>"))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
@@ -157,6 +158,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 		}
 		w.Write(out)
 	}
+	w.Write([]byte("</body>"))
 	w.Write([]byte("</html>"))
 }
 func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Request) {
@@ -164,9 +166,10 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Downstream</title>"))
 	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
 	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
+	w.Write([]byte("<body>"))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
@@ -266,6 +269,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 			w.(net_http.Flusher).Flush()
 		}
 	}
+	w.Write([]byte("</body>"))
 	w.Write([]byte("</html>"))
 }
 func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Request) {
@@ -273,9 +277,10 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Upstream</title>"))
 	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
 	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
+	w.Write([]byte("<body>"))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
@@ -373,6 +378,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		}
 		w.Write(out)
 	}
+	w.Write([]byte("</body>"))
 	w.Write([]byte("</html>"))
 }
 func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
@@ -380,9 +386,10 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	w.Write([]byte("<head>"))
 	w.Write([]byte("<title>MyTest - Bidi</title>"))
 	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
+	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
 	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("<script src=\"//code.jquery.com/jquery-1.11.2.min.js\"></script>"))
 	w.Write([]byte("</head>"))
+	w.Write([]byte("<body>"))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
@@ -480,5 +487,6 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		}
 		w.Write(out)
 	}
+	w.Write([]byte("</body>"))
 	w.Write([]byte("</html>"))
 }
