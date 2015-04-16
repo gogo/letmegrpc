@@ -20,8 +20,6 @@ import net_http "net/http"
 import encoding_json "encoding/json"
 import io "io"
 import golang_org_x_net_context "golang.org/x/net/context"
-import strings "strings"
-import strconv "strconv"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 
@@ -61,432 +59,1551 @@ type htmlMyTest struct {
 func NewHTMLMyTestServer(client MyTestClient) *htmlMyTest {
 	return &htmlMyTest{client}
 }
+
+var FormMyTest_UnaryCall string = `<div class="container"><div class="jumbotron">
+	<h3>MyTest: UnaryCall</h3>
+	
+	<form class="form-horizontal">
+	<div id="form"><div class="children"></div></div>
+    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    </form>
+    
+	<script>
+
+function addChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+}
+
+function setChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+	$(this).hide();
+}
+
+function delChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var parentNode = thisNode.parents(".node:first");
+	thisNode.remove();
+	var setChildLink = $(">a.set-child[fieldname='" + thisNode.attr('fieldname') + "']", parentNode);
+	if (setChildLink.length > 0) {
+		setChildLink.show();
+	}
+}
+
+function delField(ev) {
+	ev.preventDefault();
+	var thisField = $(this).parents(".field:first");
+	thisField.remove();
+}
+
+function addElem(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var myFieldname = $(this).attr("fieldname");
+	if (myType == "bool") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input name="' + myFieldname + '" type="checkbox" repeated="true"/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "number") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "text") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+}
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+function activateLinks(node) {
+ 	$("a.add-child", node).click(addChildNode);
+	$("a.set-child", node).click(setChildNode);
+	$("a.add-elem", node).click(addElem);
+	$("a.del-child", node).click(delChildNode);
+	$("a.del-field", node).click(delField);
+}
+
+function getChildren(el) {
+	var json = {};
+	$("> .children > .node", el).each(function(idx, node) {
+		var nodeJson = getFields($(node));
+		var allChildren = getChildren($(node));
+		for (childType in allChildren) {
+			nodeJson[childType] = allChildren[childType];
+		}
+		var nodeType = $(node).attr("fieldname");
+		var isRepeated = $(node).attr("repeated") == "true";
+		if (isRepeated) {
+			if (!(nodeType in json)) {
+				json[nodeType] = [];
+			}
+			json[nodeType].push(nodeJson);
+		} else {
+			json[nodeType] = nodeJson;
+		}
+	});
+	return json
+}
+
+function getFields(node) {
+	var nodeJson = {};
+	$("> div.field > div ", $(node)).each(function(idx, field) {
+		$("> input[type=text]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).val();
+		});
+		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).is(':checked');
+		});
+		$("> input[type=number]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> select", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+	});
+	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		$("input[type=text]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).val());
+		});
+		$("input[type=checkbox]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).is(':checked'));
+		});
+		$("input[type=number]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("input[type=radio]:checked", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("select", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+	});
+
+	return nodeJson;
+}
+
+function radioed(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "checked"
+	}
+	return ""
+}
+
+function checked(value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == true) {
+		return "checked='checked'"
+	}
+	return ""
+}
+
+function selected(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	return ""
+}
+
+function emptyIfNull(json) {
+	if (json == undefined || json == null) {
+		return JSON.parse("{}");
+	}
+	return json;
+}
+
+function getValue(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("{}");
+	}
+	return value;
+}
+
+function getList(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("[]");
+	}
+	return value;
+}
+
+function setLink(json, typ, fieldname) {
+	if (json[fieldname] == undefined) {
+		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>';
+	}
+	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
+}
+
+function setValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return 'value="' + value + '"'
+}
+
+function setStrValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return "value='" + value + "'"
+}
+
+var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
+	function buildMyRequest_RootKeyword(json) {
+if (json == undefined) {
+		return "";
+	}
+	
+var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" '+setValue(json["Value2"])+'/></div></div>';
+				
+
+			s += '</div>';
+			var node = $(s);
+			activateLinks(node);
+			return node;
+		}function init() {
+	var root = $(nodeFactory["MyRequest_RootKeyword"]);
+	var jsonText = getUrlParameter("json");
+	if (jsonText == undefined) {
+		var json = emptyIfNull(null);
+	} else {
+		var json = JSON.parse(unescape(jsonText));
+	}
+	$("#form > .children").html(buildMyRequest_RootKeyword(json));
+	activateLinks(root);
+	$("a[id=submit]").click(function(ev) { 
+		ev.preventDefault();
+		c = getChildren($("#form"));
+		j = JSON.stringify(c["RootKeyword"]);
+		window.location.assign("./UnaryCall?json="+j);
+	});
+}
+
+	init();
+
+	</script>
+
+	<style>
+
+	.node{
+		padding-left: 2em;
+		min-height:20px;
+	    padding:10px;
+	    margin-top:10px;
+	    margin-bottom:20px;
+	    //border-left:0.5px solid #999;
+	    -webkit-border-radius:4px;
+	    -moz-border-radius:4px;
+	    border-radius:4px;
+	    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    background-color:#eaeaea;
+	}
+
+	.node .node {
+		background-color:#e2e2e2;
+	}
+
+	.node .node .node {
+		background-color:#d9d9d9;
+	}
+
+	.node .node .node .node {
+		background-color:#d1d1d1;
+	}
+
+	.node .node .node .node .node {
+		background-color:#c7c7c7;
+	}
+
+	.node .node .node .node .node .node {
+		background-color:#c0c0c0;
+	}
+
+	label{
+	        font-weight: normal;
+	}
+
+	.heading {
+		font-weight: bold;
+	}
+
+	</style>
+	
+	</div>`
+
 func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte("<html>"))
-	w.Write([]byte("<head>"))
-	w.Write([]byte("<title>MyTest - UnaryCall</title>"))
-	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
-	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("</head>"))
-	w.Write([]byte("<body>"))
+	w.Write([]byte(Header(`MyTest`, `UnaryCall`)))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		someValue = true
-	} else {
-		fieldnames := []string{
-			"Value",
-			"Value2",
-		}
-		isString := []bool{
-			false,
-			false,
-		}
-		isBool := []bool{
-			false,
-			false,
-		}
-		fields := make([]string, 0, len(fieldnames))
-		for i, name := range fieldnames {
-			v := req.FormValue(name)
-			if len(v) > 0 {
-				someValue = true
-				if isString[i] {
-					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
-				} else if isBool[i] {
-					if v == "on" {
-						fields = append(fields, "\""+name+"\":"+"true")
-					} else {
-						fields = append(fields, "\""+name+"\":"+"false")
-					}
-				} else {
-					fields = append(fields, "\""+name+"\":"+v)
-				}
-			}
-			if someValue {
-				s := "{" + strings.Join(fields, ",") + "}"
-				err := encoding_json.Unmarshal([]byte(s), msg)
-				if err != nil {
-					if err == io.EOF {
-						return
-					}
-					w.Write([]byte(err.Error()))
-					return
-				}
-			}
-		}
 	}
-	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest - UnaryCall</h3>"))
-	s := "<form action=\"/MyTest/UnaryCall\" method=\"GET\" role=\"form\">"
-	w.Write([]byte(s))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value\">Value</label>"))
-	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value2\">Value2</label>"))
-	w.Write([]byte("<input id=\"Value2\" name=\"Value2\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
+	w.Write([]byte(FormMyTest_UnaryCall))
 	if someValue {
 		reply, err := this.client.UnaryCall(golang_org_x_net_context.Background(), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		out, err := htmlstringer(msg, reply)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		w.Write(out)
 	}
-	w.Write([]byte("</body>"))
-	w.Write([]byte("</html>"))
+	w.Write([]byte(Footer))
 }
+
+var FormMyTest_Downstream string = `<div class="container"><div class="jumbotron">
+	<h3>MyTest: Downstream</h3>
+	
+	<form class="form-horizontal">
+	<div id="form"><div class="children"></div></div>
+    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    </form>
+    
+	<script>
+
+function addChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+}
+
+function setChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+	$(this).hide();
+}
+
+function delChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var parentNode = thisNode.parents(".node:first");
+	thisNode.remove();
+	var setChildLink = $(">a.set-child[fieldname='" + thisNode.attr('fieldname') + "']", parentNode);
+	if (setChildLink.length > 0) {
+		setChildLink.show();
+	}
+}
+
+function delField(ev) {
+	ev.preventDefault();
+	var thisField = $(this).parents(".field:first");
+	thisField.remove();
+}
+
+function addElem(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var myFieldname = $(this).attr("fieldname");
+	if (myType == "bool") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input name="' + myFieldname + '" type="checkbox" repeated="true"/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "number") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "text") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+}
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+function activateLinks(node) {
+ 	$("a.add-child", node).click(addChildNode);
+	$("a.set-child", node).click(setChildNode);
+	$("a.add-elem", node).click(addElem);
+	$("a.del-child", node).click(delChildNode);
+	$("a.del-field", node).click(delField);
+}
+
+function getChildren(el) {
+	var json = {};
+	$("> .children > .node", el).each(function(idx, node) {
+		var nodeJson = getFields($(node));
+		var allChildren = getChildren($(node));
+		for (childType in allChildren) {
+			nodeJson[childType] = allChildren[childType];
+		}
+		var nodeType = $(node).attr("fieldname");
+		var isRepeated = $(node).attr("repeated") == "true";
+		if (isRepeated) {
+			if (!(nodeType in json)) {
+				json[nodeType] = [];
+			}
+			json[nodeType].push(nodeJson);
+		} else {
+			json[nodeType] = nodeJson;
+		}
+	});
+	return json
+}
+
+function getFields(node) {
+	var nodeJson = {};
+	$("> div.field > div ", $(node)).each(function(idx, field) {
+		$("> input[type=text]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).val();
+		});
+		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).is(':checked');
+		});
+		$("> input[type=number]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> select", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+	});
+	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		$("input[type=text]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).val());
+		});
+		$("input[type=checkbox]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).is(':checked'));
+		});
+		$("input[type=number]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("input[type=radio]:checked", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("select", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+	});
+
+	return nodeJson;
+}
+
+function radioed(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "checked"
+	}
+	return ""
+}
+
+function checked(value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == true) {
+		return "checked='checked'"
+	}
+	return ""
+}
+
+function selected(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	return ""
+}
+
+function emptyIfNull(json) {
+	if (json == undefined || json == null) {
+		return JSON.parse("{}");
+	}
+	return json;
+}
+
+function getValue(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("{}");
+	}
+	return value;
+}
+
+function getList(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("[]");
+	}
+	return value;
+}
+
+function setLink(json, typ, fieldname) {
+	if (json[fieldname] == undefined) {
+		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>';
+	}
+	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
+}
+
+function setValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return 'value="' + value + '"'
+}
+
+function setStrValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return "value='" + value + "'"
+}
+
+var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
+	function buildMyRequest_RootKeyword(json) {
+if (json == undefined) {
+		return "";
+	}
+	
+var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" '+setValue(json["Value2"])+'/></div></div>';
+				
+
+			s += '</div>';
+			var node = $(s);
+			activateLinks(node);
+			return node;
+		}function init() {
+	var root = $(nodeFactory["MyRequest_RootKeyword"]);
+	var jsonText = getUrlParameter("json");
+	if (jsonText == undefined) {
+		var json = emptyIfNull(null);
+	} else {
+		var json = JSON.parse(unescape(jsonText));
+	}
+	$("#form > .children").html(buildMyRequest_RootKeyword(json));
+	activateLinks(root);
+	$("a[id=submit]").click(function(ev) { 
+		ev.preventDefault();
+		c = getChildren($("#form"));
+		j = JSON.stringify(c["RootKeyword"]);
+		window.location.assign("./Downstream?json="+j);
+	});
+}
+
+	init();
+
+	</script>
+
+	<style>
+
+	.node{
+		padding-left: 2em;
+		min-height:20px;
+	    padding:10px;
+	    margin-top:10px;
+	    margin-bottom:20px;
+	    //border-left:0.5px solid #999;
+	    -webkit-border-radius:4px;
+	    -moz-border-radius:4px;
+	    border-radius:4px;
+	    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    background-color:#eaeaea;
+	}
+
+	.node .node {
+		background-color:#e2e2e2;
+	}
+
+	.node .node .node {
+		background-color:#d9d9d9;
+	}
+
+	.node .node .node .node {
+		background-color:#d1d1d1;
+	}
+
+	.node .node .node .node .node {
+		background-color:#c7c7c7;
+	}
+
+	.node .node .node .node .node .node {
+		background-color:#c0c0c0;
+	}
+
+	label{
+	        font-weight: normal;
+	}
+
+	.heading {
+		font-weight: bold;
+	}
+
+	</style>
+	
+	</div>`
+
 func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte("<html>"))
-	w.Write([]byte("<head>"))
-	w.Write([]byte("<title>MyTest - Downstream</title>"))
-	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
-	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("</head>"))
-	w.Write([]byte("<body>"))
+	w.Write([]byte(Header(`MyTest`, `Downstream`)))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		someValue = true
-	} else {
-		fieldnames := []string{
-			"Value",
-			"Value2",
-		}
-		isString := []bool{
-			false,
-			false,
-		}
-		isBool := []bool{
-			false,
-			false,
-		}
-		fields := make([]string, 0, len(fieldnames))
-		for i, name := range fieldnames {
-			v := req.FormValue(name)
-			if len(v) > 0 {
-				someValue = true
-				if isString[i] {
-					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
-				} else if isBool[i] {
-					if v == "on" {
-						fields = append(fields, "\""+name+"\":"+"true")
-					} else {
-						fields = append(fields, "\""+name+"\":"+"false")
-					}
-				} else {
-					fields = append(fields, "\""+name+"\":"+v)
-				}
-			}
-			if someValue {
-				s := "{" + strings.Join(fields, ",") + "}"
-				err := encoding_json.Unmarshal([]byte(s), msg)
-				if err != nil {
-					if err == io.EOF {
-						return
-					}
-					w.Write([]byte(err.Error()))
-					return
-				}
-			}
-		}
 	}
-	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest - Downstream</h3>"))
-	s := "<form action=\"/MyTest/Downstream\" method=\"GET\" role=\"form\">"
-	w.Write([]byte(s))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value\">Value</label>"))
-	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value2\">Value2</label>"))
-	w.Write([]byte("<input id=\"Value2\" name=\"Value2\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
+	w.Write([]byte(FormMyTest_Downstream))
 	if someValue {
 		down, err := this.client.Downstream(golang_org_x_net_context.Background(), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		for {
 			reply, err := down.Recv()
 			if err != nil {
-				if err == io.EOF {
+				if err != io.EOF {
+					w.Write([]byte(err.Error()))
 					return
 				}
-				w.Write([]byte(err.Error()))
-				return
+				break
 			}
 			out, err := htmlstringer(msg, reply)
 			if err != nil {
-				if err == io.EOF {
+				if err != io.EOF {
+					w.Write([]byte(err.Error()))
 					return
 				}
 				w.Write([]byte(err.Error()))
-				return
 			}
 			w.Write(out)
 			w.(net_http.Flusher).Flush()
 		}
 	}
-	w.Write([]byte("</body>"))
-	w.Write([]byte("</html>"))
+	w.Write([]byte(Footer))
 }
+
+var FormMyTest_Upstream string = `<div class="container"><div class="jumbotron">
+	<h3>MyTest: Upstream</h3>
+	
+	<form class="form-horizontal">
+	<div id="form"><div class="children"></div></div>
+    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    </form>
+    
+	<script>
+
+function addChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+}
+
+function setChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+	$(this).hide();
+}
+
+function delChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var parentNode = thisNode.parents(".node:first");
+	thisNode.remove();
+	var setChildLink = $(">a.set-child[fieldname='" + thisNode.attr('fieldname') + "']", parentNode);
+	if (setChildLink.length > 0) {
+		setChildLink.show();
+	}
+}
+
+function delField(ev) {
+	ev.preventDefault();
+	var thisField = $(this).parents(".field:first");
+	thisField.remove();
+}
+
+function addElem(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var myFieldname = $(this).attr("fieldname");
+	if (myType == "bool") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input name="' + myFieldname + '" type="checkbox" repeated="true"/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "number") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "text") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+}
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+function activateLinks(node) {
+ 	$("a.add-child", node).click(addChildNode);
+	$("a.set-child", node).click(setChildNode);
+	$("a.add-elem", node).click(addElem);
+	$("a.del-child", node).click(delChildNode);
+	$("a.del-field", node).click(delField);
+}
+
+function getChildren(el) {
+	var json = {};
+	$("> .children > .node", el).each(function(idx, node) {
+		var nodeJson = getFields($(node));
+		var allChildren = getChildren($(node));
+		for (childType in allChildren) {
+			nodeJson[childType] = allChildren[childType];
+		}
+		var nodeType = $(node).attr("fieldname");
+		var isRepeated = $(node).attr("repeated") == "true";
+		if (isRepeated) {
+			if (!(nodeType in json)) {
+				json[nodeType] = [];
+			}
+			json[nodeType].push(nodeJson);
+		} else {
+			json[nodeType] = nodeJson;
+		}
+	});
+	return json
+}
+
+function getFields(node) {
+	var nodeJson = {};
+	$("> div.field > div ", $(node)).each(function(idx, field) {
+		$("> input[type=text]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).val();
+		});
+		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).is(':checked');
+		});
+		$("> input[type=number]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> select", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+	});
+	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		$("input[type=text]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).val());
+		});
+		$("input[type=checkbox]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).is(':checked'));
+		});
+		$("input[type=number]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("input[type=radio]:checked", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("select", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+	});
+
+	return nodeJson;
+}
+
+function radioed(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "checked"
+	}
+	return ""
+}
+
+function checked(value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == true) {
+		return "checked='checked'"
+	}
+	return ""
+}
+
+function selected(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	return ""
+}
+
+function emptyIfNull(json) {
+	if (json == undefined || json == null) {
+		return JSON.parse("{}");
+	}
+	return json;
+}
+
+function getValue(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("{}");
+	}
+	return value;
+}
+
+function getList(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("[]");
+	}
+	return value;
+}
+
+function setLink(json, typ, fieldname) {
+	if (json[fieldname] == undefined) {
+		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>';
+	}
+	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
+}
+
+function setValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return 'value="' + value + '"'
+}
+
+function setStrValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return "value='" + value + "'"
+}
+
+var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
+	function buildMyMsg_RootKeyword(json) {
+if (json == undefined) {
+		return "";
+	}
+	
+var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+				
+
+			s += '</div>';
+			var node = $(s);
+			activateLinks(node);
+			return node;
+		}function init() {
+	var root = $(nodeFactory["MyMsg_RootKeyword"]);
+	var jsonText = getUrlParameter("json");
+	if (jsonText == undefined) {
+		var json = emptyIfNull(null);
+	} else {
+		var json = JSON.parse(unescape(jsonText));
+	}
+	$("#form > .children").html(buildMyMsg_RootKeyword(json));
+	activateLinks(root);
+	$("a[id=submit]").click(function(ev) { 
+		ev.preventDefault();
+		c = getChildren($("#form"));
+		j = JSON.stringify(c["RootKeyword"]);
+		window.location.assign("./Upstream?json="+j);
+	});
+}
+
+	init();
+
+	</script>
+
+	<style>
+
+	.node{
+		padding-left: 2em;
+		min-height:20px;
+	    padding:10px;
+	    margin-top:10px;
+	    margin-bottom:20px;
+	    //border-left:0.5px solid #999;
+	    -webkit-border-radius:4px;
+	    -moz-border-radius:4px;
+	    border-radius:4px;
+	    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    background-color:#eaeaea;
+	}
+
+	.node .node {
+		background-color:#e2e2e2;
+	}
+
+	.node .node .node {
+		background-color:#d9d9d9;
+	}
+
+	.node .node .node .node {
+		background-color:#d1d1d1;
+	}
+
+	.node .node .node .node .node {
+		background-color:#c7c7c7;
+	}
+
+	.node .node .node .node .node .node {
+		background-color:#c0c0c0;
+	}
+
+	label{
+	        font-weight: normal;
+	}
+
+	.heading {
+		font-weight: bold;
+	}
+
+	</style>
+	
+	</div>`
+
 func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte("<html>"))
-	w.Write([]byte("<head>"))
-	w.Write([]byte("<title>MyTest - Upstream</title>"))
-	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
-	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("</head>"))
-	w.Write([]byte("<body>"))
+	w.Write([]byte(Header(`MyTest`, `Upstream`)))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		someValue = true
-	} else {
-		fieldnames := []string{
-			"Value",
-		}
-		isString := []bool{
-			false,
-		}
-		isBool := []bool{
-			false,
-		}
-		fields := make([]string, 0, len(fieldnames))
-		for i, name := range fieldnames {
-			v := req.FormValue(name)
-			if len(v) > 0 {
-				someValue = true
-				if isString[i] {
-					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
-				} else if isBool[i] {
-					if v == "on" {
-						fields = append(fields, "\""+name+"\":"+"true")
-					} else {
-						fields = append(fields, "\""+name+"\":"+"false")
-					}
-				} else {
-					fields = append(fields, "\""+name+"\":"+v)
-				}
-			}
-			if someValue {
-				s := "{" + strings.Join(fields, ",") + "}"
-				err := encoding_json.Unmarshal([]byte(s), msg)
-				if err != nil {
-					if err == io.EOF {
-						return
-					}
-					w.Write([]byte(err.Error()))
-					return
-				}
-			}
-		}
 	}
-	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest - Upstream</h3>"))
-	s := "<form action=\"/MyTest/Upstream\" method=\"GET\" role=\"form\">"
-	w.Write([]byte(s))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value\">Value</label>"))
-	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
+	w.Write([]byte(FormMyTest_Upstream))
 	if someValue {
 		up, err := this.client.Upstream(golang_org_x_net_context.Background())
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		err = up.Send(msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		reply, err := up.CloseAndRecv()
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		out, err := htmlstringer(msg, reply)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		w.Write(out)
 	}
-	w.Write([]byte("</body>"))
-	w.Write([]byte("</html>"))
+	w.Write([]byte(Footer))
 }
+
+var FormMyTest_Bidi string = `<div class="container"><div class="jumbotron">
+	<h3>MyTest: Bidi</h3>
+	
+	<form class="form-horizontal">
+	<div id="form"><div class="children"></div></div>
+    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    </form>
+    
+	<script>
+
+function addChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+}
+
+function setChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var child = $(nodeFactory[myType]);
+	activateLinks(child);
+	$(">.children[type=" + myType + "]", thisNode).append(child);
+	$(this).hide();
+}
+
+function delChildNode(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var parentNode = thisNode.parents(".node:first");
+	thisNode.remove();
+	var setChildLink = $(">a.set-child[fieldname='" + thisNode.attr('fieldname') + "']", parentNode);
+	if (setChildLink.length > 0) {
+		setChildLink.show();
+	}
+}
+
+function delField(ev) {
+	ev.preventDefault();
+	var thisField = $(this).parents(".field:first");
+	thisField.remove();
+}
+
+function addElem(ev) {
+	ev.preventDefault();
+	var thisNode = $(this).parents(".node:first");
+	var myType = $(this).attr("type");
+	var myFieldname = $(this).attr("fieldname");
+	if (myType == "bool") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input name="' + myFieldname + '" type="checkbox" repeated="true"/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "number") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "text") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+}
+
+function getUrlParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+function activateLinks(node) {
+ 	$("a.add-child", node).click(addChildNode);
+	$("a.set-child", node).click(setChildNode);
+	$("a.add-elem", node).click(addElem);
+	$("a.del-child", node).click(delChildNode);
+	$("a.del-field", node).click(delField);
+}
+
+function getChildren(el) {
+	var json = {};
+	$("> .children > .node", el).each(function(idx, node) {
+		var nodeJson = getFields($(node));
+		var allChildren = getChildren($(node));
+		for (childType in allChildren) {
+			nodeJson[childType] = allChildren[childType];
+		}
+		var nodeType = $(node).attr("fieldname");
+		var isRepeated = $(node).attr("repeated") == "true";
+		if (isRepeated) {
+			if (!(nodeType in json)) {
+				json[nodeType] = [];
+			}
+			json[nodeType].push(nodeJson);
+		} else {
+			json[nodeType] = nodeJson;
+		}
+	});
+	return json
+}
+
+function getFields(node) {
+	var nodeJson = {};
+	$("> div.field > div ", $(node)).each(function(idx, field) {
+		$("> input[type=text]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).val();
+		});
+		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = $(input).is(':checked');
+		});
+		$("> input[type=number]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+		$("> select", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+		});
+	});
+	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		$("input[type=text]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).val());
+		});
+		$("input[type=checkbox]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push($(input).is(':checked'));
+		});
+		$("input[type=number]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("input[type=radio]:checked", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+		$("select", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseInt($(input).val()));
+		});
+	});
+
+	return nodeJson;
+}
+
+function radioed(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "checked"
+	}
+	return ""
+}
+
+function checked(value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == true) {
+		return "checked='checked'"
+	}
+	return ""
+}
+
+function selected(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	return ""
+}
+
+function emptyIfNull(json) {
+	if (json == undefined || json == null) {
+		return JSON.parse("{}");
+	}
+	return json;
+}
+
+function getValue(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("{}");
+	}
+	return value;
+}
+
+function getList(json, name) {
+	var value = json[name];
+	if (value == undefined) {
+		return JSON.parse("[]");
+	}
+	return value;
+}
+
+function setLink(json, typ, fieldname) {
+	if (json[fieldname] == undefined) {
+		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>';
+	}
+	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
+}
+
+function setValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return 'value="' + value + '"'
+}
+
+function setStrValue(value) {
+	if (value == undefined) {
+		return ""
+	}
+	return "value='" + value + "'"
+}
+
+var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
+	function buildMyMsg_RootKeyword(json) {
+if (json == undefined) {
+		return "";
+	}
+	
+var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+				
+
+			s += '</div>';
+			var node = $(s);
+			activateLinks(node);
+			return node;
+		}function init() {
+	var root = $(nodeFactory["MyMsg_RootKeyword"]);
+	var jsonText = getUrlParameter("json");
+	if (jsonText == undefined) {
+		var json = emptyIfNull(null);
+	} else {
+		var json = JSON.parse(unescape(jsonText));
+	}
+	$("#form > .children").html(buildMyMsg_RootKeyword(json));
+	activateLinks(root);
+	$("a[id=submit]").click(function(ev) { 
+		ev.preventDefault();
+		c = getChildren($("#form"));
+		j = JSON.stringify(c["RootKeyword"]);
+		window.location.assign("./Bidi?json="+j);
+	});
+}
+
+	init();
+
+	</script>
+
+	<style>
+
+	.node{
+		padding-left: 2em;
+		min-height:20px;
+	    padding:10px;
+	    margin-top:10px;
+	    margin-bottom:20px;
+	    //border-left:0.5px solid #999;
+	    -webkit-border-radius:4px;
+	    -moz-border-radius:4px;
+	    border-radius:4px;
+	    -webkit-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    -moz-box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    box-shadow:inset 0 1px 1px rgba(0, 0, 0, 0.05);
+	    background-color:#eaeaea;
+	}
+
+	.node .node {
+		background-color:#e2e2e2;
+	}
+
+	.node .node .node {
+		background-color:#d9d9d9;
+	}
+
+	.node .node .node .node {
+		background-color:#d1d1d1;
+	}
+
+	.node .node .node .node .node {
+		background-color:#c7c7c7;
+	}
+
+	.node .node .node .node .node .node {
+		background-color:#c0c0c0;
+	}
+
+	label{
+	        font-weight: normal;
+	}
+
+	.heading {
+		font-weight: bold;
+	}
+
+	</style>
+	
+	</div>`
+
 func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte("<html>"))
-	w.Write([]byte("<head>"))
-	w.Write([]byte("<title>MyTest - Bidi</title>"))
-	w.Write([]byte("<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">"))
-	w.Write([]byte("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>"))
-	w.Write([]byte("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>"))
-	w.Write([]byte("</head>"))
-	w.Write([]byte("<body>"))
+	w.Write([]byte(Header(`MyTest`, `Bidi`)))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		someValue = true
-	} else {
-		fieldnames := []string{
-			"Value",
-		}
-		isString := []bool{
-			false,
-		}
-		isBool := []bool{
-			false,
-		}
-		fields := make([]string, 0, len(fieldnames))
-		for i, name := range fieldnames {
-			v := req.FormValue(name)
-			if len(v) > 0 {
-				someValue = true
-				if isString[i] {
-					fields = append(fields, "\""+name+"\":"+strconv.Quote(v))
-				} else if isBool[i] {
-					if v == "on" {
-						fields = append(fields, "\""+name+"\":"+"true")
-					} else {
-						fields = append(fields, "\""+name+"\":"+"false")
-					}
-				} else {
-					fields = append(fields, "\""+name+"\":"+v)
-				}
-			}
-			if someValue {
-				s := "{" + strings.Join(fields, ",") + "}"
-				err := encoding_json.Unmarshal([]byte(s), msg)
-				if err != nil {
-					if err == io.EOF {
-						return
-					}
-					w.Write([]byte(err.Error()))
-					return
-				}
-			}
-		}
 	}
-	w.Write([]byte("<div class=\"container\"><div class=\"jumbotron\">"))
-	w.Write([]byte("<h3>MyTest - Bidi</h3>"))
-	s := "<form action=\"/MyTest/Bidi\" method=\"GET\" role=\"form\">"
-	w.Write([]byte(s))
-	w.Write([]byte("<div class=\"form-group\">"))
-	w.Write([]byte("<label for=\"Value\">Value</label>"))
-	w.Write([]byte("<input id=\"Value\" name=\"Value\" type=\"text\" class=\"form-control\"/><br>"))
-	w.Write([]byte("</div>"))
-	w.Write([]byte("<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>"))
+	w.Write([]byte(FormMyTest_Bidi))
 	if someValue {
 		bidi, err := this.client.Bidi(golang_org_x_net_context.Background())
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		err = bidi.Send(msg)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		reply, err := bidi.Recv()
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		out, err := htmlstringer(msg, reply)
 		if err != nil {
-			if err == io.EOF {
+			if err != io.EOF {
+				w.Write([]byte(err.Error()))
 				return
 			}
 			w.Write([]byte(err.Error()))
-			return
 		}
 		w.Write(out)
 	}
-	w.Write([]byte("</body>"))
-	w.Write([]byte("</html>"))
+	w.Write([]byte(Footer))
 }
+
+var Header func(servName, methodName string) string = func(servName, methodName string) string {
+	return `
+	<html>
+	<head>
+	<title>` + servName + `:` + methodName + `</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+	`
+}
+var Footer string = `
+	</body>
+	</html>
+	`
