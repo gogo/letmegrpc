@@ -117,7 +117,7 @@ function addElem(ev) {
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 	if (myType == "number") {
-		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="1" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
@@ -125,6 +125,11 @@ function addElem(ev) {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "float") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
 	}
 }
 
@@ -181,7 +186,10 @@ function getFields(node) {
 		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).is(':checked');
 		});
-		$("> input[type=number]", $(field)).each(function(idx, input) {
+		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
+		});
+		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
@@ -206,7 +214,14 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push($(input).is(':checked'));
 		});
-		$("input[type=number]", $(field)).each(function(idx, input) {
+		$("input[type=number][step=any]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseFloat($(input).val()));
+		});
+		$("input[type=number][step=1]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
@@ -303,7 +318,7 @@ function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value='" + value + "'"
+	return "value=" + JSON.stringify(value);
 }
 
 var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
@@ -313,9 +328,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" '+setValue(json["Value2"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -490,7 +505,7 @@ function addElem(ev) {
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 	if (myType == "number") {
-		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="1" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
@@ -498,6 +513,11 @@ function addElem(ev) {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "float") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
 	}
 }
 
@@ -554,7 +574,10 @@ function getFields(node) {
 		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).is(':checked');
 		});
-		$("> input[type=number]", $(field)).each(function(idx, input) {
+		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
+		});
+		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
@@ -579,7 +602,14 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push($(input).is(':checked'));
 		});
-		$("input[type=number]", $(field)).each(function(idx, input) {
+		$("input[type=number][step=any]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseFloat($(input).val()));
+		});
+		$("input[type=number][step=1]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
@@ -676,7 +706,7 @@ function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value='" + value + "'"
+	return "value=" + JSON.stringify(value);
 }
 
 var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
@@ -686,9 +716,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" '+setValue(json["Value2"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -874,7 +904,7 @@ function addElem(ev) {
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 	if (myType == "number") {
-		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="1" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
@@ -882,6 +912,11 @@ function addElem(ev) {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "float") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
 	}
 }
 
@@ -938,7 +973,10 @@ function getFields(node) {
 		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).is(':checked');
 		});
-		$("> input[type=number]", $(field)).each(function(idx, input) {
+		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
+		});
+		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
@@ -963,7 +1001,14 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push($(input).is(':checked'));
 		});
-		$("input[type=number]", $(field)).each(function(idx, input) {
+		$("input[type=number][step=any]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseFloat($(input).val()));
+		});
+		$("input[type=number][step=1]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
@@ -1060,7 +1105,7 @@ function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value='" + value + "'"
+	return "value=" + JSON.stringify(value);
 }
 
 var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
@@ -1070,7 +1115,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -1261,7 +1306,7 @@ function addElem(ev) {
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 	if (myType == "number") {
-		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="1" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
@@ -1269,6 +1314,11 @@ function addElem(ev) {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "float") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
 	}
 }
 
@@ -1325,7 +1375,10 @@ function getFields(node) {
 		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).is(':checked');
 		});
-		$("> input[type=number]", $(field)).each(function(idx, input) {
+		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
+		});
+		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
@@ -1350,7 +1403,14 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push($(input).is(':checked'));
 		});
-		$("input[type=number]", $(field)).each(function(idx, input) {
+		$("input[type=number][step=any]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseFloat($(input).val()));
+		});
+		$("input[type=number][step=1]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
@@ -1447,7 +1507,7 @@ function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value='" + value + "'"
+	return "value=" + JSON.stringify(value);
 }
 
 var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
@@ -1457,7 +1517,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';

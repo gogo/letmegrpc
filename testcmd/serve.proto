@@ -51,7 +51,7 @@ message Artist {
 message Song {
 	string Name = 1;
 	uint64 Track = 2;
-	uint64 Duration = 3;
+	double Duration = 3;
 	repeated Artist Composer = 4;
 }
 

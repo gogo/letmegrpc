@@ -34,9 +34,9 @@ Clicking Submit will send your newly populated message to your grpc server imple
 
 Open your webbrowser at
 
-    http://localhost:8080/OnionSeller/OnlyOnce
+    http://localhost:8080/Label/Produce
 
-![image](https://github.com/gogo/letmegrpc/blob/master/allo.png "Allo Allo")
+![image](https://github.com/gogo/letmegrpc/blob/master/screenshot.png "ScreenShot")
 
 ## Customization
 

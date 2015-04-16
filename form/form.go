@@ -82,7 +82,7 @@ function addElem(ev) {
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 	if (myType == "number") {
-		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="1" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
@@ -90,6 +90,11 @@ function addElem(ev) {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="text" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
 		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
+	}
+	if (myType == "float") {
+		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
+		$("a.del-field", input).click(delField);
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
 	}
 }
 
@@ -146,7 +151,10 @@ function getFields(node) {
 		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).is(':checked');
 		});
-		$("> input[type=number]", $(field)).each(function(idx, input) {
+		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
+			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
+		});
+		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
@@ -171,7 +179,14 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push($(input).is(':checked'));
 		});
-		$("input[type=number]", $(field)).each(function(idx, input) {
+		$("input[type=number][step=any]", $(field)).each(function(idx, input) {
+			var fieldname = $(input).attr("name");
+			if (!(fieldname in nodeJson)) {
+				nodeJson[fieldname] = [];
+			}
+			nodeJson[fieldname].push(parseFloat($(input).val()));
+		});
+		$("input[type=number][step=1]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
@@ -268,7 +283,7 @@ function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value='" + value + "'"
+	return "value=" + JSON.stringify(value);
 }
 
 `
@@ -288,6 +303,15 @@ func isEnum(f *descriptor.FieldDescriptorProto) bool {
 func getEnum(fileDescriptorSet *descriptor.FileDescriptorSet, f *descriptor.FieldDescriptorProto) *descriptor.EnumDescriptorProto {
 	typeNames := strings.Split(f.GetTypeName(), ".")
 	return fileDescriptorSet.GetEnum(typeNames[1], typeNames[2])
+}
+
+func isFloat(f *descriptor.FieldDescriptorProto) bool {
+	switch f.GetType() {
+	case descriptor.FieldDescriptorProto_TYPE_DOUBLE,
+		descriptor.FieldDescriptorProto_TYPE_FLOAT:
+		return true
+	}
+	return false
 }
 
 func isNumber(f *descriptor.FieldDescriptorProto) bool {
@@ -401,7 +425,10 @@ func BuildField(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descripto
 					return s
 				}
 			} else if isNumber(f) {
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" '+setValue(json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(json["` + f.GetName() + `"])+'/></div></div>';
+				`
+			} else if isFloat(f) {
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else {
 				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(json["` + f.GetName() + `"])+'/></div></div>';
@@ -424,10 +451,21 @@ func BuildField(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descripto
 					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
-					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" repeated="true" '+setValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>';
+				`
+				return s
+			} else if isNumber(f) || isEnum(f) {
+				s :=
+					`s += '<div class="fields" fieldname="` + fieldname + `">';
+				var ` + fieldname + ` = getList(json, "` + fieldname + `");
+				for (var i = 0; i < ` + fieldname + `.length; i++) {
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+				}
+				s += '</div>';
+				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>';
 				`
 				return s
 			} else {

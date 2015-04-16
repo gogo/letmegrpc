@@ -99,7 +99,7 @@ func (*Artist) ProtoMessage()    {}
 type Song struct {
 	Name     string    `protobuf:"bytes,1,opt,proto3" json:"Name,omitempty"`
 	Track    uint64    `protobuf:"varint,2,opt,proto3" json:"Track,omitempty"`
-	Duration uint64    `protobuf:"varint,3,opt,proto3" json:"Duration,omitempty"`
+	Duration float64   `protobuf:"fixed64,3,opt,proto3" json:"Duration,omitempty"`
 	Composer []*Artist `protobuf:"bytes,4,rep" json:"Composer,omitempty"`
 }
 
