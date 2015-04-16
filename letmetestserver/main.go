@@ -34,19 +34,11 @@ import (
 	"net"
 )
 
-type receiver struct{}
-
-func (this *receiver) Produce(a *serve.Album) (*serve.Album, error) {
-	a.Name = "Allo " + a.Name
-	return a, nil
-}
-
-type server struct {
-	create func() *receiver
-}
+type server struct{}
 
 func (this *server) Produce(c context.Context, a *serve.Album) (*serve.Album, error) {
-	return this.create().Produce(a)
+	a.Producer = append(a.Producer, "My Label")
+	return a, nil
 }
 
 var port = flag.String("port", "12345", "port")

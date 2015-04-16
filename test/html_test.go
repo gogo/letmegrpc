@@ -139,10 +139,3 @@ func TestHTML(t *testing.T) {
 		t.Fatal("could not find json value")
 	}
 }
-
-// func TestLetMeTest(t *testing.T) {
-// 	server, client := setup(t, &aServer{})
-// 	defer server.Stop()
-// 	htmlserver := NewHTMLMyTestServer(client, nil)
-// 	htmlserver.Serve("localhost:80")
-// }

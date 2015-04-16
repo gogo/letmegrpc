@@ -59,7 +59,7 @@ func TestCmd(t *testing.T) {
 	runInBack(client)
 	defer client.Process.Kill()
 	log.Printf("client started")
-	resp, err := http.Get("http://localhost:8080/OnionSeller/OnlyOnce")
+	resp, err := http.Get("http://localhost:8080/Label/Produce")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,7 @@ func TestCmd(t *testing.T) {
 	if !strings.Contains(string(body), "<form") {
 		log.Fatal("no form")
 	}
-	resp, err = http.Get("http://localhost:8080/OnionSeller/OnlyOnce?Name=\"Walter\"")
+	resp, err = http.Get(`http://localhost:8080/Label/Produce?json={%22Name%22:%22Walter%22}`)
 	if err != nil {
 		log.Fatal(err)
 	}
