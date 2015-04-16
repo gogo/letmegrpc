@@ -27,13 +27,42 @@ syntax = "proto3";
 
 package serve;
 
-message Allo {
-	string Name = 1;
-	int64 Age = 2;
-	string Country = 3;
-	bool Spy = 4;
+enum Instrument {
+    Voice = 0;
+    Guitar = 1;
+    Drum = 2;
 }
 
-service OnionSeller {
-	rpc OnlyOnce(Allo) returns (Allo);
+enum Genre {
+	Pop = 0;
+	Rock = 1;
+	Jazz = 2;
+	NintendoCore = 3;
+	Indie = 4;
+	Punk = 5;
+	Dance = 6;
+}
+
+message Artist {
+	string Name = 1;
+	Instrument Role = 2;
+}
+
+message Song {
+	string Name = 1;
+	uint64 Track = 2;
+	uint64 Duration = 3;
+	repeated Artist Composer = 4;
+}
+
+message Album {
+	string Name = 1;
+	repeated Song Song = 2;
+	Genre Genre = 3;
+	string Year = 4;
+	repeated string Producer = 5;
+}
+
+service Label {
+	rpc Produce(Album) returns (Album);
 }

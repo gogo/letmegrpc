@@ -34,12 +34,19 @@ import (
 	"net"
 )
 
-type onionSeller struct{}
+type receiver struct{}
 
-func (this *onionSeller) OnlyOnce(c context.Context, a *serve.Allo) (*serve.Allo, error) {
-	a.Spy = !a.Spy
+func (this *receiver) Produce(a *serve.Album) (*serve.Album, error) {
 	a.Name = "Allo " + a.Name
 	return a, nil
+}
+
+type server struct {
+	create func() *receiver
+}
+
+func (this *server) Produce(c context.Context, a *serve.Album) (*serve.Album, error) {
+	return this.create().Produce(a)
 }
 
 var port = flag.String("port", "12345", "port")
@@ -51,6 +58,6 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	serve.RegisterOnionSellerServer(s, &onionSeller{})
+	serve.RegisterLabelServer(s, &server{})
 	s.Serve(lis)
 }

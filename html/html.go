@@ -26,6 +26,7 @@
 package html
 
 import (
+	"github.com/gogo/letmegrpc/form"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"strings"
@@ -57,34 +58,18 @@ func (p *html) typeName(name string) string {
 	return p.TypeName(p.ObjectNamed(name))
 }
 
-func (p *html) writeError() {
+func (p *html) writeError(eof string) {
 	p.P(`if err != nil {`)
 	p.In()
-	p.P(`if err == `, p.ioPkg.Use(), `.EOF {`)
+	p.P(`if err != `, p.ioPkg.Use(), `.EOF {`)
 	p.In()
-	p.P(`return`)
-	p.Out()
-	p.P(`}`)
 	p.P(`w.Write([]byte(err.Error()))`)
 	p.P(`return`)
 	p.Out()
 	p.P(`}`)
-}
-
-func (p *html) w(s string) {
-	p.P(`w.Write([]byte("`, s, `"))`)
-}
-
-func formable(msg *descriptor.DescriptorProto) bool {
-	for _, f := range msg.GetField() {
-		if f.IsRepeated() {
-			return false
-		}
-		if f.IsMessage() {
-			return false
-		}
-	}
-	return true
+	p.P(eof)
+	p.Out()
+	p.P(`}`)
 }
 
 func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descriptor.DescriptorProto {
@@ -99,109 +84,16 @@ func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descripto
 	return msg
 }
 
-func (p *html) generateSets(servName string, method *descriptor.MethodDescriptorProto) {
-	msg := p.getInputType(method)
-	if !formable(msg) {
-		return
-	}
-	p.P(`fieldnames := []string{`)
-	p.In()
-	for _, f := range msg.GetField() {
-		p.P(`"`, f.GetName(), `",`)
-	}
-	p.Out()
-	p.P(`}`)
-	p.P(`isString := []bool{`)
-	p.In()
-	for _, f := range msg.GetField() {
-		if f.IsString() {
-			p.P(`true,`)
-		} else {
-			p.P(`false,`)
-		}
-	}
-	p.Out()
-	p.P(`}`)
-	p.P(`isBool := []bool{`)
-	p.In()
-	for _, f := range msg.GetField() {
-		if f.GetType() == descriptor.FieldDescriptorProto_TYPE_BOOL {
-			p.P(`true,`)
-		} else {
-			p.P(`false,`)
-		}
-	}
-	p.Out()
-	p.P(`}`)
-	p.P(`fields := make([]string, 0, len(fieldnames))`)
-	p.P(`for i, name := range fieldnames {`)
-	p.In()
-	p.P(`v := req.FormValue(name)`)
-	p.P(`if len(v) > 0 {`)
-	p.In()
-	p.P(`someValue = true`)
-	p.P(`if isString[i] {`)
-	p.In()
-	p.P(`fields = append(fields, "\"" + name + "\":" + `, p.strconvPkg.Use(), `.Quote(v))`)
-	p.Out()
-	p.P(`} else if isBool[i] {`)
-	p.In()
-	p.P(`if v == "on" {`)
-	p.In()
-	p.P(`fields = append(fields, "\"" + name + "\":" + "true")`)
-	p.Out()
-	p.P(`} else {`)
-	p.In()
-	p.P(`fields = append(fields, "\"" + name + "\":" + "false")`)
-	p.Out()
-	p.P(`}`)
-	p.Out()
-	p.P(`} else {`)
-	p.In()
-	p.P(`fields = append(fields, "\"" + name + "\":" + v)`)
-	p.Out()
-	p.P(`}`)
-	p.Out()
-	p.P(`}`)
-	p.P(`if someValue {`)
-	p.In()
-	p.P(`s := "{" + `, p.stringsPkg.Use(), `.Join(fields, ",") + "}"`)
-	p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(s), msg)`)
-	p.writeError()
-	p.Out()
-	p.P(`}`)
-	p.Out()
-	p.P(`}`)
-}
-
-func (p *html) generateForm(servName string, method *descriptor.MethodDescriptorProto) {
-	msg := p.getInputType(method)
-	p.w(`<div class=\"container\"><div class=\"jumbotron\">`)
-	p.w(`<h3>` + servName + ` - ` + method.GetName() + `</h3>`)
-	p.P(`s := "<form action=\"/`, servName, `/`, method.GetName(), `\" method=\"GET\" role=\"form\">"`)
-	p.P(`w.Write([]byte(s))`)
-	if !formable(msg) {
-		panic("I don't think it is complicated")
-		p.w(`<div class=\"form-group\">`)
-		p.w(`Json for ` + method.GetInputType()[1:] + ` : <input name=\"json\" type=\"text\"><br>`)
-		p.w(`</div>`)
-	} else {
-		for _, f := range msg.GetField() {
-			if f.GetType() == descriptor.FieldDescriptorProto_TYPE_BOOL {
-				p.w(`<div class=\"checkbox\">`)
-				p.w(`<label for=\"` + f.GetName() + `\">`)
-				p.w(`<input id=\"` + f.GetName() + `\" name=\"` + f.GetName() + `\" type=\"checkbox\"/>`)
-				p.w(f.GetName())
-				p.w(`</label>`)
-			} else {
-				p.w(`<div class=\"form-group\">`)
-				p.w(`<label for=\"` + f.GetName() + `\">` + f.GetName() + `</label>`)
-				p.w(`<input id=\"` + f.GetName() + `\" name=\"` + f.GetName() + `\" type=\"text\" class=\"form-control\"/><br>`)
-			}
-			p.w(`</div>`)
-		}
-	}
-	p.w(`<button type=\"submit\" class=\"btn btn-primary\">Submit</button></form></div></div>`)
+func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescriptorProto) {
+	fileDescriptorSet := p.AllFiles()
+	inputs := strings.Split(method.GetInputType(), ".")
+	packageName := inputs[1]
+	messageName := inputs[2]
+	s := `<div class="container"><div class="jumbotron">
+	<h3>` + servName + `: ` + method.GetName() + `</h3>
+	` + form.Create(method.GetName(), packageName, messageName, fileDescriptorSet) + `
+	</div>`
+	p.P(`var Form`, servName, "_", method.GetName(), " string = `", s, "`")
 }
 
 func (p *html) Generate(file *generator.FileDescriptor) {
@@ -277,49 +169,40 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.P(`}`)
 
 		for _, m := range s.GetMethod() {
+			p.generateFormFunc(servName, m)
+			p.P(``)
 			p.P(`func (this *html`, servName, `) `, m.GetName(), `(w `, httpPkg.Use(), `.ResponseWriter, req *`, httpPkg.Use(), `.Request) {`)
 			p.In()
-			p.w("<html>")
-			p.w("<head>")
-			p.w("<title>" + servName + " - " + m.GetName() + "</title>")
-			p.w(`<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css\">`)
-			p.w(`<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js\"></script>`)
-			p.w(`<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>`)
-			p.w("</head>")
-			p.w("<body>")
+			p.P("w.Write([]byte(Header(`", servName, "`,`", m.GetName(), "`)))")
 			p.P(`jsonString := req.FormValue("json")`)
 			p.P(`someValue := false`)
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
 			p.P(`if len(jsonString) > 0 {`)
 			p.In()
 			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
-			p.writeError()
+			p.writeError(`w.Write([]byte(err.Error()))`)
 			p.P(`someValue = true`)
 			p.Out()
-			p.P(`} else {`)
-			p.In()
-			p.generateSets(servName, m)
-			p.Out()
 			p.P(`}`)
-			p.generateForm(servName, m)
+			p.P(`w.Write([]byte(Form`, servName, `_`, m.GetName(), `))`)
 			p.P(`if someValue {`)
 			p.In()
 			if !m.GetClientStreaming() {
 				if !m.GetServerStreaming() {
 					p.P(`reply, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`out, err := htmlstringer(msg, reply)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				} else {
 					p.P(`down, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`for {`)
 					p.In()
 					p.P(`reply, err := down.Recv()`)
-					p.writeError()
+					p.writeError(`break`)
 					p.P(`out, err := htmlstringer(msg, reply)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 					p.P(`w.(`, httpPkg.Use(), `.Flusher).Flush()`)
 					p.Out()
@@ -328,32 +211,57 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			} else {
 				if !m.GetServerStreaming() {
 					p.P(`up, err := this.client.Upstream(`, contextPkg.Use(), `.Background())`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`err = up.Send(msg)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`reply, err := up.CloseAndRecv()`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`out, err := htmlstringer(msg, reply)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				} else {
 					p.P(`bidi, err := this.client.Bidi(`, contextPkg.Use(), `.Background())`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`err = bidi.Send(msg)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`reply, err := bidi.Recv()`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`out, err := htmlstringer(msg, reply)`)
-					p.writeError()
+					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				}
 			}
 			p.Out()
 			p.P(`}`)
-			p.w("</body>")
-			p.w("</html>")
+			p.P("w.Write([]byte(Footer))")
 			p.Out()
 			p.P(`}`)
 		}
 	}
+
+	header1 := `
+	<html>
+	<head>
+	<title>`
+
+	header2 := `</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+	`
+	footer := `
+	</body>
+	</html>
+	`
+
+	p.P("var Header func(servName, methodName string) string = func(servName, methodName string) string {")
+	p.In()
+	p.P("return `", header1, "` + servName + `:` + methodName + `", header2, "`")
+	p.Out()
+	p.P(`}`)
+
+	p.P("var Footer string = `", footer, "`")
+
 }
