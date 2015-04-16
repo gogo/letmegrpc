@@ -184,7 +184,7 @@ function getFields(node) {
 		$("> input[type=number]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -557,7 +557,7 @@ function getFields(node) {
 		$("> input[type=number]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -941,7 +941,7 @@ function getFields(node) {
 		$("> input[type=number]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -1328,7 +1328,7 @@ function getFields(node) {
 		$("> input[type=number]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
