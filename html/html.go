@@ -176,6 +176,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P("w.Write([]byte(Header(`", servName, "`,`", m.GetName(), "`)))")
 			p.P(`jsonString := req.FormValue("json")`)
 			p.P(`someValue := false`)
+			p.RecordTypeUse(m.GetInputType())
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
 			p.P(`if len(jsonString) > 0 {`)
 			p.In()
