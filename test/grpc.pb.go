@@ -208,9 +208,9 @@ func RegisterMyTestServer(s *grpc1.Server, srv MyTestServer) {
 	s.RegisterService(&_MyTest_serviceDesc, srv)
 }
 
-func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, buf []byte) (interface{}, error) {
+func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, codec grpc1.Codec, buf []byte) (interface{}, error) {
 	in := new(MyRequest)
-	if err := proto.Unmarshal(buf, in); err != nil {
+	if err := codec.Unmarshal(buf, in); err != nil {
 		return nil, err
 	}
 	out, err := srv.(MyTestServer).UnaryCall(ctx, in)

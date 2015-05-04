@@ -171,9 +171,9 @@ func RegisterLabelServer(s *grpc.Server, srv LabelServer) {
 	s.RegisterService(&_Label_serviceDesc, srv)
 }
 
-func _Label_Produce_Handler(srv interface{}, ctx context.Context, buf []byte) (interface{}, error) {
+func _Label_Produce_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
 	in := new(Album)
-	if err := proto.Unmarshal(buf, in); err != nil {
+	if err := codec.Unmarshal(buf, in); err != nil {
 		return nil, err
 	}
 	out, err := srv.(LabelServer).Produce(ctx, in)
