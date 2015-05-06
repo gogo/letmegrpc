@@ -26,11 +26,9 @@
 package form
 
 import (
-	"bytes"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"strconv"
 	"strings"
-	"text/template"
 )
 
 var Header string = `
@@ -142,6 +140,12 @@ function getChildren(el) {
 	return json
 }
 
+function isInt(value) {
+  return !isNaN(value) && 
+         parseInt(Number(value)) == value && 
+         !isNaN(parseInt(value, 10));
+}
+
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
@@ -161,7 +165,12 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var textvalue = $(input).val();
+			if (isInt(textvalue)) {
+				nodeJson[$(input).attr("name")] = parseInt(textvalue);	
+			} else {
+				nodeJson[$(input).attr("name")] = textvalue;
+			}
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
@@ -237,6 +246,9 @@ function selected(index, value) {
 		return ""
 	}
 	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	if (index == value) {
 		return "selected='selected'"
 	}
 	return ""
@@ -373,7 +385,9 @@ func typ(fieldname string, repeated bool, msg *descriptor.DescriptorProto) strin
 	return msg.GetName() + "_" + fieldname
 }
 
-func BuildField(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet) string {
+type FieldBuilder func(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto) string
+
+func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto) string {
 	fieldname := f.GetName()
 	if f.IsMessage() {
 		typName := typ(fieldname, f.IsRepeated(), getMessage(f, fileDescriptorSet))
@@ -485,7 +499,7 @@ func BuildField(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descripto
 	panic("unreachable")
 }
 
-func Builder(root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet) string {
+func Builder(root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
 	s := []string{`function build` + typ(fieldname, repeated, msg) + `(json) {`}
 	if repeated {
 		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg)+`" fieldname="`+fieldname+`" repeated="true">';`)
@@ -507,9 +521,9 @@ func Builder(root bool, fieldname string, repeated bool, msg *descriptor.Descrip
 	for _, f := range msg.GetField() {
 		if f.IsMessage() {
 			fieldMsg := getMessage(f, fileDescriptorSet)
-			ms = append(ms, Builder(false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet))
+			ms = append(ms, Builder(false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, buildField))
 		}
-		s = append(s, BuildField(f, fileDescriptorSet))
+		s = append(s, buildField(fileDescriptorSet, msg, f))
 	}
 	if root {
 		s = append(s, `
@@ -530,6 +544,10 @@ func Builder(root bool, fieldname string, repeated bool, msg *descriptor.Descrip
 }
 
 func Create(methodName, packageName, messageName string, fileDescriptorSet *descriptor.FileDescriptorSet) string {
+	return CreateCustom(methodName, packageName, messageName, fileDescriptorSet, BuildField)
+}
+
+func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
 	msg := fileDescriptorSet.GetMessage(packageName, messageName)
 	text := `
 	<form class="form-horizontal">
@@ -542,7 +560,7 @@ func Create(methodName, packageName, messageName string, fileDescriptorSet *desc
 	text += Header
 	text += `var nodeFactory = {` + strings.Join(BuilderMap("RootKeyword", false, msg, fileDescriptorSet), "\n") + `}
 	`
-	text += Builder(true, "RootKeyword", false, msg, fileDescriptorSet)
+	text += Builder(true, "RootKeyword", false, msg, fileDescriptorSet, buildField)
 	text += Init(methodName, "RootKeyword", false, msg)
 	text += `
 	init();
@@ -597,9 +615,5 @@ func Create(methodName, packageName, messageName string, fileDescriptorSet *desc
 
 	</style>
 	`
-	buf := bytes.NewBuffer(nil)
-	if err := template.Must(template.New("a").Parse(text)).Execute(buf, nil); err != nil {
-		panic(err)
-	}
-	return string(buf.Bytes())
+	return text
 }
