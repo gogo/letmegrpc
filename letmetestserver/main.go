@@ -41,6 +41,10 @@ func (this *server) Produce(c context.Context, a *serve.Album) (*serve.Album, er
 	return a, nil
 }
 
+func (this *server) Loop(c context.Context, t *serve.EndLess) (*serve.EndLess, error) {
+	return t, nil
+}
+
 var port = flag.String("port", "12345", "port")
 
 func main() {

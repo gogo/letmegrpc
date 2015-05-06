@@ -12,6 +12,8 @@ It has these top-level messages:
 	Artist
 	Song
 	Album
+	EndLess
+	Tree
 */
 package serve
 
@@ -133,6 +135,45 @@ func (m *Album) GetSong() []*Song {
 	return nil
 }
 
+type EndLess struct {
+	Tree *Tree `protobuf:"bytes,1,opt" json:"Tree,omitempty"`
+}
+
+func (m *EndLess) Reset()         { *m = EndLess{} }
+func (m *EndLess) String() string { return proto.CompactTextString(m) }
+func (*EndLess) ProtoMessage()    {}
+
+func (m *EndLess) GetTree() *Tree {
+	if m != nil {
+		return m.Tree
+	}
+	return nil
+}
+
+type Tree struct {
+	Value string `protobuf:"bytes,1,opt,proto3" json:"Value,omitempty"`
+	Left  *Tree  `protobuf:"bytes,2,opt" json:"Left,omitempty"`
+	Right *Tree  `protobuf:"bytes,3,opt" json:"Right,omitempty"`
+}
+
+func (m *Tree) Reset()         { *m = Tree{} }
+func (m *Tree) String() string { return proto.CompactTextString(m) }
+func (*Tree) ProtoMessage()    {}
+
+func (m *Tree) GetLeft() *Tree {
+	if m != nil {
+		return m.Left
+	}
+	return nil
+}
+
+func (m *Tree) GetRight() *Tree {
+	if m != nil {
+		return m.Right
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("serve.Instrument", Instrument_name, Instrument_value)
 	proto.RegisterEnum("serve.Genre", Genre_name, Genre_value)
@@ -142,6 +183,7 @@ func init() {
 
 type LabelClient interface {
 	Produce(ctx context.Context, in *Album, opts ...grpc.CallOption) (*Album, error)
+	Loop(ctx context.Context, in *EndLess, opts ...grpc.CallOption) (*EndLess, error)
 }
 
 type labelClient struct {
@@ -161,10 +203,20 @@ func (c *labelClient) Produce(ctx context.Context, in *Album, opts ...grpc.CallO
 	return out, nil
 }
 
+func (c *labelClient) Loop(ctx context.Context, in *EndLess, opts ...grpc.CallOption) (*EndLess, error) {
+	out := new(EndLess)
+	err := grpc.Invoke(ctx, "/serve.Label/Loop", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Label service
 
 type LabelServer interface {
 	Produce(context.Context, *Album) (*Album, error)
+	Loop(context.Context, *EndLess) (*EndLess, error)
 }
 
 func RegisterLabelServer(s *grpc.Server, srv LabelServer) {
@@ -183,6 +235,18 @@ func _Label_Produce_Handler(srv interface{}, ctx context.Context, codec grpc.Cod
 	return out, nil
 }
 
+func _Label_Loop_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+	in := new(EndLess)
+	if err := codec.Unmarshal(buf, in); err != nil {
+		return nil, err
+	}
+	out, err := srv.(LabelServer).Loop(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 var _Label_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "serve.Label",
 	HandlerType: (*LabelServer)(nil),
@@ -190,6 +254,10 @@ var _Label_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Produce",
 			Handler:    _Label_Produce_Handler,
+		},
+		{
+			MethodName: "Loop",
+			Handler:    _Label_Loop_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{},

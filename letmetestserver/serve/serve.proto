@@ -63,6 +63,17 @@ message Album {
 	repeated string Producer = 5;
 }
 
+message EndLess {
+	Tree Tree = 1;
+}
+
+message Tree {
+	string Value = 1;
+	Tree Left = 2;
+	Tree Right = 3;
+}
+
 service Label {
 	rpc Produce(Album) returns (Album);
+	rpc Loop(EndLess) returns (EndLess);
 }

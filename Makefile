@@ -39,6 +39,7 @@ test:
 	go test -v ./test/...
 
 regenerate:
+	go install github.com/gogo/letmegrpc/protoc-gen-letmegrpc
 	(cd test && protoc --gogo_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
 	(cd test && protoc --letmegrpc_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
 	(cd letmetestserver/serve && protoc --gogo_out=. --proto_path=. serve.proto)

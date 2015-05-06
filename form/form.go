@@ -345,14 +345,17 @@ func getMessage(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descripto
 	return fileDescriptorSet.GetMessage(packageName, messageName)
 }
 
-func BuilderMap(fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet) []string {
+func BuilderMap(visited map[string]struct{}, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet) []string {
 	s := []string{`"` + typ(fieldname, repeated, msg) + `": build` + typ(fieldname, repeated, msg) + `(emptyIfNull(null)),`}
 	for _, f := range msg.GetField() {
 		if !f.IsMessage() {
 			continue
 		}
 		fieldMsg := getMessage(f, fileDescriptorSet)
-		s = append(s, BuilderMap(f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet)...)
+		if _, ok := visited[msg.GetName()+"."+f.GetName()]; !ok {
+			visited[msg.GetName()+"."+f.GetName()] = struct{}{}
+			s = append(s, BuilderMap(visited, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet)...)
+		}
 	}
 	return s
 }
@@ -499,7 +502,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	panic("unreachable")
 }
 
-func Builder(root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
+func Builder(visited map[string]struct{}, root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
 	s := []string{`function build` + typ(fieldname, repeated, msg) + `(json) {`}
 	if repeated {
 		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg)+`" fieldname="`+fieldname+`" repeated="true">';`)
@@ -521,7 +524,10 @@ func Builder(root bool, fieldname string, repeated bool, msg *descriptor.Descrip
 	for _, f := range msg.GetField() {
 		if f.IsMessage() {
 			fieldMsg := getMessage(f, fileDescriptorSet)
-			ms = append(ms, Builder(false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, buildField))
+			if _, ok := visited[msg.GetName()+"."+f.GetName()]; !ok {
+				visited[msg.GetName()+"."+f.GetName()] = struct{}{}
+				ms = append(ms, Builder(visited, false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, buildField))
+			}
 		}
 		s = append(s, buildField(fileDescriptorSet, msg, f))
 	}
@@ -558,9 +564,10 @@ func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet
 	text += `
 	<script>`
 	text += Header
-	text += `var nodeFactory = {` + strings.Join(BuilderMap("RootKeyword", false, msg, fileDescriptorSet), "\n") + `}
+	text += `var nodeFactory = {` + strings.Join(BuilderMap(make(map[string]struct{}),
+		"RootKeyword", false, msg, fileDescriptorSet), "\n") + `}
 	`
-	text += Builder(true, "RootKeyword", false, msg, fileDescriptorSet, buildField)
+	text += Builder(make(map[string]struct{}), true, "RootKeyword", false, msg, fileDescriptorSet, buildField)
 	text += Init(methodName, "RootKeyword", false, msg)
 	text += `
 	init();

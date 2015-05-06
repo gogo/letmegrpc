@@ -175,6 +175,12 @@ function getChildren(el) {
 	return json
 }
 
+function isInt(value) {
+  return !isNaN(value) && 
+         parseInt(Number(value)) == value && 
+         !isNaN(parseInt(value, 10));
+}
+
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
@@ -194,7 +200,12 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var textvalue = $(input).val();
+			if (isInt(textvalue)) {
+				nodeJson[$(input).attr("name")] = parseInt(textvalue);	
+			} else {
+				nodeJson[$(input).attr("name")] = textvalue;
+			}
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
@@ -270,6 +281,9 @@ function selected(index, value) {
 		return ""
 	}
 	if (index == parseInt(value)) {
+		return "selected='selected'"
+	}
+	if (index == value) {
 		return "selected='selected'"
 	}
 	return ""
