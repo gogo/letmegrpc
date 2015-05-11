@@ -196,7 +196,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -262,6 +262,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }
@@ -346,11 +356,11 @@ s += '</div></div>'
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(json["Name"])+'/></div></div>';
 				
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Role: </label>';
-					s += '<div class="col-sm-10"><form role="form">';
-					s += 	'<div class="radio-inline"><input type="radio" name="Role" value="0" ' + radioed(0, json["Role"]) + '/> Voice</div>';
-						s += 	'<div class="radio-inline"><input type="radio" name="Role" value="1" ' + radioed(1, json["Role"]) + '/> Guitar</div>';
-						s += 	'<div class="radio-inline"><input type="radio" name="Role" value="2" ' + radioed(2, json["Role"]) + '/> Drum</div>';
-						s += '</form></div></div>';
+					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					s += 	'<label class="btn btn-primary ' + activeradio(0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(0, json["Role"]) + '/> Voice</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(1, json["Role"]) + '/> Guitar</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed(2, json["Role"]) + '/> Drum</label>';
+						s += '</div></div></div>';
 					
 
 		s += '</div>';

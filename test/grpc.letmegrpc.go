@@ -202,7 +202,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -268,6 +268,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }
@@ -604,7 +614,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -670,6 +680,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }
@@ -1017,7 +1037,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -1083,6 +1103,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }
@@ -1433,7 +1463,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -1499,6 +1529,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }

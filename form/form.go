@@ -161,7 +161,7 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> form > div > input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -227,6 +227,16 @@ function radioed(index, value) {
 	}
 	if (index == parseInt(value)) {
 		return "checked"
+	}
+	return ""
+}
+
+function activeradio(index, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (index == parseInt(value)) {
+		return "active"
 	}
 	return ""
 }
@@ -418,14 +428,14 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if len(enum.GetValue()) <= 4 {
 					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
 					`
-					s += `s += '<div class="col-sm-10"><form role="form">';
+					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
 					for _, v := range enum.GetValue() {
 						num := strconv.Itoa(int(v.GetNumber()))
-						s += `s += 	'<div class="radio-inline"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + num + `, json["` + fieldname + `"]) + '/> ` + v.GetName() + `</div>';
+						s += `s += 	'<label class="btn btn-primary ' + activeradio(` + num + `, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + num + `, json["` + fieldname + `"]) + '/> ` + v.GetName() + `</label>';
 						`
 					}
-					s += `s += '</form></div></div>';
+					s += `s += '</div></div></div>';
 					`
 					return s
 				} else {
