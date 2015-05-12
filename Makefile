@@ -52,11 +52,7 @@ gofmt:
 
 drone:
 	sudo apt-get install protobuf-compiler
-	go get golang.org/x/net/context
-	go get google.golang.org/grpc
-	mkdir -p $(GOPATH)/src/github.com/gogo/protobuf
-	git clone https://github.com/gogo/protobuf $(GOPATH)/src/github.com/gogo/protobuf
-	(cd $(GOPATH)/src/github.com/gogo/protobuf && git checkout proto3)
+	(cd $(GOPATH) && src/github.com/gogo/letmegrpc/deps.sh)
 	(cd $(GOPATH)/src/github.com/gogo/protobuf && make)
 	make install
 	go test -v ./test/...
