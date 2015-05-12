@@ -61,6 +61,10 @@ message Album {
 	Genre Genre = 3;
 	string Year = 4;
 	repeated string Producer = 5;
+	bool Mediocre = 6;
+	bool Rated = 7;
+	string Epilogue = 8;
+	repeated bool Likes = 9;
 }
 
 message EndLess {

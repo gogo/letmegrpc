@@ -116,6 +116,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -152,9 +159,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -162,7 +166,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -228,6 +239,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -247,6 +261,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }
@@ -417,12 +441,23 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			}
 			s += '</div>';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="` + typName + `">add ` + fieldname + `</a>';
+			s += '<div class="field form-group"></div>';
 			`
 		}
 	} else {
 		if !f.IsRepeated() {
 			if isBool(f) {
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input name="` + fieldname + `" type="checkbox" ' + checked(json["` + fieldname + `"]) +'/></div></div>';`
+				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
+					`
+				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					`
+				s += `s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="false" ' + radioed(false, json["` + fieldname + `"]) + '/>No</label>';
+					`
+				s += `s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="true" ' + radioed(true, json["` + fieldname + `"]) + '/>Yes</label>';
+					`
+				s += `s += '</div></div></div>';
+					`
+				return s
 			} else if isEnum(f) {
 				enum := getEnum(fileDescriptorSet, f)
 				if len(enum.GetValue()) <= 4 {
@@ -471,6 +506,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="bool">add ` + fieldname + `</a>';
+				s += '<div class="field form-group"></div>';
 				`
 				return s
 			} else if isNumber(f) || isEnum(f) {
@@ -482,6 +518,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>';
+				s += '<div class="field form-group"></div>';
 				`
 				return s
 			} else if isNumber(f) || isEnum(f) {
@@ -493,6 +530,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>';
+				s += '<div class="field form-group"></div>';
 				`
 				return s
 			} else {
@@ -504,6 +542,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="text">add ` + fieldname + `</a>';
+				s += '<div class="field form-group"></div>';
 				`
 				return s
 			}

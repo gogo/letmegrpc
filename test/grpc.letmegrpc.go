@@ -157,6 +157,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -193,9 +200,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -203,7 +207,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -269,6 +280,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -288,6 +302,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }
@@ -569,6 +593,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -605,9 +636,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -615,7 +643,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -681,6 +716,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -700,6 +738,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }
@@ -992,6 +1040,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -1028,9 +1083,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -1038,7 +1090,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -1104,6 +1163,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -1123,6 +1185,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }
@@ -1418,6 +1490,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -1454,9 +1533,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -1464,7 +1540,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -1530,6 +1613,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -1549,6 +1635,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }

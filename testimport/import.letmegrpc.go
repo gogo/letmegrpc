@@ -151,6 +151,13 @@ function activateLinks(node) {
 	$("a.add-elem", node).click(addElem);
 	$("a.del-child", node).click(delChildNode);
 	$("a.del-field", node).click(delField);
+	$('label[type=checkbox]').click(function() {
+	    if ($(this).hasClass('active')) {
+	        $(this).removeClass('active');
+	    } else {
+	        $(this).addClass('active');
+	    }
+	});
 }
 
 function getChildren(el) {
@@ -187,9 +194,6 @@ function getFields(node) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = $(input).val();
 		});
-		$("> input[type=checkbox]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).is(':checked');
-		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
 		});
@@ -197,7 +201,14 @@ function getFields(node) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
 		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			var v = $(input).val();
+			if (v == "true") {
+				nodeJson[$(input).attr("name")] = true;
+			} else if (v == "false") {
+				nodeJson[$(input).attr("name")] = false;
+			} else {
+				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
@@ -263,6 +274,9 @@ function radioed(index, value) {
 	if (index == parseInt(value)) {
 		return "checked"
 	}
+	if (index == value) {
+		return "checked"
+	}
 	return ""
 }
 
@@ -282,6 +296,16 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
+	}
+	return ""
+}
+
+function activecheckbox(thevalue, value) {
+	if (value == undefined) {
+		return ""
+	}
+	if (value == thevalue) {
+		return "active"
 	}
 	return ""
 }
@@ -387,6 +411,7 @@ s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			}
 			s += '</div>';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Artist_Composer">add Composer</a>';
+			s += '<div class="field form-group"></div>';
 			
 
 		s += '</div>';
@@ -408,6 +433,7 @@ s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			}
 			s += '</div>';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Song_Song">add Song</a>';
+			s += '<div class="field form-group"></div>';
 			
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre: </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="Genre">';
@@ -429,6 +455,31 @@ s += '<div class="fields" fieldname="Producer">';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="Producer" class="add-elem btn btn-info btn-sm" role="button" type="text">add Producer</a>';
+				s += '<div class="field form-group"></div>';
+				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Mediocre: </label>';
+					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(false, json["Mediocre"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(true, json["Mediocre"]) + '/>Yes</label>';
+					s += '</div></div></div>';
+					
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated: </label>';
+					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["Rated"]) + '"><input type="radio" name="Rated" value="false" ' + radioed(false, json["Rated"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed(true, json["Rated"]) + '/>Yes</label>';
+					s += '</div></div></div>';
+					
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(json["Epilogue"])+'/></div></div>';
+				
+
+				s += '<div class="fields" fieldname="Likes">';
+				var Likes = getList(json, "Likes");
+				for (var i = 0; i < Likes.length; i++) {
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">Likes: </label><div class="col-sm-8"><input name="Likes" type="checkbox" repeated="true" ' + checked(Likes[i]) + '/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+				}
+				s += '</div>';
+				s += '<a href="#" fieldname="Likes" class="add-elem btn btn-info btn-sm" role="button" type="bool">add Likes</a>';
+				s += '<div class="field form-group"></div>';
 				
 
 			s += '</div>';

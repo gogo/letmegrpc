@@ -122,6 +122,10 @@ type Album struct {
 	Genre    Genre    `protobuf:"varint,3,opt,proto3,enum=serve.Genre" json:"Genre,omitempty"`
 	Year     string   `protobuf:"bytes,4,opt,proto3" json:"Year,omitempty"`
 	Producer []string `protobuf:"bytes,5,rep" json:"Producer,omitempty"`
+	Mediocre bool     `protobuf:"varint,6,opt,proto3" json:"Mediocre,omitempty"`
+	Rated    bool     `protobuf:"varint,7,opt,proto3" json:"Rated,omitempty"`
+	Epilogue string   `protobuf:"bytes,8,opt,proto3" json:"Epilogue,omitempty"`
+	Likes    []bool   `protobuf:"varint,9,rep" json:"Likes,omitempty"`
 }
 
 func (m *Album) Reset()         { *m = Album{} }
