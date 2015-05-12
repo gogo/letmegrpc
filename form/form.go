@@ -232,9 +232,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -245,11 +248,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -261,16 +270,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }
@@ -422,9 +421,9 @@ func typ(fieldname string, repeated bool, msg *descriptor.DescriptorProto) strin
 	return msg.GetName() + "_" + fieldname
 }
 
-type FieldBuilder func(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto) string
+type FieldBuilder func(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string
 
-func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto) string {
+func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string {
 	fieldname := f.GetName()
 	if f.IsMessage() {
 		typName := typ(fieldname, f.IsRepeated(), getMessage(f, fileDescriptorSet))
@@ -447,13 +446,17 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	} else {
 		if !f.IsRepeated() {
 			if isBool(f) {
+				defaultBool := ""
+				if proto3 {
+					defaultBool = "false"
+				}
 				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
 					`
 				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
-				s += `s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="false" ' + radioed(false, json["` + fieldname + `"]) + '/>No</label>';
+				s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, false, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="false" ' + radioed(` + defaultBool + `, false, json["` + fieldname + `"]) + '/>No</label>';
 					`
-				s += `s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="true" ' + radioed(true, json["` + fieldname + `"]) + '/>Yes</label>';
+				s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, true, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="true" ' + radioed(` + defaultBool + `, true, json["` + fieldname + `"]) + '/>Yes</label>';
 					`
 				s += `s += '</div></div></div>';
 					`
@@ -461,13 +464,17 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			} else if isEnum(f) {
 				enum := getEnum(fileDescriptorSet, f)
 				if len(enum.GetValue()) <= 4 {
+					defaultEnum := ""
+					if proto3 {
+						defaultEnum = "0"
+					}
 					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
 					`
 					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
 					for _, v := range enum.GetValue() {
 						num := strconv.Itoa(int(v.GetNumber()))
-						s += `s += 	'<label class="btn btn-primary ' + activeradio(` + num + `, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + num + `, json["` + fieldname + `"]) + '/> ` + v.GetName() + `</label>';
+						s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '/> ` + v.GetName() + `</label>';
 						`
 					}
 					s += `s += '</div></div></div>';
@@ -551,7 +558,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	panic("unreachable")
 }
 
-func Builder(visited map[string]struct{}, root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
+func Builder(visited map[string]struct{}, root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, proto3 bool, buildField FieldBuilder) string {
 	s := []string{`function build` + typ(fieldname, repeated, msg) + `(json) {`}
 	if repeated {
 		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg)+`" fieldname="`+fieldname+`" repeated="true">';`)
@@ -575,10 +582,10 @@ func Builder(visited map[string]struct{}, root bool, fieldname string, repeated 
 			fieldMsg := getMessage(f, fileDescriptorSet)
 			if _, ok := visited[msg.GetName()+"."+f.GetName()]; !ok {
 				visited[msg.GetName()+"."+f.GetName()] = struct{}{}
-				ms = append(ms, Builder(visited, false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, buildField))
+				ms = append(ms, Builder(visited, false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, proto3, buildField))
 			}
 		}
-		s = append(s, buildField(fileDescriptorSet, msg, f))
+		s = append(s, buildField(fileDescriptorSet, msg, f, proto3))
 	}
 	if root {
 		s = append(s, `
@@ -604,6 +611,7 @@ func Create(methodName, packageName, messageName string, fileDescriptorSet *desc
 
 func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
 	msg := fileDescriptorSet.GetMessage(packageName, messageName)
+	proto3 := fileDescriptorSet.IsProto3(packageName, messageName)
 	text := `
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
@@ -616,7 +624,7 @@ func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet
 	text += `var nodeFactory = {` + strings.Join(BuilderMap(make(map[string]struct{}),
 		"RootKeyword", false, msg, fileDescriptorSet), "\n") + `}
 	`
-	text += Builder(make(map[string]struct{}), true, "RootKeyword", false, msg, fileDescriptorSet, buildField)
+	text += Builder(make(map[string]struct{}), true, "RootKeyword", false, msg, fileDescriptorSet, proto3, buildField)
 	text += Init(methodName, "RootKeyword", false, msg)
 	text += `
 	init();

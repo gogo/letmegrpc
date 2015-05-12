@@ -37,6 +37,7 @@ install:
 
 test:
 	go test -v ./test/...
+	go test -v ./form/...
 
 regenerate:
 	go install github.com/gogo/letmegrpc/protoc-gen-letmegrpc

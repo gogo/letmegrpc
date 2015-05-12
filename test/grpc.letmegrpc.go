@@ -273,9 +273,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -286,11 +289,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -302,16 +311,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }
@@ -709,9 +708,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -722,11 +724,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -738,16 +746,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }
@@ -1156,9 +1154,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -1169,11 +1170,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -1185,16 +1192,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }
@@ -1606,9 +1603,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -1619,11 +1619,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -1635,16 +1641,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }

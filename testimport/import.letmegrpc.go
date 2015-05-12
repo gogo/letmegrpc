@@ -267,9 +267,12 @@ function getFields(node) {
 	return nodeJson;
 }
 
-function radioed(index, value) {
+function radioed(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "checked"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -280,11 +283,17 @@ function radioed(index, value) {
 	return ""
 }
 
-function activeradio(index, value) {
+function activeradio(def, index, value) {
 	if (value == undefined) {
-		return ""
+		if (def == index) {
+			return "active"
+		}
+		return "" 
 	}
 	if (index == parseInt(value)) {
+		return "active"
+	}
+	if (index == value) {
 		return "active"
 	}
 	return ""
@@ -296,16 +305,6 @@ function checked(value) {
 	}
 	if (value == true) {
 		return "checked='checked'"
-	}
-	return ""
-}
-
-function activecheckbox(thevalue, value) {
-	if (value == undefined) {
-		return ""
-	}
-	if (value == thevalue) {
-		return "active"
 	}
 	return ""
 }
@@ -381,9 +380,9 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: 
 				
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Role: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					s += 	'<label class="btn btn-primary ' + activeradio(0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(0, json["Role"]) + '/> Voice</label>';
-						s += 	'<label class="btn btn-primary ' + activeradio(1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(1, json["Role"]) + '/> Guitar</label>';
-						s += 	'<label class="btn btn-primary ' + activeradio(2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed(2, json["Role"]) + '/> Drum</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(0, 0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(0, 0, json["Role"]) + '/> Voice</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(0, 1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(0, 1, json["Role"]) + '/> Guitar</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(0, 2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed(0, 2, json["Role"]) + '/> Drum</label>';
 						s += '</div></div></div>';
 					
 
@@ -459,14 +458,14 @@ s += '<div class="fields" fieldname="Producer">';
 				
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Mediocre: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(false, json["Mediocre"]) + '/>No</label>';
-					s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(true, json["Mediocre"]) + '/>Yes</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(false, false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(false, false, json["Mediocre"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(false, true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(false, true, json["Mediocre"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					s += 	'<label class="btn btn-primary ' + activecheckbox(false, json["Rated"]) + '"><input type="radio" name="Rated" value="false" ' + radioed(false, json["Rated"]) + '/>No</label>';
-					s += 	'<label class="btn btn-primary ' + activecheckbox(true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed(true, json["Rated"]) + '/>Yes</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(false, false, json["Rated"]) + '"><input type="radio" name="Rated" value="false" ' + radioed(false, false, json["Rated"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(false, true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed(false, true, json["Rated"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(json["Epilogue"])+'/></div></div>';

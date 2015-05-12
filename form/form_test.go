@@ -75,10 +75,10 @@ func TestCreateCustom(t *testing.T) {
 	}
 }
 
-func CustomBuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto) string {
+func CustomBuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string {
 	fieldname := f.GetName()
 	if fieldname != "WeirdName" {
-		return BuildField(fileDescriptorSet, msg, f)
+		return BuildField(fileDescriptorSet, msg, f, proto3)
 	}
 	s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10">';
 	s += '<select class="form-control" name="` + fieldname + `">';
