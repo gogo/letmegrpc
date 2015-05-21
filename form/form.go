@@ -157,7 +157,7 @@ function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).val();
+			nodeJson[$(input).attr("name")] = $(input).val().replace("&", "%26");
 		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
@@ -190,7 +190,7 @@ function getFields(node) {
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
 			}
-			nodeJson[fieldname].push($(input).val());
+			nodeJson[fieldname].push($(input).val().replace("&", "%26"));
 		});
 		$("input[type=checkbox]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
@@ -324,11 +324,35 @@ function setValue(value) {
 	return 'value="' + value + '"'
 }
 
+function encode_utf8(s) {
+  return unescape(encodeURIComponent(s));
+}
+
+function decode_utf8(s) {
+  return decodeURIComponent(escape(s));
+}
+
+function HTMLEncode(str){
+  var i = str.length,
+      aRet = [];
+
+  while (i--) {
+    var iC = str[i].charCodeAt();
+    if (iC < 65 || iC > 127 || (iC>90 && iC<97)) {
+      aRet[i] = '&#'+iC+';';
+    } else {
+      aRet[i] = str[i];
+    }
+   }
+  return aRet.join('');    
+}
+
+
 function setStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
-	return "value=" + JSON.stringify(value);
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
 `
