@@ -96,7 +96,7 @@ func main() {
 import tmpprotos "tmpprotos"
 
 func main() {
-	tmpprotos.Serve("localhost:` + *httpPort + `", "` + *grpcAddr + `")
+	tmpprotos.Serve("localhost:` + *httpPort + `", "` + *grpcAddr + `", tmpprotos.DefaultHtmlStringer)
 }
 `
 	if err := ioutil.WriteFile(filepath.Join(cmdDir, "/main.go"), []byte(mainStr), 0777); err != nil {

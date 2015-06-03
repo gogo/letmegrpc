@@ -27,7 +27,7 @@ import proto "github.com/gogo/protobuf/proto"
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 
-var htmlstringer = func(req, resp interface{}) ([]byte, error) {
+var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
 	header := []byte("<p><div class=\"container\"><pre>")
 	data, err := encoding_json.MarshalIndent(resp, "", "\t")
 	if err != nil {
@@ -37,16 +37,13 @@ var htmlstringer = func(req, resp interface{}) ([]byte, error) {
 	return append(append(header, data...), footer...), nil
 }
 
-func SetHtmlStringer(s func(req, resp interface{}) ([]byte, error)) {
-	htmlstringer = s
-}
-func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption) {
+func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) {
 	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
 	if err != nil {
 		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
 	}
 	MyTestClient := NewMyTestClient(conn)
-	MyTestServer := NewHTMLMyTestServer(MyTestClient)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient, stringer)
 	net_http.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
 	net_http.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
 	net_http.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
@@ -57,11 +54,12 @@ func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption)
 }
 
 type htmlMyTest struct {
-	client MyTestClient
+	client   MyTestClient
+	stringer func(req, resp interface{}) ([]byte, error)
 }
 
-func NewHTMLMyTestServer(client MyTestClient) *htmlMyTest {
-	return &htmlMyTest{client}
+func NewHTMLMyTestServer(client MyTestClient, stringer func(req, resp interface{}) ([]byte, error)) *htmlMyTest {
+	return &htmlMyTest{client, stringer}
 }
 
 var FormMyTest_UnaryCall string = `<div class="container"><div class="jumbotron">
@@ -510,7 +508,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 			}
 			w.Write([]byte(err.Error()))
 		}
-		out, err := htmlstringer(msg, reply)
+		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte(err.Error()))
@@ -978,7 +976,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 				}
 				break
 			}
-			out, err := htmlstringer(msg, reply)
+			out, err := this.stringer(msg, reply)
 			if err != nil {
 				if err != io.EOF {
 					w.Write([]byte(err.Error()))
@@ -1453,7 +1451,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 			}
 			w.Write([]byte(err.Error()))
 		}
-		out, err := htmlstringer(msg, reply)
+		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte(err.Error()))
@@ -1926,7 +1924,7 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 			}
 			w.Write([]byte(err.Error()))
 		}
-		out, err := htmlstringer(msg, reply)
+		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte(err.Error()))

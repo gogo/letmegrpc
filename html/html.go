@@ -108,7 +108,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	logPkg := p.NewImport("log")
 	grpcPkg := p.NewImport("google.golang.org/grpc")
 
-	p.P(`var htmlstringer = func(req, resp interface{}) ([]byte, error) {`)
+	p.P(`var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {`)
 	p.In()
 	p.P(`header := []byte("<p><div class=\"container\"><pre>")`)
 	p.P(`data, err := `, p.jsonPkg.Use(), `.MarshalIndent(resp, "", "\t")`)
@@ -122,13 +122,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.Out()
 	p.P(`}`)
 
-	p.P(`func SetHtmlStringer(s func(req, resp interface{}) ([]byte, error)) {`)
-	p.In()
-	p.P(`htmlstringer = s`)
-	p.Out()
-	p.P(`}`)
-
-	p.P(`func Serve(httpAddr, grpcAddr string, opts ...`, grpcPkg.Use(), `.DialOption) {`)
+	p.P(`func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...`, grpcPkg.Use(), `.DialOption) {`)
 	p.In()
 	p.P(`conn, err := `, grpcPkg.Use(), `.Dial(grpcAddr, opts...)`)
 	p.P(`if err != nil {`)
@@ -140,7 +134,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
 		p.P(origServName, `Client := New`, servName, `Client(conn)`)
-		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client)`)
+		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, stringer)`)
 		for _, m := range s.GetMethod() {
 			p.P(httpPkg.Use(), `.HandleFunc("/`, servName, `/`, m.GetName(), `", `, origServName, `Server.`, m.GetName(), `)`)
 		}
@@ -159,12 +153,13 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.P(`type html`, servName, ` struct {`)
 		p.In()
 		p.P(`client `, servName, `Client`)
+		p.P(`stringer func(req, resp interface{}) ([]byte, error)`)
 		p.Out()
 		p.P(`}`)
 
-		p.P(`func NewHTML`, servName, `Server(client `, servName, `Client) *html`, servName, ` {`)
+		p.P(`func NewHTML`, servName, `Server(client `, servName, `Client, stringer func(req, resp interface{}) ([]byte, error)) *html`, servName, ` {`)
 		p.In()
-		p.P(`return &html`, servName, `{client}`)
+		p.P(`return &html`, servName, `{client, stringer}`)
 		p.Out()
 		p.P(`}`)
 
@@ -192,7 +187,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 				if !m.GetServerStreaming() {
 					p.P(`reply, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
-					p.P(`out, err := htmlstringer(msg, reply)`)
+					p.P(`out, err := this.stringer(msg, reply)`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				} else {
@@ -202,7 +197,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.In()
 					p.P(`reply, err := down.Recv()`)
 					p.writeError(`break`)
-					p.P(`out, err := htmlstringer(msg, reply)`)
+					p.P(`out, err := this.stringer(msg, reply)`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 					p.P(`w.(`, httpPkg.Use(), `.Flusher).Flush()`)
@@ -217,7 +212,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`reply, err := up.CloseAndRecv()`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
-					p.P(`out, err := htmlstringer(msg, reply)`)
+					p.P(`out, err := this.stringer(msg, reply)`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				} else {
@@ -227,7 +222,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`reply, err := bidi.Recv()`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
-					p.P(`out, err := htmlstringer(msg, reply)`)
+					p.P(`out, err := this.stringer(msg, reply)`)
 					p.writeError(`w.Write([]byte(err.Error()))`)
 					p.P(`w.Write(out)`)
 				}

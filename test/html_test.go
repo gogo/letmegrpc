@@ -100,7 +100,7 @@ func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, string) {
 func TestHTML(t *testing.T) {
 	server, grpcAddr := setup(t, &aServer{})
 	defer server.Stop()
-	go Serve("localhost:8080", grpcAddr)
+	go Serve("localhost:8080", grpcAddr, DefaultHtmlStringer)
 	time.Sleep(1e9)
 	resp, err := http.Get("http://localhost:8080/MyTest/UnaryCall")
 	if err != nil {

@@ -24,7 +24,7 @@ import serve "github.com/gogo/letmegrpc/letmetestserver/serve"
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 
-var htmlstringer = func(req, resp interface{}) ([]byte, error) {
+var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
 	header := []byte("<p><div class=\"container\"><pre>")
 	data, err := encoding_json.MarshalIndent(resp, "", "\t")
 	if err != nil {
@@ -34,16 +34,13 @@ var htmlstringer = func(req, resp interface{}) ([]byte, error) {
 	return append(append(header, data...), footer...), nil
 }
 
-func SetHtmlStringer(s func(req, resp interface{}) ([]byte, error)) {
-	htmlstringer = s
-}
-func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption) {
+func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) {
 	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
 	if err != nil {
 		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
 	}
 	OtherLabelClient := NewOtherLabelClient(conn)
-	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient)
+	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient, stringer)
 	net_http.HandleFunc("/OtherLabel/Produce", OtherLabelServer.Produce)
 	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
 		log.Fatal(err)
@@ -51,11 +48,12 @@ func Serve(httpAddr, grpcAddr string, opts ...google_golang_org_grpc.DialOption)
 }
 
 type htmlOtherLabel struct {
-	client OtherLabelClient
+	client   OtherLabelClient
+	stringer func(req, resp interface{}) ([]byte, error)
 }
 
-func NewHTMLOtherLabelServer(client OtherLabelClient) *htmlOtherLabel {
-	return &htmlOtherLabel{client}
+func NewHTMLOtherLabelServer(client OtherLabelClient, stringer func(req, resp interface{}) ([]byte, error)) *htmlOtherLabel {
+	return &htmlOtherLabel{client, stringer}
 }
 
 var FormOtherLabel_Produce string = `<div class="container"><div class="jumbotron">
@@ -607,7 +605,7 @@ func (this *htmlOtherLabel) Produce(w net_http.ResponseWriter, req *net_http.Req
 			}
 			w.Write([]byte(err.Error()))
 		}
-		out, err := htmlstringer(msg, reply)
+		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte(err.Error()))
