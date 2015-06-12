@@ -41,11 +41,11 @@ test:
 
 regenerate:
 	go install github.com/gogo/letmegrpc/protoc-gen-letmegrpc
-	(cd test && protoc --gogo_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
-	(cd test && protoc --letmegrpc_out=. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
-	(cd letmetestserver/serve && protoc --gogo_out=. --proto_path=. serve.proto)
-	(cd testimport && protoc --gogo_out=. --proto_path=.:../../../../ import.proto)
-	(cd testimport && protoc --letmegrpc_out=. --proto_path=.:../../../../ import.proto)
+	(cd test && protoc --gogo_out=plugins=grpc:. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
+	(cd test && protoc --letmegrpc_out=plugins=grpc:. --proto_path=.:$(GOPATH)/src/:$(GOPATH)/src/github.com/gogo/protobuf/protobuf/ grpc.proto)
+	(cd letmetestserver/serve && protoc --gogo_out=plugins=grpc:. --proto_path=. serve.proto)
+	(cd testimport && protoc --gogo_out=plugins=grpc:. --proto_path=.:../../../../ import.proto)
+	(cd testimport && protoc --letmegrpc_out=plugins=grpc:. --proto_path=.:../../../../ import.proto)
 
 gofmt:
 	gofmt -l -s -w .

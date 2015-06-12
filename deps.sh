@@ -68,7 +68,7 @@ if [ ! -d src/github.com/gogo/letmegrpc ]; then
 fi
 
 
-checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 23f7c73266e2a610736002021d5338803c1c0878
+checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 34a0a4b4d24615b45db397604c4e4e1e096381e9
 
 
 checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 923d211a3ddc46c838e2132b35871dd4a23a7187
