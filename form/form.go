@@ -470,7 +470,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	} else {
 		if !f.IsRepeated() {
 			if isBool(f) {
-				defaultBool := ""
+				defaultBool := "\"nothing\""
 				if proto3 {
 					defaultBool = "false"
 				}
@@ -488,7 +488,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			} else if isEnum(f) {
 				enum := getEnum(fileDescriptorSet, f)
 				if len(enum.GetValue()) <= 4 {
-					defaultEnum := ""
+					defaultEnum := "\"nothing\""
 					if proto3 {
 						defaultEnum = "0"
 					}

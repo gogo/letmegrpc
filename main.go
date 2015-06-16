@@ -88,8 +88,8 @@ func main() {
 	if _, err := exec.LookPath("protoc"); err != nil {
 		log.Fatalf("cannot find protoc in PATH")
 	}
-	run(exec.Command("protoc", "--gogo_out="+outDir, "--proto_path="+*proto_path, filename))
-	run(exec.Command("protoc", "--letmegrpc_out="+outDir, "--proto_path="+*proto_path, filename))
+	run(exec.Command("protoc", "--gogo_out=plugins=grpc:"+outDir, "--proto_path="+*proto_path, filename))
+	run(exec.Command("protoc", "--letmegrpc_out=plugins=grpc:"+outDir, "--proto_path="+*proto_path, filename))
 
 	var mainStr = `package main
 

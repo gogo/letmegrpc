@@ -26,6 +26,7 @@
 .PHONY: test
 
 all:
+	make nuke
 	make install
 	make regenerate
 	make gofmt
@@ -34,6 +35,12 @@ all:
 
 install:
 	go install -v ./...
+
+clean:
+	go clean ./...
+
+nuke:
+	go clean -i ./...
 
 test:
 	go test -v ./test/...
@@ -46,6 +53,8 @@ regenerate:
 	(cd letmetestserver/serve && protoc --gogo_out=plugins=grpc:. --proto_path=. serve.proto)
 	(cd testimport && protoc --gogo_out=plugins=grpc:. --proto_path=.:../../../../ import.proto)
 	(cd testimport && protoc --letmegrpc_out=plugins=grpc:. --proto_path=.:../../../../ import.proto)
+	(cd testproto2 && protoc --gogo_out=plugins=grpc:. proto2.proto)
+	(cd testproto2 && protoc --letmegrpc_out=plugins=grpc:. proto2.proto)
 
 gofmt:
 	gofmt -l -s -w .
