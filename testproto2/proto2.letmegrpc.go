@@ -217,7 +217,7 @@ function getFields(node) {
 			if (isInt(textvalue)) {
 				nodeJson[$(input).attr("name")] = parseInt(textvalue);	
 			} else {
-				nodeJson[$(input).attr("name")] = textvalue;
+				nodeJson[$(input).attr("name")] = textvalue.replace("&", "%26");
 			}
 		});
 	});
@@ -262,7 +262,12 @@ function getFields(node) {
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
 			}
-			nodeJson[fieldname].push(parseInt($(input).val()));
+			var textvalue = $(input).val();
+			if (isInt(textvalue)) {
+				nodeJson[fieldname].push(parseInt(textvalue));
+			} else {
+				nodeJson[fieldname].push(textvalue.replace("&", "%26"));
+			}
 		});
 	});
 
