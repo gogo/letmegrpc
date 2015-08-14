@@ -184,7 +184,7 @@ function getFields(node) {
 			if (isInt(textvalue)) {
 				nodeJson[$(input).attr("name")] = parseInt(textvalue);	
 			} else {
-				nodeJson[$(input).attr("name")] = textvalue.replace("&", "%26");
+				nodeJson[$(input).attr("name")] = replaceAll(textvalue, "&", "%26");
 			}
 		});
 	});
@@ -194,7 +194,7 @@ function getFields(node) {
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
 			}
-			nodeJson[fieldname].push($(input).val().replace("&", "%26"));
+			nodeJson[fieldname].push(replaceAll($(input).val(), "&", "%26"));
 		});
 		$("input[type=checkbox]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
@@ -233,7 +233,7 @@ function getFields(node) {
 			if (isInt(textvalue)) {
 				nodeJson[fieldname].push(parseInt(textvalue));
 			} else {
-				nodeJson[fieldname].push(textvalue.replace("&", "%26"));
+				nodeJson[fieldname].push(replaceAll(textvalue, "&", "%26"));
 			}
 		});
 	});
