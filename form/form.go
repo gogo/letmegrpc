@@ -153,11 +153,15 @@ function isInt(value) {
          !isNaN(parseInt(value, 10));
 }
 
+function replaceAll(str, search, replace) {
+	return str.split(search).join(replace);
+}
+
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = $(input).val().replace("&", "%26");
+			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
