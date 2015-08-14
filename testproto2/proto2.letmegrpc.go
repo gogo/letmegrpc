@@ -597,10 +597,10 @@ func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		someValue = true
 	}
@@ -609,18 +609,18 @@ func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request
 		reply, err := this.client.Produce(golang_org_x_net_context.Background(), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		w.Write(out)
 	}

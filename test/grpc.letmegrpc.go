@@ -496,10 +496,10 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		someValue = true
 	}
@@ -508,18 +508,18 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 		reply, err := this.client.UnaryCall(golang_org_x_net_context.Background(), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		w.Write(out)
 	}
@@ -960,10 +960,10 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		someValue = true
 	}
@@ -972,16 +972,16 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 		down, err := this.client.Downstream(golang_org_x_net_context.Background(), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		for {
 			reply, err := down.Recv()
 			if err != nil {
 				if err != io.EOF {
-					w.Write([]byte(err.Error()))
+					w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 					return
 				}
 				break
@@ -989,10 +989,10 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 			out, err := this.stringer(msg, reply)
 			if err != nil {
 				if err != io.EOF {
-					w.Write([]byte(err.Error()))
+					w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 					return
 				}
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 			}
 			w.Write(out)
 			w.(net_http.Flusher).Flush()
@@ -1433,10 +1433,10 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		someValue = true
 	}
@@ -1445,34 +1445,34 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		up, err := this.client.Upstream(golang_org_x_net_context.Background())
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		err = up.Send(msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		reply, err := up.CloseAndRecv()
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		w.Write(out)
 	}
@@ -1911,10 +1911,10 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		someValue = true
 	}
@@ -1923,34 +1923,34 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 		bidi, err := this.client.Bidi(golang_org_x_net_context.Background())
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		err = bidi.Send(msg)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		reply, err := bidi.Recv()
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		out, err := this.stringer(msg, reply)
 		if err != nil {
 			if err != io.EOF {
-				w.Write([]byte(err.Error()))
+				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 				return
 			}
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
 		}
 		w.Write(out)
 	}

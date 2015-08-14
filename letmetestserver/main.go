@@ -26,6 +26,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"github.com/gogo/letmegrpc/letmetestserver/serve"
 	"golang.org/x/net/context"
@@ -37,6 +38,9 @@ import (
 type server struct{}
 
 func (this *server) Produce(c context.Context, a *serve.Album) (*serve.Album, error) {
+	if a.Name == "error" {
+		return nil, errors.New("test error")
+	}
 	a.Producer = append(a.Producer, "My Label")
 	return a, nil
 }

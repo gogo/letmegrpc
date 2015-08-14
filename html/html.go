@@ -58,12 +58,14 @@ func (p *html) typeName(name string) string {
 	return p.TypeName(p.ObjectNamed(name))
 }
 
+const errString = `w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))`
+
 func (p *html) writeError(eof string) {
 	p.P(`if err != nil {`)
 	p.In()
 	p.P(`if err != `, p.ioPkg.Use(), `.EOF {`)
 	p.In()
-	p.P(`w.Write([]byte(err.Error()))`)
+	p.P(errString)
 	p.P(`return`)
 	p.Out()
 	p.P(`}`)
@@ -176,7 +178,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`if len(jsonString) > 0 {`)
 			p.In()
 			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
-			p.writeError(`w.Write([]byte(err.Error()))`)
+			p.writeError(errString)
 			p.P(`someValue = true`)
 			p.Out()
 			p.P(`}`)
@@ -186,19 +188,19 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			if !m.GetClientStreaming() {
 				if !m.GetServerStreaming() {
 					p.P(`reply, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`out, err := this.stringer(msg, reply)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`w.Write(out)`)
 				} else {
 					p.P(`down, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`for {`)
 					p.In()
 					p.P(`reply, err := down.Recv()`)
 					p.writeError(`break`)
 					p.P(`out, err := this.stringer(msg, reply)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`w.Write(out)`)
 					p.P(`w.(`, httpPkg.Use(), `.Flusher).Flush()`)
 					p.Out()
@@ -207,23 +209,23 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			} else {
 				if !m.GetServerStreaming() {
 					p.P(`up, err := this.client.Upstream(`, contextPkg.Use(), `.Background())`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`err = up.Send(msg)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`reply, err := up.CloseAndRecv()`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`out, err := this.stringer(msg, reply)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`w.Write(out)`)
 				} else {
 					p.P(`bidi, err := this.client.Bidi(`, contextPkg.Use(), `.Background())`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`err = bidi.Send(msg)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`reply, err := bidi.Recv()`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`out, err := this.stringer(msg, reply)`)
-					p.writeError(`w.Write([]byte(err.Error()))`)
+					p.writeError(errString)
 					p.P(`w.Write(out)`)
 				}
 			}
