@@ -283,8 +283,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -326,7 +329,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -357,7 +370,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -483,6 +506,9 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if proto3 {
 					defaultBool = "false"
 				}
+				if f.DefaultValue != nil {
+					defaultBool = f.GetDefaultValue()
+				}
 				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
 					`
 				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
@@ -496,11 +522,19 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				return s
 			} else if isEnum(f) {
 				enum := getEnum(fileDescriptorSet, f)
-				if len(enum.GetValue()) <= 4 {
-					defaultEnum := "\"nothing\""
-					if proto3 {
-						defaultEnum = "0"
+				defaultEnum := "\"nothing\""
+				if proto3 {
+					defaultEnum = "0"
+				}
+				if f.DefaultValue != nil {
+					for _, v := range enum.GetValue() {
+						if v.GetName() == f.GetDefaultValue() {
+							defaultEnum = strconv.Itoa(int(v.GetNumber()))
+							break
+						}
 					}
+				}
+				if len(enum.GetValue()) <= 4 {
 					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
 					`
 					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
@@ -519,7 +553,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					`
 					for _, v := range enum.GetValue() {
 						num := strconv.Itoa(int(v.GetNumber()))
-						s += `s += 	'<option value="` + num + `" ' + selected(` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
+						s += `s += 	'<option value="` + num + `" ' + selected(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
 						`
 					}
 					s += `s += '</select></div></div>';
@@ -527,13 +561,34 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					return s
 				}
 			} else if isNumber(f) {
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(json["` + f.GetName() + `"])+'/></div></div>';
+				def := "\"\""
+				if proto3 {
+					def = "0"
+				}
+				if f.DefaultValue != nil {
+					def = f.GetDefaultValue()
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else if isFloat(f) {
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(json["` + f.GetName() + `"])+'/></div></div>';
+				def := "\"\""
+				if proto3 {
+					def = "0"
+				}
+				if f.DefaultValue != nil {
+					def = f.GetDefaultValue()
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else {
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(json["` + f.GetName() + `"])+'/></div></div>';
+				def := "undefined"
+				if proto3 {
+					def = "\"\""
+				}
+				if f.DefaultValue != nil {
+					def = strconv.Quote(f.GetDefaultValue())
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			}
 		} else {
@@ -554,19 +609,19 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
-					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>';
 				s += '<div class="field form-group"></div>';
 				`
 				return s
-			} else if isNumber(f) || isEnum(f) {
+			} else if isFloat(f) {
 				s :=
 					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
-					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>';
@@ -578,7 +633,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
-					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="text" repeated="true" '+setStrValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="text" repeated="true" '+setRepStrValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="text">add ` + fieldname + `</a>';

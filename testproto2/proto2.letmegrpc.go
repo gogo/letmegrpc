@@ -320,8 +320,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -363,7 +366,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -394,7 +407,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -411,13 +434,13 @@ s += '<a href="#" class="del-child btn btn-danger btn-xs" role="button" fieldnam
 s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Composer</label>'
 s += '</div></div>'
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(json["Name"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
 				
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Role: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					s += 	'<label class="btn btn-primary ' + activeradio("nothing", 0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed("nothing", 0, json["Role"]) + '/> Voice</label>';
-						s += 	'<label class="btn btn-primary ' + activeradio("nothing", 1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed("nothing", 1, json["Role"]) + '/> Guitar</label>';
-						s += 	'<label class="btn btn-primary ' + activeradio("nothing", 2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed("nothing", 2, json["Role"]) + '/> Drum</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(1, 0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(1, 0, json["Role"]) + '/> Voice</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(1, 1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(1, 1, json["Role"]) + '/> Guitar</label>';
+						s += 	'<label class="btn btn-primary ' + activeradio(1, 2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed(1, 2, json["Role"]) + '/> Drum</label>';
 						s += '</div></div></div>';
 					
 
@@ -432,11 +455,11 @@ s += '<a href="#" class="del-child btn btn-danger btn-xs" role="button" fieldnam
 s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Song</label>'
 s += '</div></div>'
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(json["Name"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue("Type in a Name", json["Name"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="number" step="1" '+setValue(json["Track"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="number" step="1" '+setValue(1, json["Track"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Duration: </label><div class="col-sm-10"><input class="form-control" name="Duration" type="number" step="any" '+setValue(json["Duration"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Duration: </label><div class="col-sm-10"><input class="form-control" name="Duration" type="number" step="any" '+setValue(3.3, json["Duration"])+'/></div></div>';
 				
 s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			var Composer = getList(json, "Composer");
@@ -447,6 +470,12 @@ s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Artist_Composer">add Composer</a>';
 			s += '<div class="field form-group"></div>';
 			
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Good: </label>';
+					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Good"]) + '"><input type="radio" name="Good" value="false" ' + radioed(true, false, json["Good"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Good"]) + '"><input type="radio" name="Good" value="true" ' + radioed(true, true, json["Good"]) + '/>Yes</label>';
+					s += '</div></div></div>';
+					
 
 		s += '</div>';
 		return s;
@@ -458,7 +487,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="Album_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(json["Name"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
 				
 s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			var Song = getList(json, "Song");
@@ -471,21 +500,21 @@ s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre: </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="Genre">';
-					s += 	'<option value="0" ' + selected(0, json["Genre"]) + '>Pop</option>';
-						s += 	'<option value="1" ' + selected(1, json["Genre"]) + '>Rock</option>';
-						s += 	'<option value="2" ' + selected(2, json["Genre"]) + '>Jazz</option>';
-						s += 	'<option value="3" ' + selected(3, json["Genre"]) + '>NintendoCore</option>';
-						s += 	'<option value="4" ' + selected(4, json["Genre"]) + '>Indie</option>';
-						s += 	'<option value="5" ' + selected(5, json["Genre"]) + '>Punk</option>';
-						s += 	'<option value="6" ' + selected(6, json["Genre"]) + '>Dance</option>';
+					s += 	'<option value="0" ' + selected(1, 0, json["Genre"]) + '>Pop</option>';
+						s += 	'<option value="1" ' + selected(1, 1, json["Genre"]) + '>Rock</option>';
+						s += 	'<option value="2" ' + selected(1, 2, json["Genre"]) + '>Jazz</option>';
+						s += 	'<option value="3" ' + selected(1, 3, json["Genre"]) + '>NintendoCore</option>';
+						s += 	'<option value="4" ' + selected(1, 4, json["Genre"]) + '>Indie</option>';
+						s += 	'<option value="5" ' + selected(1, 5, json["Genre"]) + '>Punk</option>';
+						s += 	'<option value="6" ' + selected(1, 6, json["Genre"]) + '>Dance</option>';
 						s += '</select></div></div>';
 					
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Year: </label><div class="col-sm-10"><input class="form-control" name="Year" type="text" '+setStrValue(json["Year"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Year: </label><div class="col-sm-10"><input class="form-control" name="Year" type="text" '+setStrValue("2015", json["Year"])+'/></div></div>';
 				
 s += '<div class="fields" fieldname="Producer">';
 				var Producer = getList(json, "Producer");
 				for (var i = 0; i < Producer.length; i++) {
-					s += '<div class="field form-group"><label class="col-sm-2 control-label">Producer: </label><div class="col-sm-8"><input class="form-control" name="Producer" type="text" repeated="true" '+setStrValue(json["Producer"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">Producer: </label><div class="col-sm-8"><input class="form-control" name="Producer" type="text" repeated="true" '+setRepStrValue(json["Producer"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="Producer" class="add-elem btn btn-info btn-sm" role="button" type="text">add Producer</a>';
@@ -493,8 +522,8 @@ s += '<div class="fields" fieldname="Producer">';
 				
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Mediocre: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					s += 	'<label class="btn btn-primary ' + activeradio("nothing", false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed("nothing", false, json["Mediocre"]) + '/>No</label>';
-					s += 	'<label class="btn btn-primary ' + activeradio("nothing", true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed("nothing", true, json["Mediocre"]) + '/>Yes</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(true, false, json["Mediocre"]) + '/>No</label>';
+					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(true, true, json["Mediocre"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated: </label>';
@@ -503,7 +532,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated:
 					s += 	'<label class="btn btn-primary ' + activeradio("nothing", true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed("nothing", true, json["Rated"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(json["Epilogue"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(undefined, json["Epilogue"])+'/></div></div>';
 				
 
 				s += '<div class="fields" fieldname="Likes">';
@@ -513,6 +542,17 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilog
 				}
 				s += '</div>';
 				s += '<a href="#" fieldname="Likes" class="add-elem btn btn-info btn-sm" role="button" type="bool">add Likes</a>';
+				s += '<div class="field form-group"></div>';
+				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Stars: </label><div class="col-sm-10"><input class="form-control" name="Stars" type="number" step="1" '+setValue("", json["Stars"])+'/></div></div>';
+				
+s += '<div class="fields" fieldname="Serial">';
+				var Serial = getList(json, "Serial");
+				for (var i = 0; i < Serial.length; i++) {
+					s += '<div class="field form-group"><label class="col-sm-2 control-label">Serial: </label><div class="col-sm-8"><input class="form-control" name="Serial" type="number" step="1" repeated="true" '+setRepValue(json["Serial"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
+				}
+				s += '</div>';
+				s += '<a href="#" fieldname="Serial" class="add-elem btn btn-info btn-sm" role="button" type="float">add Serial</a>';
 				s += '<div class="field form-group"></div>';
 				
 

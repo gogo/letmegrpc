@@ -49,24 +49,27 @@ enum Genre {
 
 message Artist {
 	optional string Name = 1;
-	optional Instrument Role = 2;
+	optional Instrument Role = 2 [default=Guitar];
 }
 
 message Song {
-	optional string Name = 1;
-	optional uint64 Track = 2;
-	optional double Duration = 3;
+	optional string Name = 1 [default="Type in a Name"];
+	optional uint64 Track = 2 [default=1];
+	optional double Duration = 3 [default=3.30];
 	repeated Artist Composer = 4;
+	optional bool Good = 5 [default=true];
 }
 
 message Album {
 	optional string Name = 1;
 	repeated Song Song = 2;
-	optional Genre Genre = 3;
-	optional string Year = 4;
+	optional Genre Genre = 3 [default=Rock];
+	optional string Year = 4 [default="2015"];
 	repeated string Producer = 5;
-	optional bool Mediocre = 6;
+	optional bool Mediocre = 6 [default=true];
 	optional bool Rated = 7;
 	optional string Epilogue = 8;
 	repeated bool Likes = 9;
+	optional int64 Stars = 10;
+	repeated double Serial = 11;
 }

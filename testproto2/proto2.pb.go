@@ -24,10 +24,6 @@ import (
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConn
-
-// Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = math.Inf
 
@@ -117,13 +113,15 @@ func (x *Genre) UnmarshalJSON(data []byte) error {
 
 type Artist struct {
 	Name             *string     `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Role             *Instrument `protobuf:"varint,2,opt,enum=proto2.Instrument" json:"Role,omitempty"`
+	Role             *Instrument `protobuf:"varint,2,opt,enum=proto2.Instrument,def=1" json:"Role,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
 func (m *Artist) Reset()         { *m = Artist{} }
 func (m *Artist) String() string { return proto.CompactTextString(m) }
 func (*Artist) ProtoMessage()    {}
+
+const Default_Artist_Role Instrument = Instrument_Guitar
 
 func (m *Artist) GetName() string {
 	if m != nil && m.Name != nil {
@@ -136,14 +134,15 @@ func (m *Artist) GetRole() Instrument {
 	if m != nil && m.Role != nil {
 		return *m.Role
 	}
-	return Instrument_Voice
+	return Default_Artist_Role
 }
 
 type Song struct {
-	Name             *string   `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Track            *uint64   `protobuf:"varint,2,opt" json:"Track,omitempty"`
-	Duration         *float64  `protobuf:"fixed64,3,opt" json:"Duration,omitempty"`
+	Name             *string   `protobuf:"bytes,1,opt,def=Type in a Name" json:"Name,omitempty"`
+	Track            *uint64   `protobuf:"varint,2,opt,def=1" json:"Track,omitempty"`
+	Duration         *float64  `protobuf:"fixed64,3,opt,def=3.3" json:"Duration,omitempty"`
 	Composer         []*Artist `protobuf:"bytes,4,rep" json:"Composer,omitempty"`
+	Good             *bool     `protobuf:"varint,5,opt,def=1" json:"Good,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 
@@ -151,25 +150,30 @@ func (m *Song) Reset()         { *m = Song{} }
 func (m *Song) String() string { return proto.CompactTextString(m) }
 func (*Song) ProtoMessage()    {}
 
+const Default_Song_Name string = "Type in a Name"
+const Default_Song_Track uint64 = 1
+const Default_Song_Duration float64 = 3.3
+const Default_Song_Good bool = true
+
 func (m *Song) GetName() string {
 	if m != nil && m.Name != nil {
 		return *m.Name
 	}
-	return ""
+	return Default_Song_Name
 }
 
 func (m *Song) GetTrack() uint64 {
 	if m != nil && m.Track != nil {
 		return *m.Track
 	}
-	return 0
+	return Default_Song_Track
 }
 
 func (m *Song) GetDuration() float64 {
 	if m != nil && m.Duration != nil {
 		return *m.Duration
 	}
-	return 0
+	return Default_Song_Duration
 }
 
 func (m *Song) GetComposer() []*Artist {
@@ -179,22 +183,35 @@ func (m *Song) GetComposer() []*Artist {
 	return nil
 }
 
+func (m *Song) GetGood() bool {
+	if m != nil && m.Good != nil {
+		return *m.Good
+	}
+	return Default_Song_Good
+}
+
 type Album struct {
-	Name             *string  `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Song             []*Song  `protobuf:"bytes,2,rep" json:"Song,omitempty"`
-	Genre            *Genre   `protobuf:"varint,3,opt,enum=proto2.Genre" json:"Genre,omitempty"`
-	Year             *string  `protobuf:"bytes,4,opt" json:"Year,omitempty"`
-	Producer         []string `protobuf:"bytes,5,rep" json:"Producer,omitempty"`
-	Mediocre         *bool    `protobuf:"varint,6,opt" json:"Mediocre,omitempty"`
-	Rated            *bool    `protobuf:"varint,7,opt" json:"Rated,omitempty"`
-	Epilogue         *string  `protobuf:"bytes,8,opt" json:"Epilogue,omitempty"`
-	Likes            []bool   `protobuf:"varint,9,rep" json:"Likes,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	Name             *string   `protobuf:"bytes,1,opt" json:"Name,omitempty"`
+	Song             []*Song   `protobuf:"bytes,2,rep" json:"Song,omitempty"`
+	Genre            *Genre    `protobuf:"varint,3,opt,enum=proto2.Genre,def=1" json:"Genre,omitempty"`
+	Year             *string   `protobuf:"bytes,4,opt,def=2015" json:"Year,omitempty"`
+	Producer         []string  `protobuf:"bytes,5,rep" json:"Producer,omitempty"`
+	Mediocre         *bool     `protobuf:"varint,6,opt,def=1" json:"Mediocre,omitempty"`
+	Rated            *bool     `protobuf:"varint,7,opt" json:"Rated,omitempty"`
+	Epilogue         *string   `protobuf:"bytes,8,opt" json:"Epilogue,omitempty"`
+	Likes            []bool    `protobuf:"varint,9,rep" json:"Likes,omitempty"`
+	Stars            *int64    `protobuf:"varint,10,opt" json:"Stars,omitempty"`
+	Serial           []float64 `protobuf:"fixed64,11,rep" json:"Serial,omitempty"`
+	XXX_unrecognized []byte    `json:"-"`
 }
 
 func (m *Album) Reset()         { *m = Album{} }
 func (m *Album) String() string { return proto.CompactTextString(m) }
 func (*Album) ProtoMessage()    {}
+
+const Default_Album_Genre Genre = Genre_Rock
+const Default_Album_Year string = "2015"
+const Default_Album_Mediocre bool = true
 
 func (m *Album) GetName() string {
 	if m != nil && m.Name != nil {
@@ -214,14 +231,14 @@ func (m *Album) GetGenre() Genre {
 	if m != nil && m.Genre != nil {
 		return *m.Genre
 	}
-	return Genre_Pop
+	return Default_Album_Genre
 }
 
 func (m *Album) GetYear() string {
 	if m != nil && m.Year != nil {
 		return *m.Year
 	}
-	return ""
+	return Default_Album_Year
 }
 
 func (m *Album) GetProducer() []string {
@@ -235,7 +252,7 @@ func (m *Album) GetMediocre() bool {
 	if m != nil && m.Mediocre != nil {
 		return *m.Mediocre
 	}
-	return false
+	return Default_Album_Mediocre
 }
 
 func (m *Album) GetRated() bool {
@@ -259,10 +276,28 @@ func (m *Album) GetLikes() []bool {
 	return nil
 }
 
+func (m *Album) GetStars() int64 {
+	if m != nil && m.Stars != nil {
+		return *m.Stars
+	}
+	return 0
+}
+
+func (m *Album) GetSerial() []float64 {
+	if m != nil {
+		return m.Serial
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("proto2.Instrument", Instrument_name, Instrument_value)
 	proto.RegisterEnum("proto2.Genre", Genre_name, Genre_value)
 }
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
 
 // Client API for Proto2 service
 

@@ -25,10 +25,6 @@ import (
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConn
-
-// Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 
 type Instrument int32
@@ -182,6 +178,10 @@ func init() {
 	proto.RegisterEnum("serve.Instrument", Instrument_name, Instrument_value)
 	proto.RegisterEnum("serve.Genre", Genre_name, Genre_value)
 }
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
 
 // Client API for Label service
 

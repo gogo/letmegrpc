@@ -322,8 +322,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -365,7 +368,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -396,7 +409,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -410,9 +433,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(json["Value2"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -790,8 +813,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -833,7 +859,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -864,7 +900,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -878,9 +924,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(json["Value2"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -1269,8 +1315,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -1312,7 +1361,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -1343,7 +1402,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -1357,7 +1426,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -1751,8 +1820,11 @@ function checked(value) {
 	return ""
 }
 
-function selected(index, value) {
+function selected(def, index, value) {
 	if (value == undefined) {
+		if (def == index) {
+			return "selected='selected'"
+		}
 		return ""
 	}
 	if (index == parseInt(value)) {
@@ -1794,7 +1866,17 @@ function setLink(json, typ, fieldname) {
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
 
-function setValue(value) {
+function setValue(def, value) {
+	if (value == undefined) {
+		if (def.length == 0) {
+			return ""
+		}
+		return 'value="' + def + '"'	
+	}
+	return 'value="' + value + '"'
+}
+
+function setRepValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -1825,7 +1907,17 @@ function HTMLEncode(str){
 }
 
 
-function setStrValue(value) {
+function setStrValue(def, value) {
+	if (value == undefined) {
+		if (def == undefined) {
+			return ""	
+		}
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+	}
+	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
+}
+
+function setRepStrValue(value) {
 	if (value == undefined) {
 		return ""
 	}
@@ -1839,7 +1931,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(json["Value"])+'/></div></div>';
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';
