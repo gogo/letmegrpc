@@ -68,28 +68,28 @@ if [ ! -d src/github.com/gogo/letmegrpc ]; then
 fi
 
 
-checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 34a0a4b4d24615b45db397604c4e4e1e096381e9
+checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 6cab0cc9fec8f660c2cee46e1306ffc727261956
 
 
-checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 923d211a3ddc46c838e2132b35871dd4a23a7187
+checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 868330046b32ec2d0e37a3d8d8cdacff14f32555
 
 
-checkdep src/golang.org/x/net https://github.com/golang/net e0403b4e005737430c05a57aac078479844f919c
+checkdep src/golang.org/x/net https://github.com/golang/net ea47fc708ee3e20177f3ca3716217c4ab75942cb
 
 
 checkdep src/github.com/bradfitz/http2 https://github.com/bradfitz/http2 f8202bc903bda493ebba4aa54922d78430c2c42f
 
 
-checkdep src/github.com/golang/glog https://github.com/golang/glog 44145f04b68cf362d9c4df2182967c2275eaefed
+checkdep src/github.com/golang/glog https://github.com/golang/glog fca8c8854093a154ff1eb580aae10276ad6b1b5f
 
 
-checkdep src/github.com/golang/protobuf https://github.com/golang/protobuf efd7476481382c195beb33acd8ec2f1527167fb4
+checkdep src/github.com/golang/protobuf https://github.com/golang/protobuf 6dfb160b2754e3b3fa583fbd0c207dfab2e836e5
 
 
-checkdep src/golang.org/x/oauth2 https://github.com/golang/oauth2 f98d0160877ab4712b906626425ed8b0b320907c
+checkdep src/golang.org/x/oauth2 https://github.com/golang/oauth2 397fe7649477ff2e8ced8fc0b2696f781e53745a
 
 
-checkdep src/google.golang.org/cloud https://code.googlesource.com/gocloud 37b07dcfaace58962148a3e1b37c0112ab4c1df6
+checkdep src/google.golang.org/cloud https://code.googlesource.com/gocloud 43ba5cf9407286f5430bfb3ea6f2e008a9a9f14b
 
 
 
