@@ -22,10 +22,12 @@ import golang_org_x_net_context "golang.org/x/net/context"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
 import proto "github.com/gogo/protobuf/proto"
+import fmt "fmt"
 import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
 var _ = math.Inf
 
 var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
@@ -160,6 +162,7 @@ function activateLinks(node) {
 	        $(this).addClass('active');
 	    }
 	});
+	$('[data-toggle="tooltip"]', node).tooltip(); 
 }
 
 function getChildren(el) {

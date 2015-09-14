@@ -13,6 +13,8 @@ It has these top-level messages:
 package testimport
 
 import proto "github.com/gogo/protobuf/proto"
+import fmt "fmt"
+import math "math"
 import serve "github.com/gogo/letmegrpc/letmetestserver/serve"
 
 import (
@@ -22,6 +24,8 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
+var _ = math.Inf
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context

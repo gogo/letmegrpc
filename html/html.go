@@ -87,13 +87,12 @@ func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descripto
 }
 
 func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescriptorProto) {
-	fileDescriptorSet := p.AllFiles()
 	inputs := strings.Split(method.GetInputType(), ".")
 	packageName := inputs[1]
 	messageName := inputs[2]
 	s := `<div class="container"><div class="jumbotron">
 	<h3>` + servName + `: ` + method.GetName() + `</h3>
-	` + form.Create(method.GetName(), packageName, messageName, fileDescriptorSet) + `
+	` + form.Create(method.GetName(), packageName, messageName, p.Generator) + `
 	</div>`
 	p.P(`var Form`, servName, "_", method.GetName(), " string = `", s, "`")
 }

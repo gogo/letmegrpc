@@ -16,6 +16,7 @@ It has these top-level messages:
 package proto2
 
 import proto "github.com/gogo/protobuf/proto"
+import fmt "fmt"
 import math "math"
 
 import (
@@ -25,6 +26,7 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
 var _ = math.Inf
 
 type Instrument int32
@@ -112,8 +114,8 @@ func (x *Genre) UnmarshalJSON(data []byte) error {
 }
 
 type Artist struct {
-	Name             *string     `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Role             *Instrument `protobuf:"varint,2,opt,enum=proto2.Instrument,def=1" json:"Role,omitempty"`
+	Name             *string     `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	Role             *Instrument `protobuf:"varint,2,opt,name=Role,enum=proto2.Instrument,def=1" json:"Role,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
@@ -138,11 +140,11 @@ func (m *Artist) GetRole() Instrument {
 }
 
 type Song struct {
-	Name             *string   `protobuf:"bytes,1,opt,def=Type in a Name" json:"Name,omitempty"`
-	Track            *uint64   `protobuf:"varint,2,opt,def=1" json:"Track,omitempty"`
-	Duration         *float64  `protobuf:"fixed64,3,opt,def=3.3" json:"Duration,omitempty"`
-	Composer         []*Artist `protobuf:"bytes,4,rep" json:"Composer,omitempty"`
-	Good             *bool     `protobuf:"varint,5,opt,def=1" json:"Good,omitempty"`
+	Name             *string   `protobuf:"bytes,1,opt,name=Name,def=Type in a Name" json:"Name,omitempty"`
+	Track            *uint64   `protobuf:"varint,2,opt,name=Track,def=1" json:"Track,omitempty"`
+	Duration         *float64  `protobuf:"fixed64,3,opt,name=Duration,def=3.3" json:"Duration,omitempty"`
+	Composer         []*Artist `protobuf:"bytes,4,rep,name=Composer" json:"Composer,omitempty"`
+	Good             *bool     `protobuf:"varint,5,opt,name=Good,def=1" json:"Good,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 
@@ -191,17 +193,17 @@ func (m *Song) GetGood() bool {
 }
 
 type Album struct {
-	Name             *string   `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Song             []*Song   `protobuf:"bytes,2,rep" json:"Song,omitempty"`
-	Genre            *Genre    `protobuf:"varint,3,opt,enum=proto2.Genre,def=1" json:"Genre,omitempty"`
-	Year             *string   `protobuf:"bytes,4,opt,def=2015" json:"Year,omitempty"`
-	Producer         []string  `protobuf:"bytes,5,rep" json:"Producer,omitempty"`
-	Mediocre         *bool     `protobuf:"varint,6,opt,def=1" json:"Mediocre,omitempty"`
-	Rated            *bool     `protobuf:"varint,7,opt" json:"Rated,omitempty"`
-	Epilogue         *string   `protobuf:"bytes,8,opt" json:"Epilogue,omitempty"`
-	Likes            []bool    `protobuf:"varint,9,rep" json:"Likes,omitempty"`
-	Stars            *int64    `protobuf:"varint,10,opt" json:"Stars,omitempty"`
-	Serial           []float64 `protobuf:"fixed64,11,rep" json:"Serial,omitempty"`
+	Name             *string   `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	Song             []*Song   `protobuf:"bytes,2,rep,name=Song" json:"Song,omitempty"`
+	Genre            *Genre    `protobuf:"varint,3,opt,name=Genre,enum=proto2.Genre,def=1" json:"Genre,omitempty"`
+	Year             *string   `protobuf:"bytes,4,opt,name=Year,def=2015" json:"Year,omitempty"`
+	Producer         []string  `protobuf:"bytes,5,rep,name=Producer" json:"Producer,omitempty"`
+	Mediocre         *bool     `protobuf:"varint,6,opt,name=Mediocre,def=1" json:"Mediocre,omitempty"`
+	Rated            *bool     `protobuf:"varint,7,opt,name=Rated" json:"Rated,omitempty"`
+	Epilogue         *string   `protobuf:"bytes,8,opt,name=Epilogue" json:"Epilogue,omitempty"`
+	Likes            []bool    `protobuf:"varint,9,rep,name=Likes" json:"Likes,omitempty"`
+	Stars            *int64    `protobuf:"varint,10,opt,name=Stars" json:"Stars,omitempty"`
+	Serial           []float64 `protobuf:"fixed64,11,rep,name=Serial" json:"Serial,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 

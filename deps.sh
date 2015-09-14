@@ -68,7 +68,7 @@ if [ ! -d src/github.com/gogo/letmegrpc ]; then
 fi
 
 
-checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 6cab0cc9fec8f660c2cee46e1306ffc727261956
+checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 43ab7f0ec7b6d072e0368bd537ffefe74ed30198
 
 
 checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 868330046b32ec2d0e37a3d8d8cdacff14f32555
@@ -90,6 +90,9 @@ checkdep src/golang.org/x/oauth2 https://github.com/golang/oauth2 397fe7649477ff
 
 
 checkdep src/google.golang.org/cloud https://code.googlesource.com/gocloud 43ba5cf9407286f5430bfb3ea6f2e008a9a9f14b
+
+
+checkdep src/github.com/gogo/pbparser https://github.com/gogo/pbparser 62f2b658128c7b6bfde4db324651cd9e5d43d142
 
 
 

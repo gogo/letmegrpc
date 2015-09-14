@@ -33,6 +33,9 @@ all:
 	make install
 	make test
 
+anchor:
+	(cd ../../../../ && ./src/github.com/gogo/letmegrpc/anchor.sh)
+
 install:
 	go install -v ./...
 

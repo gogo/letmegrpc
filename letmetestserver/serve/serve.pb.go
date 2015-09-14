@@ -18,6 +18,8 @@ It has these top-level messages:
 package serve
 
 import proto "github.com/gogo/protobuf/proto"
+import fmt "fmt"
+import math "math"
 
 import (
 	context "golang.org/x/net/context"
@@ -26,6 +28,8 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
+var _ = math.Inf
 
 type Instrument int32
 
@@ -86,8 +90,9 @@ func (x Genre) String() string {
 }
 
 type Artist struct {
-	Name string     `protobuf:"bytes,1,opt,proto3" json:"Name,omitempty"`
-	Role Instrument `protobuf:"varint,2,opt,proto3,enum=serve.Instrument" json:"Role,omitempty"`
+	// Pick something original
+	Name string     `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Role Instrument `protobuf:"varint,2,opt,name=Role,proto3,enum=serve.Instrument" json:"Role,omitempty"`
 }
 
 func (m *Artist) Reset()         { *m = Artist{} }
@@ -95,10 +100,11 @@ func (m *Artist) String() string { return proto.CompactTextString(m) }
 func (*Artist) ProtoMessage()    {}
 
 type Song struct {
-	Name     string    `protobuf:"bytes,1,opt,proto3" json:"Name,omitempty"`
-	Track    uint64    `protobuf:"varint,2,opt,proto3" json:"Track,omitempty"`
-	Duration float64   `protobuf:"fixed64,3,opt,proto3" json:"Duration,omitempty"`
-	Composer []*Artist `protobuf:"bytes,4,rep" json:"Composer,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	// 1,2,3,4...
+	Track    uint64    `protobuf:"varint,2,opt,name=Track,proto3" json:"Track,omitempty"`
+	Duration float64   `protobuf:"fixed64,3,opt,name=Duration,proto3" json:"Duration,omitempty"`
+	Composer []*Artist `protobuf:"bytes,4,rep,name=Composer" json:"Composer,omitempty"`
 }
 
 func (m *Song) Reset()         { *m = Song{} }
@@ -113,15 +119,18 @@ func (m *Song) GetComposer() []*Artist {
 }
 
 type Album struct {
-	Name     string   `protobuf:"bytes,1,opt,proto3" json:"Name,omitempty"`
-	Song     []*Song  `protobuf:"bytes,2,rep" json:"Song,omitempty"`
-	Genre    Genre    `protobuf:"varint,3,opt,proto3,enum=serve.Genre" json:"Genre,omitempty"`
-	Year     string   `protobuf:"bytes,4,opt,proto3" json:"Year,omitempty"`
-	Producer []string `protobuf:"bytes,5,rep" json:"Producer,omitempty"`
-	Mediocre bool     `protobuf:"varint,6,opt,proto3" json:"Mediocre,omitempty"`
-	Rated    bool     `protobuf:"varint,7,opt,proto3" json:"Rated,omitempty"`
-	Epilogue string   `protobuf:"bytes,8,opt,proto3" json:"Epilogue,omitempty"`
-	Likes    []bool   `protobuf:"varint,9,rep" json:"Likes,omitempty"`
+	// Untitled?
+	Name  string  `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Song  []*Song `protobuf:"bytes,2,rep,name=Song" json:"Song,omitempty"`
+	Genre Genre   `protobuf:"varint,3,opt,name=Genre,proto3,enum=serve.Genre" json:"Genre,omitempty"`
+	// 2015
+	Year string `protobuf:"bytes,4,opt,name=Year,proto3" json:"Year,omitempty"`
+	// Uhm ja
+	Producer []string `protobuf:"bytes,5,rep,name=Producer" json:"Producer,omitempty"`
+	Mediocre bool     `protobuf:"varint,6,opt,name=Mediocre,proto3" json:"Mediocre,omitempty"`
+	Rated    bool     `protobuf:"varint,7,opt,name=Rated,proto3" json:"Rated,omitempty"`
+	Epilogue string   `protobuf:"bytes,8,opt,name=Epilogue,proto3" json:"Epilogue,omitempty"`
+	Likes    []bool   `protobuf:"varint,9,rep,name=Likes" json:"Likes,omitempty"`
 }
 
 func (m *Album) Reset()         { *m = Album{} }
@@ -136,7 +145,7 @@ func (m *Album) GetSong() []*Song {
 }
 
 type EndLess struct {
-	Tree *Tree `protobuf:"bytes,1,opt" json:"Tree,omitempty"`
+	Tree *Tree `protobuf:"bytes,1,opt,name=Tree" json:"Tree,omitempty"`
 }
 
 func (m *EndLess) Reset()         { *m = EndLess{} }
@@ -151,9 +160,9 @@ func (m *EndLess) GetTree() *Tree {
 }
 
 type Tree struct {
-	Value string `protobuf:"bytes,1,opt,proto3" json:"Value,omitempty"`
-	Left  *Tree  `protobuf:"bytes,2,opt" json:"Left,omitempty"`
-	Right *Tree  `protobuf:"bytes,3,opt" json:"Right,omitempty"`
+	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
+	Left  *Tree  `protobuf:"bytes,2,opt,name=Left" json:"Left,omitempty"`
+	Right *Tree  `protobuf:"bytes,3,opt,name=Right" json:"Right,omitempty"`
 }
 
 func (m *Tree) Reset()         { *m = Tree{} }

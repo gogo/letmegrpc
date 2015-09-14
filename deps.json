@@ -32,6 +32,10 @@
 		{
 			"Repo": "https://code.googlesource.com/gocloud",
 			"Dir": "src/google.golang.org/cloud"
+		},
+		{
+			"Repo": "https://github.com/gogo/pbparser",
+			"Dir": "src/github.com/gogo/pbparser"
 		}
 	]
 }

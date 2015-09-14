@@ -94,6 +94,7 @@ func main() {
 	var mainStr = `package main
 
 import tmpprotos "tmpprotos"
+import "google.golang.org/grpc"
 
 func main() {
 	tmpprotos.Serve("localhost:` + *httpPort + `", "` + *grpcAddr + `", tmpprotos.DefaultHtmlStringer, grpc.WithInsecure())

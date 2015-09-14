@@ -44,22 +44,27 @@ enum Genre {
 }
 
 message Artist {
+	//Pick something original
 	string Name = 1;
 	Instrument Role = 2;
 }
 
 message Song {
 	string Name = 1;
+	//1,2,3,4...
 	uint64 Track = 2;
 	double Duration = 3;
 	repeated Artist Composer = 4;
 }
 
 message Album {
+	//Untitled?
 	string Name = 1;
 	repeated Song Song = 2;
 	Genre Genre = 3;
+	//2015
 	string Year = 4;
+	//Uhm ja
 	repeated string Producer = 5;
 	bool Mediocre = 6;
 	bool Rated = 7;

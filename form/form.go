@@ -26,7 +26,9 @@
 package form
 
 import (
+	"fmt"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"strconv"
 	"strings"
 )
@@ -123,6 +125,7 @@ function activateLinks(node) {
 	        $(this).addClass('active');
 	    }
 	});
+	$('[data-toggle="tooltip"]', node).tooltip(); 
 }
 
 function getChildren(el) {
@@ -477,16 +480,22 @@ func typ(fieldname string, repeated bool, msg *descriptor.DescriptorProto) strin
 	return msg.GetName() + "_" + fieldname
 }
 
-type FieldBuilder func(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string
+type FieldBuilder func(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, help string, proto3 bool) string
 
-func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string {
+func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, help string, proto3 bool) string {
+	tooltip := ""
+	colon := ":"
+	if len(help) > 0 {
+		tooltip = ` <a href="#" data-toggle="tooltip" title="` + help + `"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>`
+		colon = ""
+	}
 	fieldname := f.GetName()
 	if f.IsMessage() {
 		typName := typ(fieldname, f.IsRepeated(), getMessage(f, fileDescriptorSet))
 		if !f.IsRepeated() {
 			return `s += '<div class="children" type="` + typName + `">' + build` + typName + `(json["` + f.GetName() + `"]);
 			s += '</div>';
-		s += setLink(json, "` + typName + `", "` + fieldname + `");
+		s += setLink(json, "` + typName + `", "` + fieldname + `")` + tooltip + `;
 		`
 		} else {
 			return `s += '<div class="children" type="` + typName + `">';
@@ -495,7 +504,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				s += build` + typName + `(` + fieldname + `[i]);
 			}
 			s += '</div>';
-			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="` + typName + `">add ` + fieldname + `</a>';
+			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="` + typName + `">add ` + fieldname + `</a>` + tooltip + `';
 			s += '<div class="field form-group"></div>';
 			`
 		}
@@ -509,7 +518,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					defaultBool = f.GetDefaultValue()
 				}
-				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
+				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
 					`
 				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
@@ -535,7 +544,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					}
 				}
 				if len(enum.GetValue()) <= 4 {
-					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label>';
+					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
 					`
 					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
@@ -548,7 +557,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					`
 					return s
 				} else {
-					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10">';
+					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="` + fieldname + `">';
 					`
 					for _, v := range enum.GetValue() {
@@ -568,7 +577,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = f.GetDefaultValue()
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else if isFloat(f) {
 				def := "\"\""
@@ -578,7 +587,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = f.GetDefaultValue()
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else {
 				def := "undefined"
@@ -588,7 +597,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = strconv.Quote(f.GetDefaultValue())
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			}
 		} else {
@@ -600,7 +609,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input name="` + fieldname + `" type="checkbox" repeated="true" ' + checked(` + fieldname + `[i]) + '/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
-				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="bool">add ` + fieldname + `</a>';
+				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="bool">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
 				return s
@@ -612,7 +621,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
-				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>';
+				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
 				return s
@@ -624,7 +633,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
-				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>';
+				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
 				return s
@@ -636,7 +645,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="text" repeated="true" '+setRepStrValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
 				}
 				s += '</div>';
-				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="text">add ` + fieldname + `</a>';
+				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="text">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
 				return s
@@ -646,16 +655,16 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	panic("unreachable")
 }
 
-func Builder(visited map[string]struct{}, root bool, fieldname string, repeated bool, msg *descriptor.DescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet, proto3 bool, buildField FieldBuilder) string {
-	s := []string{`function build` + typ(fieldname, repeated, msg) + `(json) {`}
+func Builder(visited map[string]struct{}, root bool, fieldname string, help string, repeated bool, msg *generator.Descriptor, g *generator.Generator, proto3 bool, buildField FieldBuilder) string {
+	s := []string{`function build` + typ(fieldname, repeated, msg.DescriptorProto) + `(json) {`}
 	if repeated {
-		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg)+`" fieldname="`+fieldname+`" repeated="true">';`)
+		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg.DescriptorProto)+`" fieldname="`+fieldname+`" repeated="true">';`)
 	} else {
 		s = append(s, `if (json == undefined) {
 		return "";
 	}
 	`)
-		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg)+`" fieldname="`+fieldname+`" repeated="false">';`)
+		s = append(s, `var s = '<div class="node" type="`+typ(fieldname, repeated, msg.DescriptorProto)+`" fieldname="`+fieldname+`" repeated="false">';`)
 	}
 	if !root {
 		s = append(s, `s += '<div class="row"><div class="col-sm-2">'`)
@@ -665,15 +674,16 @@ func Builder(visited map[string]struct{}, root bool, fieldname string, repeated 
 		s = append(s, `s += '</div></div>'`)
 	}
 	ms := []string{}
-	for _, f := range msg.GetField() {
+	for i, f := range msg.GetField() {
+		help := g.Comments(fmt.Sprintf("%s,%d,%d", msg.Path(), 2, i))
 		if f.IsMessage() {
-			fieldMsg := getMessage(f, fileDescriptorSet)
+			fieldMsg := g.ObjectNamed(f.GetTypeName()).(*generator.Descriptor)
 			if _, ok := visited[msg.GetName()+"."+f.GetName()]; !ok {
 				visited[msg.GetName()+"."+f.GetName()] = struct{}{}
-				ms = append(ms, Builder(visited, false, f.GetName(), f.IsRepeated(), fieldMsg, fileDescriptorSet, proto3, buildField))
+				ms = append(ms, Builder(visited, false, f.GetName(), help, f.IsRepeated(), fieldMsg, g, proto3, buildField))
 			}
 		}
-		s = append(s, buildField(fileDescriptorSet, msg, f, proto3))
+		s = append(s, buildField(g.AllFiles(), msg.DescriptorProto, f, help, proto3))
 	}
 	if root {
 		s = append(s, `
@@ -693,13 +703,13 @@ func Builder(visited map[string]struct{}, root bool, fieldname string, repeated 
 	return strings.Join(ms, "\n\n")
 }
 
-func Create(methodName, packageName, messageName string, fileDescriptorSet *descriptor.FileDescriptorSet) string {
-	return CreateCustom(methodName, packageName, messageName, fileDescriptorSet, BuildField)
+func Create(methodName, packageName, messageName string, g *generator.Generator) string {
+	return CreateCustom(methodName, packageName, messageName, g, BuildField)
 }
 
-func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet *descriptor.FileDescriptorSet, buildField FieldBuilder) string {
-	msg := fileDescriptorSet.GetMessage(packageName, messageName)
-	proto3 := fileDescriptorSet.IsProto3(packageName, messageName)
+func CreateCustom(methodName, packageName, messageName string, g *generator.Generator, buildField FieldBuilder) string {
+	msg := g.ObjectNamed("." + packageName + "." + messageName).(*generator.Descriptor)
+	proto3 := g.AllFiles().IsProto3(packageName, messageName)
 	text := `
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
@@ -710,10 +720,10 @@ func CreateCustom(methodName, packageName, messageName string, fileDescriptorSet
 	<script>`
 	text += Header
 	text += `var nodeFactory = {` + strings.Join(BuilderMap(make(map[string]struct{}),
-		"RootKeyword", false, msg, fileDescriptorSet), "\n") + `}
+		"RootKeyword", false, msg.DescriptorProto, g.AllFiles()), "\n") + `}
 	`
-	text += Builder(make(map[string]struct{}), true, "RootKeyword", false, msg, fileDescriptorSet, proto3, buildField)
-	text += Init(methodName, "RootKeyword", false, msg)
+	text += Builder(make(map[string]struct{}), true, "RootKeyword", "", false, msg, g, proto3, buildField)
+	text += Init(methodName, "RootKeyword", false, msg.DescriptorProto)
 	text += `
 	init();
 

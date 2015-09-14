@@ -27,8 +27,11 @@ package form
 
 import (
 	"encoding/json"
-	"github.com/gogo/protobuf/parser"
+	"github.com/gogo/pbparser"
+	"github.com/gogo/protobuf/proto"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 	"io"
 	"io/ioutil"
 	"net"
@@ -47,7 +50,17 @@ func TestCreateCustom(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	formStr = CreateCustom("WeirdMethod", "form", "Weird", desc, CustomBuildField)
+	g := generator.New()
+	g.Request = &plugin.CodeGeneratorRequest{ProtoFile: desc.File}
+	g.Request.FileToGenerate = []string{"form.proto"}
+	g.Request.Parameter = proto.String("plugins=grpc")
+	g.CommandLineParameters(g.Request.GetParameter())
+	g.WrapTypes()
+	g.SetPackageNames()
+	g.BuildTypeNameMap()
+	g.Reset()
+	g.SetFile(desc.File[0])
+	formStr = CreateCustom("WeirdMethod", "form", "Weird", g, CustomBuildField)
 	server := http.Server{
 		Addr:    "localhost:8080",
 		Handler: http.HandlerFunc(handle),
@@ -75,10 +88,10 @@ func TestCreateCustom(t *testing.T) {
 	}
 }
 
-func CustomBuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, proto3 bool) string {
+func CustomBuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor.DescriptorProto, f *descriptor.FieldDescriptorProto, help string, proto3 bool) string {
 	fieldname := f.GetName()
 	if fieldname != "WeirdName" {
-		return BuildField(fileDescriptorSet, msg, f, proto3)
+		return BuildField(fileDescriptorSet, msg, f, help, proto3)
 	}
 	s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-10">';
 	s += '<select class="form-control" name="` + fieldname + `">';

@@ -17,6 +17,8 @@ It has these top-level messages:
 package grpc
 
 import proto "github.com/gogo/protobuf/proto"
+import fmt "fmt"
+import math "math"
 
 import (
 	context "golang.org/x/net/context"
@@ -25,10 +27,12 @@ import (
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
+var _ = math.Inf
 
 type MyRequest struct {
-	Value  int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
-	Value2 int32 `protobuf:"varint,2,opt,proto3" json:"Value2,omitempty"`
+	Value  int64 `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
+	Value2 int32 `protobuf:"varint,2,opt,name=Value2,proto3" json:"Value2,omitempty"`
 }
 
 func (m *MyRequest) Reset()         { *m = MyRequest{} }
@@ -36,7 +40,7 @@ func (m *MyRequest) String() string { return proto.CompactTextString(m) }
 func (*MyRequest) ProtoMessage()    {}
 
 type MyResponse struct {
-	Value int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
+	Value int64 `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
 }
 
 func (m *MyResponse) Reset()         { *m = MyResponse{} }
@@ -44,7 +48,7 @@ func (m *MyResponse) String() string { return proto.CompactTextString(m) }
 func (*MyResponse) ProtoMessage()    {}
 
 type MyMsg struct {
-	Value int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
+	Value int64 `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
 }
 
 func (m *MyMsg) Reset()         { *m = MyMsg{} }
@@ -52,7 +56,7 @@ func (m *MyMsg) String() string { return proto.CompactTextString(m) }
 func (*MyMsg) ProtoMessage()    {}
 
 type MyMsg2 struct {
-	Value int64 `protobuf:"varint,1,opt,proto3" json:"Value,omitempty"`
+	Value int64 `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
 }
 
 func (m *MyMsg2) Reset()         { *m = MyMsg2{} }
