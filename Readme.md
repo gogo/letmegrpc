@@ -37,6 +37,11 @@ Open your webbrowser at
 
 ![image](https://github.com/gogo/letmegrpc/blob/master/screenshot.png "ScreenShot")
 
+## More Features
+
+ - Comments that are attached to fields become tooltips.
+ - proto2 defaults are filled into the the clean form.
+
 ## Customization
 
 letmegrpc is just another protocol buffer code generation plugin.
