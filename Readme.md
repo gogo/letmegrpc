@@ -1,6 +1,6 @@
 # letmegrpc
 
-letmegrpc generates an html interface for a [grpc.io](http://www.grpc.io/) interface
+letmegrpc generates a web form gui from a [grpc](http://www.grpc.io/) definition.
 
 [![Build Status](https://drone.io/github.com/gogo/letmegrpc/status.png)](https://drone.io/github.com/gogo/letmegrpc/latest)
 
