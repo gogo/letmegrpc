@@ -86,6 +86,7 @@ function setChildNode(ev) {
 	var child = $(nodeFactory[myType]);
 	activateLinks(child);
 	$(">.children[type=" + myType + "]", thisNode).append(child);
+$(">.tooltipper", thisNode).hide();
 	$(this).hide();
 }
 
@@ -97,6 +98,7 @@ function delChildNode(ev) {
 	var setChildLink = $(">a.set-child[fieldname='" + thisNode.attr('fieldname') + "']", parentNode);
 	if (setChildLink.length > 0) {
 		setChildLink.show();
+                $(">.tooltipper", parentNode).show();
 	}
 }
 
@@ -207,14 +209,15 @@ function getFields(node) {
 		$("> input[type=number][step=1]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseInt($(input).val());
 		});
-		$("> div > label > input[type=radio]:checked", $(field)).each(function(idx, input) {
-			var v = $(input).val();
+		$("> div > label.active", $(field)).each(function(idx, label) {
+                        var input = $("> input[type=radio]", $(label));
+			var v = input.val();
 			if (v == "true") {
-				nodeJson[$(input).attr("name")] = true;
+				nodeJson[input.attr("name")] = true;
 			} else if (v == "false") {
-				nodeJson[$(input).attr("name")] = false;
+				nodeJson[input.attr("name")] = false;
 			} else {
-				nodeJson[$(input).attr("name")] = parseInt($(input).val());
+				nodeJson[input.attr("name")] = parseInt(input.val());
 			}
 		});
 		$("> select", $(field)).each(function(idx, input) {
@@ -255,12 +258,13 @@ function getFields(node) {
 			}
 			nodeJson[fieldname].push(parseInt($(input).val()));
 		});
-		$("input[type=radio]:checked", $(field)).each(function(idx, input) {
+		$("label.active", $(field)).each(function(idx, label) {
+                        var input = $("> input[type=radio]", $(label));
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
 			}
-			nodeJson[fieldname].push(parseInt($(input).val()));
+			nodeJson[fieldname].push(parseInt(input.val()));
 		});
 		$("select", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
@@ -360,9 +364,17 @@ function getList(json, name) {
 	return value;
 }
 
-function setLink(json, typ, fieldname) {
+function setLink(json, typ, fieldname, help) {
+var display = "";
+	if (json[fieldname] != undefined) {
+display = 'style="display:none"';
+}
+        var tooltip = "";
+        if (help.length > 0) {
+		tooltip = '<a href="#" data-toggle="tooltip" ' + display + ' title="' + help + '" class="tooltipper"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>';
+        }
 	if (json[fieldname] == undefined) {
-		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>';
+		return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '">Set ' + fieldname + '</a>' + tooltip;
 	}
 	return '<a href="#" type="' + typ + '" class="set-child btn btn-success btn-sm" role="button" fieldname="' + fieldname + '" style="display: none;">Set ' + fieldname + '</a>';
 }
