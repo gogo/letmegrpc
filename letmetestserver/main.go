@@ -28,11 +28,12 @@ package main
 import (
 	"errors"
 	"flag"
+	"log"
+	"net"
+
 	"github.com/gogo/letmegrpc/letmetestserver/serve"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"log"
-	"net"
 )
 
 type server struct{}

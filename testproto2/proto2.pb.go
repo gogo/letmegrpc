@@ -334,9 +334,9 @@ func RegisterProto2Server(s *grpc.Server, srv Proto2Server) {
 	s.RegisterService(&_Proto2_serviceDesc, srv)
 }
 
-func _Proto2_Produce_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+func _Proto2_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(Album)
-	if err := codec.Unmarshal(buf, in); err != nil {
+	if err := dec(in); err != nil {
 		return nil, err
 	}
 	out, err := srv.(Proto2Server).Produce(ctx, in)

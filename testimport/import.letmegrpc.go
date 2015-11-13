@@ -131,7 +131,7 @@ function addElem(ev) {
 	if (myType == "float") {
 		var input = $('<div class="field form-group"><label class="col-sm-2 control-label">' + myFieldname + ': </label><div class="col-sm-8"><input class="form-control" name="' + myFieldname + '" type="number" step="any" repeated="true"/></div><div class="col-sm-2"><a href="#"  class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>');
 		$("a.del-field", input).click(delField);
-		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);	
+		$("> .fields[fieldname='" + myFieldname + "']", thisNode).append(input);
 	}
 }
 
@@ -139,10 +139,10 @@ function getUrlParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
     var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++) 
+    for (var i = 0; i < sURLVariables.length; i++)
     {
         var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam) 
+        if (sParameterName[0] == sParam)
         {
             return sParameterName[1];
         }
@@ -162,7 +162,7 @@ function activateLinks(node) {
 	        $(this).addClass('active');
 	    }
 	});
-	$('[data-toggle="tooltip"]', node).tooltip(); 
+	$('[data-toggle="tooltip"]', node).tooltip();
 }
 
 function getChildren(el) {
@@ -188,8 +188,8 @@ function getChildren(el) {
 }
 
 function isInt(value) {
-  return !isNaN(value) && 
-         parseInt(Number(value)) == value && 
+  return !isNaN(value) &&
+         parseInt(Number(value)) == value &&
          !isNaN(parseInt(value, 10));
 }
 
@@ -223,7 +223,7 @@ function getFields(node) {
 		$("> select", $(field)).each(function(idx, input) {
 			var textvalue = $(input).val();
 			if (isInt(textvalue)) {
-				nodeJson[$(input).attr("name")] = parseInt(textvalue);	
+				nodeJson[$(input).attr("name")] = parseInt(textvalue);
 			} else {
 				nodeJson[$(input).attr("name")] = replaceAll(textvalue, "&", "%26");
 			}
@@ -288,7 +288,7 @@ function radioed(def, index, value) {
 		if (def == index) {
 			return "checked"
 		}
-		return "" 
+		return ""
 	}
 	if (index == parseInt(value)) {
 		return "checked"
@@ -304,7 +304,7 @@ function activeradio(def, index, value) {
 		if (def == index) {
 			return "active"
 		}
-		return "" 
+		return ""
 	}
 	if (index == parseInt(value)) {
 		return "active"
@@ -384,7 +384,7 @@ function setValue(def, value) {
 		if (def.length == 0) {
 			return ""
 		}
-		return 'value="' + def + '"'	
+		return 'value="' + def + '"'
 	}
 	return 'value="' + value + '"'
 }
@@ -416,16 +416,16 @@ function HTMLEncode(str){
       aRet[i] = str[i];
     }
    }
-  return aRet.join('');    
+  return aRet.join('');
 }
 
 
 function setStrValue(def, value) {
 	if (value == undefined) {
 		if (def == undefined) {
-			return ""	
+			return ""
 		}
-		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));	
+		return "value=" + JSON.stringify(HTMLEncode(decode_utf8(def)));
 	}
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
@@ -566,7 +566,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilog
 	}
 	$("#form > .children").html(buildAlbum_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) { 
+	$("a[id=submit]").click(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
