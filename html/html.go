@@ -109,6 +109,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.strconvPkg = p.NewImport("strconv")
 	logPkg := p.NewImport("log")
 	grpcPkg := p.NewImport("google.golang.org/grpc")
+	jsonpbPkg := p.NewImport("github.com/golang/protobuf/jsonpb")
 
 	p.P(`var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {`)
 	p.In()
@@ -177,7 +178,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
 			p.P(`if len(jsonString) > 0 {`)
 			p.In()
-			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
+			p.P(`err := `, jsonpbPkg.Use(), `.UnmarshalString(jsonString, msg)`)
 			p.writeError(errString)
 			p.P(`someValue = true`)
 			p.Out()
