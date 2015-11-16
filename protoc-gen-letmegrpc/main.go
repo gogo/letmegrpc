@@ -26,12 +26,13 @@
 package main
 
 import (
-	"github.com/gogo/letmegrpc/html"
-	"github.com/gogo/protobuf/proto"
-	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/gogo/letmegrpc/html"
+	"github.com/gogo/protobuf/proto"
+	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 )
 
 func main() {

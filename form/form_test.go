@@ -27,17 +27,18 @@ package form
 
 import (
 	"encoding/json"
-	"github.com/gogo/pbparser"
-	"github.com/gogo/protobuf/proto"
-	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
-	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
-	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/gogo/pbparser"
+	"github.com/gogo/protobuf/proto"
+	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 )
 
 type Msg struct {

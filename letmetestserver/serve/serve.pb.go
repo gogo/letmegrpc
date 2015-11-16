@@ -236,9 +236,9 @@ func RegisterLabelServer(s *grpc.Server, srv LabelServer) {
 	s.RegisterService(&_Label_serviceDesc, srv)
 }
 
-func _Label_Produce_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+func _Label_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(Album)
-	if err := codec.Unmarshal(buf, in); err != nil {
+	if err := dec(in); err != nil {
 		return nil, err
 	}
 	out, err := srv.(LabelServer).Produce(ctx, in)
@@ -248,9 +248,9 @@ func _Label_Produce_Handler(srv interface{}, ctx context.Context, codec grpc.Cod
 	return out, nil
 }
 
-func _Label_Loop_Handler(srv interface{}, ctx context.Context, codec grpc.Codec, buf []byte) (interface{}, error) {
+func _Label_Loop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
 	in := new(EndLess)
-	if err := codec.Unmarshal(buf, in); err != nil {
+	if err := dec(in); err != nil {
 		return nil, err
 	}
 	out, err := srv.(LabelServer).Loop(ctx, in)
