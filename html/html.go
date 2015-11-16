@@ -95,7 +95,7 @@ func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescri
 	<h3>` + servName + `: ` + method.GetName() + `</h3>
 	` + form.Create(method.GetName(), packageName, messageName, p.Generator) + `
 	</div>`
-	p.P(`var Form`, servName, "_", method.GetName(), " string = `", s, "`")
+	p.P(`var Form`, servName, "_", method.GetName(), " = `", s, "`")
 }
 
 func (p *html) Generate(file *generator.FileDescriptor) {

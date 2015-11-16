@@ -34,7 +34,7 @@ import (
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 )
 
-var Header string = `
+var Header = `
 
 function addChildNode(ev) {
 	ev.preventDefault();
@@ -166,6 +166,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -196,6 +199,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -403,6 +409,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 `
 
 func isBool(f *descriptor.FieldDescriptorProto) bool {
@@ -502,6 +519,15 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 		tooltip = ` <a href="#" data-toggle="tooltip" title="` + strings.Replace(help, "\n", " ", -1) + `"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>`
 		colon = ""
 	}
+
+	var oneofClass string
+	var oneofClick string
+	if f.OneofIndex != nil {
+		oneofClass += fmt.Sprintf("oneof-%d '+oneofDisabled(json['"+f.GetName()+"'])+'", *f.OneofIndex)
+		action := fmt.Sprintf(`oneofSelect(this, \'oneof-%d\')`, *f.OneofIndex)
+		oneofClick += `onClick="` + action + `" onFocusIn="` + action + `" onChange="` + action + `"`
+	}
+
 	fieldname := f.GetName()
 	if f.IsMessage() {
 		typName := typ(fieldname, f.IsRepeated(), getMessage(f, fileDescriptorSet))
@@ -531,7 +557,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					defaultBool = f.GetDefaultValue()
 				}
-				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
+				s := `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
 					`
 				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
@@ -557,7 +583,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					}
 				}
 				if len(enum.GetValue()) <= 4 {
-					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
+					s := `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
 					`
 					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
@@ -571,7 +597,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					`
 					return s
 				} else {
-					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
+					s := `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="` + fieldname + `">';
 					`
 					for _, v := range enum.GetValue() {
@@ -591,7 +617,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = f.GetDefaultValue()
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else if isFloat(f) {
 				def := "\"\""
@@ -601,7 +627,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = f.GetDefaultValue()
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			} else {
 				def := "undefined"
@@ -611,7 +637,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				if f.DefaultValue != nil {
 					def = strconv.Quote(f.GetDefaultValue())
 				}
-				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return `s += '<div class="field form-group ` + oneofClass + `" ` + oneofClick + `><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
 			}
 		} else {
@@ -628,8 +654,8 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				`
 				return s
 			} else if isNumber(f) || isEnum(f) {
-				s :=
-					`s += '<div class="fields" fieldname="` + fieldname + `">';
+				s := `
+					s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -640,8 +666,8 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				`
 				return s
 			} else if isFloat(f) {
-				s :=
-					`s += '<div class="fields" fieldname="` + fieldname + `">';
+				s := `
+					s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -652,8 +678,8 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				`
 				return s
 			} else {
-				s :=
-					`s += '<div class="fields" fieldname="` + fieldname + `">';
+				s := `
+					s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="text" repeated="true" '+setRepStrValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -685,6 +711,9 @@ func Builder(visited map[string]struct{}, root bool, fieldname string, help stri
 		s = append(s, `s += '<a href="#" class="del-child btn btn-danger btn-xs" role="button" fieldname="`+fieldname+`">Remove</a>'`)
 		s = append(s, `s += '</div><div class="col-sm-10">'`)
 		s = append(s, `s += '<label class="heading">`+fieldname+`</label>'`)
+		if len(msg.OneofDecl) > 0 {
+			s = append(s, `s += '<br/>This message has `+fmt.Sprintf("%d", len(msg.OneofDecl))+` oneof declarations.<br/>'`)
+		}
 		s = append(s, `s += '</div></div>'`)
 	}
 	ms := []string{}
@@ -782,11 +811,18 @@ func CreateCustom(methodName, packageName, messageName string, g *generator.Gene
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
