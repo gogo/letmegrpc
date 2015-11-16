@@ -77,7 +77,10 @@ message EndLess {
 }
 
 message Tree {
-	string Value = 1;
+	oneof stuff {
+		string ValueString = 1;
+		uint64 ValueNum = 4;
+	}
 	Tree Left = 2;
 	Tree Right = 3;
 }
