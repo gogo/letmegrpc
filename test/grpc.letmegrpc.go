@@ -22,6 +22,7 @@ import io "io"
 import golang_org_x_net_context "golang.org/x/net/context"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
+import github_com_golang_protobuf_jsonpb "github.com/golang/protobuf/jsonpb"
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
@@ -66,7 +67,7 @@ func NewHTMLMyTestServer(client MyTestClient, stringer func(req, resp interface{
 	return &htmlMyTest{client, stringer}
 }
 
-var FormMyTest_UnaryCall string = `<div class="container"><div class="jumbotron">
+var FormMyTest_UnaryCall = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: UnaryCall</h3>
 	
 	<form class="form-horizontal">
@@ -206,6 +207,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -236,6 +240,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -443,6 +450,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
 	function buildMyRequest_RootKeyword(json) {
 if (json == undefined) {
@@ -450,9 +468,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -520,11 +538,18 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
@@ -537,7 +562,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	someValue := false
 	msg := &MyRequest{}
 	if len(jsonString) > 0 {
-		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		err := github_com_golang_protobuf_jsonpb.UnmarshalString(jsonString, msg)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
@@ -570,7 +595,7 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	w.Write([]byte(Footer))
 }
 
-var FormMyTest_Downstream string = `<div class="container"><div class="jumbotron">
+var FormMyTest_Downstream = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Downstream</h3>
 	
 	<form class="form-horizontal">
@@ -710,6 +735,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -740,6 +768,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -947,6 +978,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNull(null)),}
 	function buildMyRequest_RootKeyword(json) {
 if (json == undefined) {
@@ -954,9 +996,9 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -1024,11 +1066,18 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
@@ -1041,7 +1090,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	someValue := false
 	msg := &MyRequest{}
 	if len(jsonString) > 0 {
-		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		err := github_com_golang_protobuf_jsonpb.UnmarshalString(jsonString, msg)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
@@ -1085,7 +1134,7 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte(Footer))
 }
 
-var FormMyTest_Upstream string = `<div class="container"><div class="jumbotron">
+var FormMyTest_Upstream = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Upstream</h3>
 	
 	<form class="form-horizontal">
@@ -1225,6 +1274,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -1255,6 +1307,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -1462,6 +1517,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
 	function buildMyMsg_RootKeyword(json) {
 if (json == undefined) {
@@ -1469,7 +1535,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -1537,11 +1603,18 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
@@ -1554,7 +1627,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	someValue := false
 	msg := &MyMsg{}
 	if len(jsonString) > 0 {
-		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		err := github_com_golang_protobuf_jsonpb.UnmarshalString(jsonString, msg)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
@@ -1603,7 +1676,7 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 	w.Write([]byte(Footer))
 }
 
-var FormMyTest_Bidi string = `<div class="container"><div class="jumbotron">
+var FormMyTest_Bidi = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Bidi</h3>
 	
 	<form class="form-horizontal">
@@ -1743,6 +1816,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -1773,6 +1849,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -1980,6 +2059,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)),}
 	function buildMyMsg_RootKeyword(json) {
 if (json == undefined) {
@@ -1987,7 +2077,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
 				
 
 			s += '</div>';
@@ -2055,11 +2145,18 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
@@ -2072,7 +2169,7 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	someValue := false
 	msg := &MyMsg{}
 	if len(jsonString) > 0 {
-		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		err := github_com_golang_protobuf_jsonpb.UnmarshalString(jsonString, msg)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))

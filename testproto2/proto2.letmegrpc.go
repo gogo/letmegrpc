@@ -21,6 +21,7 @@ import io "io"
 import golang_org_x_net_context "golang.org/x/net/context"
 import log "log"
 import google_golang_org_grpc "google.golang.org/grpc"
+import github_com_golang_protobuf_jsonpb "github.com/golang/protobuf/jsonpb"
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
@@ -62,7 +63,7 @@ func NewHTMLProto2Server(client Proto2Client, stringer func(req, resp interface{
 	return &htmlProto2{client, stringer}
 }
 
-var FormProto2_Produce string = `<div class="container"><div class="jumbotron">
+var FormProto2_Produce = `<div class="container"><div class="jumbotron">
 	<h3>Proto2: Produce</h3>
 	
 	<form class="form-horizontal">
@@ -202,6 +203,9 @@ function replaceAll(str, search, replace) {
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
+		if($(field.parentNode).hasClass('oneof-disabled')) {
+			return
+		}
 		$("> input[type=text]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
 		});
@@ -232,6 +236,9 @@ function getFields(node) {
 		});
 	});
 	$("> div.fields > div ", $(node)).each(function(idx, field) {
+		if($(field).hasClass('oneof-disabled')) {
+			return
+		}
 		$("input[type=text]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
 			if (!(fieldname in nodeJson)) {
@@ -439,6 +446,17 @@ function setRepStrValue(value) {
 	return "value=" + JSON.stringify(HTMLEncode(decode_utf8(value)));
 }
 
+function oneofSelect(selected, oneofSelector) {
+	$("> div.field."+oneofSelector, selected.parentNode).addClass('oneof-disabled');
+	$(selected).removeClass('oneof-disabled');
+}
+
+function oneofDisabled(value) {
+	if(value == undefined || value == null) {
+		return "oneof-disabled";
+	}
+}
+
 var nodeFactory = {"Album_RootKeyword": buildAlbum_RootKeyword(emptyIfNull(null)),
 "RepeatedKeyword_Song_Song": buildRepeatedKeyword_Song_Song(emptyIfNull(null)),
 "RepeatedKeyword_Artist_Composer": buildRepeatedKeyword_Artist_Composer(emptyIfNull(null)),}
@@ -449,9 +467,9 @@ s += '<a href="#" class="del-child btn btn-danger btn-xs" role="button" fieldnam
 s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Composer</label>'
 s += '</div></div>'
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Role: </label>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Role: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(1, 0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(1, 0, json["Role"]) + '/> Voice</label>';
 						s += 	'<label class="btn btn-primary ' + activeradio(1, 1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(1, 1, json["Role"]) + '/> Guitar</label>';
@@ -470,11 +488,11 @@ s += '<a href="#" class="del-child btn btn-danger btn-xs" role="button" fieldnam
 s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Song</label>'
 s += '</div></div>'
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue("Type in a Name", json["Name"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue("Type in a Name", json["Name"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="number" step="1" '+setValue(1, json["Track"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="number" step="1" '+setValue(1, json["Track"])+'/></div></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Duration: </label><div class="col-sm-10"><input class="form-control" name="Duration" type="number" step="any" '+setValue(3.3, json["Duration"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Duration: </label><div class="col-sm-10"><input class="form-control" name="Duration" type="number" step="any" '+setValue(3.3, json["Duration"])+'/></div></div>';
 				
 s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			var Composer = getList(json, "Composer");
@@ -485,7 +503,7 @@ s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Artist_Composer">add Composer</a>';
 			s += '<div class="field form-group"></div>';
 			
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Good: </label>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Good: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Good"]) + '"><input type="radio" name="Good" value="false" ' + radioed(true, false, json["Good"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Good"]) + '"><input type="radio" name="Good" value="true" ' + radioed(true, true, json["Good"]) + '/>Yes</label>';
@@ -502,7 +520,7 @@ if (json == undefined) {
 	}
 	
 var s = '<div class="node" type="Album_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
 				
 s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			var Song = getList(json, "Song");
@@ -513,7 +531,7 @@ s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Song_Song">add Song</a>';
 			s += '<div class="field form-group"></div>';
 			
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre: </label><div class="col-sm-10">';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Genre: </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="Genre">';
 					s += 	'<option value="0" ' + selected(1, 0, json["Genre"]) + '>Pop</option>';
 						s += 	'<option value="1" ' + selected(1, 1, json["Genre"]) + '>Rock</option>';
@@ -524,9 +542,10 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre:
 						s += 	'<option value="6" ' + selected(1, 6, json["Genre"]) + '>Dance</option>';
 						s += '</select></div></div>';
 					
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Year: </label><div class="col-sm-10"><input class="form-control" name="Year" type="text" '+setStrValue("2015", json["Year"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Year: </label><div class="col-sm-10"><input class="form-control" name="Year" type="text" '+setStrValue("2015", json["Year"])+'/></div></div>';
 				
-s += '<div class="fields" fieldname="Producer">';
+
+					s += '<div class="fields" fieldname="Producer">';
 				var Producer = getList(json, "Producer");
 				for (var i = 0; i < Producer.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">Producer: </label><div class="col-sm-8"><input class="form-control" name="Producer" type="text" repeated="true" '+setRepStrValue(json["Producer"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -535,19 +554,19 @@ s += '<div class="fields" fieldname="Producer">';
 				s += '<a href="#" fieldname="Producer" class="add-elem btn btn-info btn-sm" role="button" type="text">add Producer</a>';
 				s += '<div class="field form-group"></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Mediocre: </label>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Mediocre: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(true, false, json["Mediocre"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(true, true, json["Mediocre"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated: </label>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Rated: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio("nothing", false, json["Rated"]) + '"><input type="radio" name="Rated" value="false" ' + radioed("nothing", false, json["Rated"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio("nothing", true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed("nothing", true, json["Rated"]) + '/>Yes</label>';
 					s += '</div></div></div>';
 					
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(undefined, json["Epilogue"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(undefined, json["Epilogue"])+'/></div></div>';
 				
 
 				s += '<div class="fields" fieldname="Likes">';
@@ -559,9 +578,10 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilog
 				s += '<a href="#" fieldname="Likes" class="add-elem btn btn-info btn-sm" role="button" type="bool">add Likes</a>';
 				s += '<div class="field form-group"></div>';
 				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Stars: </label><div class="col-sm-10"><input class="form-control" name="Stars" type="number" step="1" '+setValue("", json["Stars"])+'/></div></div>';
+s += '<div class="field form-group " ><label class="col-sm-2 control-label">Stars: </label><div class="col-sm-10"><input class="form-control" name="Stars" type="number" step="1" '+setValue("", json["Stars"])+'/></div></div>';
 				
-s += '<div class="fields" fieldname="Serial">';
+
+					s += '<div class="fields" fieldname="Serial">';
 				var Serial = getList(json, "Serial");
 				for (var i = 0; i < Serial.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">Serial: </label><div class="col-sm-8"><input class="form-control" name="Serial" type="number" step="1" repeated="true" '+setRepValue(json["Serial"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -636,11 +656,18 @@ s += '<div class="fields" fieldname="Serial">';
 	}
 
 	label{
-	        font-weight: normal;
+		font-weight: normal;
 	}
 
 	.heading {
 		font-weight: bold;
+	}
+
+	.oneof-disabled {
+		color: grey;
+	}
+	.oneof-disabled input {
+		background-color: grey;
 	}
 
 	</style>
@@ -653,7 +680,7 @@ func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request
 	someValue := false
 	msg := &Album{}
 	if len(jsonString) > 0 {
-		err := encoding_json.Unmarshal([]byte(jsonString), msg)
+		err := github_com_golang_protobuf_jsonpb.UnmarshalString(jsonString, msg)
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
