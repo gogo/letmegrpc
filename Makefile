@@ -34,6 +34,7 @@ all:
 	make test
 
 anchor:
+	go get github.com/awalterschulze/git-anchor
 	(cd ../../../../ && ./src/github.com/gogo/letmegrpc/anchor.sh)
 
 install:

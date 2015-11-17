@@ -68,13 +68,13 @@ if [ ! -d src/github.com/gogo/letmegrpc ]; then
 fi
 
 
-checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf 2093b57e5ca2ccbee4626814100bc1aada691b18
+checkdep src/github.com/gogo/protobuf https://github.com/gogo/protobuf d3235f01ecae4901dd9f7ea6af57a352c0189deb
 
 
-checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 3255a5521cec5027cdd8acdefb1ac7a130ac6e2b
+checkdep src/google.golang.org/grpc https://github.com/grpc/grpc-go 3490323066222fe765ef7903b53a48cbc876906d
 
 
-checkdep src/golang.org/x/net https://github.com/golang/net db8e4de5b2d6653f66aea53094624468caad15d2
+checkdep src/golang.org/x/net https://github.com/golang/net 1d9fd3b8333e891c0e7353e1adcfe8a612573033
 
 
 checkdep src/github.com/bradfitz/http2 https://github.com/bradfitz/http2 f8202bc903bda493ebba4aa54922d78430c2c42f

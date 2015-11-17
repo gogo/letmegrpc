@@ -63,6 +63,13 @@ func (m *MyMsg2) Reset()         { *m = MyMsg2{} }
 func (m *MyMsg2) String() string { return proto.CompactTextString(m) }
 func (*MyMsg2) ProtoMessage()    {}
 
+func init() {
+	proto.RegisterType((*MyRequest)(nil), "grpc.MyRequest")
+	proto.RegisterType((*MyResponse)(nil), "grpc.MyResponse")
+	proto.RegisterType((*MyMsg)(nil), "grpc.MyMsg")
+	proto.RegisterType((*MyMsg2)(nil), "grpc.MyMsg2")
+}
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc1.ClientConn

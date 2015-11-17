@@ -184,6 +184,11 @@ func (m *Tree) GetRight() *Tree {
 }
 
 func init() {
+	proto.RegisterType((*Artist)(nil), "serve.Artist")
+	proto.RegisterType((*Song)(nil), "serve.Song")
+	proto.RegisterType((*Album)(nil), "serve.Album")
+	proto.RegisterType((*EndLess)(nil), "serve.EndLess")
+	proto.RegisterType((*Tree)(nil), "serve.Tree")
 	proto.RegisterEnum("serve.Instrument", Instrument_name, Instrument_value)
 	proto.RegisterEnum("serve.Genre", Genre_name, Genre_value)
 }

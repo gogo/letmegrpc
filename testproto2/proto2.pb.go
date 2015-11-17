@@ -293,6 +293,9 @@ func (m *Album) GetSerial() []float64 {
 }
 
 func init() {
+	proto.RegisterType((*Artist)(nil), "proto2.Artist")
+	proto.RegisterType((*Song)(nil), "proto2.Song")
+	proto.RegisterType((*Album)(nil), "proto2.Album")
 	proto.RegisterEnum("proto2.Instrument", Instrument_name, Instrument_value)
 	proto.RegisterEnum("proto2.Genre", Genre_name, Genre_value)
 }
