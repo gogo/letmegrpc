@@ -524,6 +524,12 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	var oneofClick string
 	if f.OneofIndex != nil {
 		oneofClass += fmt.Sprintf("oneof-%d '+oneofDisabled(json['"+f.GetName()+"'])+'", *f.OneofIndex)
+		if *f.OneofIndex%2 == 0 {
+			oneofClass += " oneof-even"
+		} else {
+			oneofClass += " oneof-odd"
+		}
+
 		action := fmt.Sprintf(`oneofSelect(this, \'oneof-%d\')`, *f.OneofIndex)
 		oneofClick += `onClick="` + action + `" onFocusIn="` + action + `" onChange="` + action + `"`
 	}
@@ -823,6 +829,12 @@ func CreateCustom(methodName, packageName, messageName string, g *generator.Gene
 	}
 	.oneof-disabled input {
 		background-color: grey;
+	}
+	.oneof-even > div {
+		border-right: 5px solid red;
+	}
+	.oneof-odd > div {
+		border-right: 5px solid blue;
 	}
 
 	</style>
