@@ -64,7 +64,8 @@ func run(cmd *exec.Cmd) {
 
 var proto_path = flag.String("proto_path", ".", "")
 var grpcAddr = flag.String("addr", "127.0.0.1:8081", "grpc address")
-var httpPort = flag.String("port", "8080", "http port")
+var httpAddr = flag.String("httpaddr", "127.0.0.1:8080", "http address")
+var httpPort = flag.String("port", "", "http port. if empty, ignored; if non-empty, replaces httpaddr which will then listen on 127.0.0.1.")
 
 func main() {
 	flag.Parse()
@@ -91,13 +92,17 @@ func main() {
 	run(exec.Command("protoc", "--gogo_out=plugins=grpc:"+outDir, "--proto_path="+*proto_path, filename))
 	run(exec.Command("protoc", "--letmegrpc_out=plugins=grpc:"+outDir, "--proto_path="+*proto_path, filename))
 
+	if *httpPort != "" {
+		*httpAddr = "127.0.0.1:" + *httpPort
+	}
+
 	var mainStr = `package main
 
 import tmpprotos "tmpprotos"
 import "google.golang.org/grpc"
 
 func main() {
-	tmpprotos.Serve("localhost:` + *httpPort + `", "` + *grpcAddr + `", tmpprotos.DefaultHtmlStringer, grpc.WithInsecure())
+	tmpprotos.Serve("` + *httpAddr + `", "` + *grpcAddr + `", tmpprotos.DefaultHtmlStringer, grpc.WithInsecure())
 }
 `
 	if err := ioutil.WriteFile(filepath.Join(cmdDir, "/main.go"), []byte(mainStr), 0777); err != nil {
