@@ -508,7 +508,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 		if !f.IsRepeated() {
 			return `s += '<div class="children" type="` + typName + `">' + build` + typName + `(json["` + f.GetName() + `"]);
 			s += '</div>';
-		s += setLink(json, "` + typName + `", "` + fieldname + `", "` + help + `");
+		s += setLink(json, "` + typName + `", "` + fieldname + `", "` + strings.Replace(help, "\n", " ", -1) + `");
 		`
 		} else {
 			return `s += '<div class="children" type="` + typName + `">';
