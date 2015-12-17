@@ -199,11 +199,15 @@ function replaceAll(str, search, replace) {
 	return str.split(search).join(replace);
 }
 
+function escapeIllegal(str) {
+	return replaceAll(replaceAll(str, "%", "%25"), "&", "%26");
+}
+
 function getFields(node) {
 	var nodeJson = {};
 	$("> div.field > div ", $(node)).each(function(idx, field) {
 		$("> input[type=text]", $(field)).each(function(idx, input) {
-			nodeJson[$(input).attr("name")] = replaceAll($(input).val(), "&", "%26");
+			nodeJson[$(input).attr("name")] = escapeIllegal($(input).val());
 		});
 		$("> input[type=number][step=any]", $(field)).each(function(idx, input) {
 			nodeJson[$(input).attr("name")] = parseFloat($(input).val());
@@ -227,7 +231,7 @@ function getFields(node) {
 			if (isInt(textvalue)) {
 				nodeJson[$(input).attr("name")] = parseInt(textvalue);
 			} else {
-				nodeJson[$(input).attr("name")] = replaceAll(textvalue, "&", "%26");
+				nodeJson[$(input).attr("name")] = escapeIllegal(textvalue);
 			}
 		});
 	});
@@ -237,7 +241,7 @@ function getFields(node) {
 			if (!(fieldname in nodeJson)) {
 				nodeJson[fieldname] = [];
 			}
-			nodeJson[fieldname].push(replaceAll($(input).val(), "&", "%26"));
+			nodeJson[fieldname].push(escapeIllegal($(input).val()));
 		});
 		$("input[type=checkbox]", $(field)).each(function(idx, input) {
 			var fieldname = $(input).attr("name");
@@ -277,7 +281,7 @@ function getFields(node) {
 			if (isInt(textvalue)) {
 				nodeJson[fieldname].push(parseInt(textvalue));
 			} else {
-				nodeJson[fieldname].push(replaceAll(textvalue, "&", "%26"));
+				nodeJson[fieldname].push(escapeIllegal(textvalue));
 			}
 		});
 	});
