@@ -69,6 +69,6 @@ drone:
 	go get google.golang.org/grpc
 	mkdir -p $(GOPATH)/src/github.com/gogo/protobuf
 	git clone https://github.com/gogo/protobuf $(GOPATH)/src/github.com/gogo/protobuf
-	(cd $(GOPATH)/src/github.com/gogo/protobuf && make)
+	(cd $(GOPATH)/src/github.com/gogo/protobuf && make install)
 	make install
 	go test -v ./test/...
