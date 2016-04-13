@@ -164,7 +164,7 @@ function replaceAll(str, search, replace) {
 }
 
 function escapeIllegal(str) {
-	return replaceAll(replaceAll(str, "%", "%25"), "&", "%26");
+	return replaceAll(replaceAll(replaceAll(str, "%", "%25"), "&", "%26"), "#", "%23");
 }
 
 function getFields(node) {
