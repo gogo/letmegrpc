@@ -149,6 +149,36 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.Out()
 	p.P(`}`)
 
+	p.P(`func Handler(conn *`, grpcPkg.Use(), `.ClientConn, stringer func(req, resp interface{}) ([]byte, error)) (`, httpPkg.Use(), `.Handler) {`)
+	p.In()
+	p.P(`muxhandler := `, httpPkg.Use(), `.NewServeMux()`)
+	for _, s := range file.GetService() {
+		origServName := s.GetName()
+		servName := generator.CamelCase(origServName)
+		p.P(origServName, `Client := New`, servName, `Client(conn)`)
+		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, stringer)`)
+		for _, m := range s.GetMethod() {
+			p.P(`muxhandler.HandleFunc("/`, servName, `/`, m.GetName(), `", `, origServName, `Server.`, m.GetName(), `)`)
+		}
+	}
+	p.P(`return muxhandler`)
+	p.P(`}`)
+
+	p.P(`func DefaultHandler(conn *`, grpcPkg.Use(), `.ClientConn) `, httpPkg.Use(), `.Handler {`)
+	p.In()
+	p.P(`muxhandler := `, httpPkg.Use(), `.NewServeMux()`)
+	for _, s := range file.GetService() {
+		origServName := s.GetName()
+		servName := generator.CamelCase(origServName)
+		p.P(origServName, `Client := New`, servName, `Client(conn)`)
+		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, DefaultHtmlStringer)`)
+		for _, m := range s.GetMethod() {
+			p.P(`muxhandler.HandleFunc("/`, servName, `/`, m.GetName(), `", `, origServName, `Server.`, m.GetName(), `)`)
+		}
+	}
+	p.P(`return muxhandler`)
+	p.P(`}`)
+
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
