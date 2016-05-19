@@ -27,9 +27,17 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+const _ = proto.GoGoProtoPackageIsVersion1
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion2
 
 // Client API for OtherLabel service
 
@@ -64,16 +72,22 @@ func RegisterOtherLabelServer(s *grpc.Server, srv OtherLabelServer) {
 	s.RegisterService(&_OtherLabel_serviceDesc, srv)
 }
 
-func _OtherLabel_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _OtherLabel_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(serve.Album)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(OtherLabelServer).Produce(ctx, in)
-	if err != nil {
-		return nil, err
+	if interceptor == nil {
+		return srv.(OtherLabelServer).Produce(ctx, in)
 	}
-	return out, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/testimport.OtherLabel/Produce",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OtherLabelServer).Produce(ctx, req.(*serve.Album))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _OtherLabel_serviceDesc = grpc.ServiceDesc{
@@ -86,4 +100,17 @@ var _OtherLabel_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{},
+}
+
+var fileDescriptorImport = []byte{
+	// 132 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xe2, 0xc9, 0xcc, 0x2d, 0xc8,
+	0x2f, 0x2a, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x2a, 0x49, 0x2d, 0x2e, 0x81, 0x88,
+	0x48, 0x59, 0xa7, 0x67, 0x96, 0x64, 0x94, 0x26, 0xe9, 0x25, 0xe7, 0xe7, 0xea, 0xa7, 0xe7, 0xa7,
+	0xe7, 0xeb, 0xe7, 0xa4, 0x96, 0xe4, 0xa6, 0xa6, 0x17, 0x15, 0x24, 0x43, 0x58, 0x20, 0xa5, 0xc5,
+	0xa9, 0x45, 0x65, 0xa9, 0x45, 0xfa, 0x60, 0x0a, 0x42, 0x42, 0x0c, 0x32, 0x32, 0xe6, 0xe2, 0xf2,
+	0x2f, 0xc9, 0x48, 0x2d, 0xf2, 0x49, 0x4c, 0x4a, 0xcd, 0x11, 0x52, 0xe5, 0x62, 0x0f, 0x28, 0xca,
+	0x4f, 0x29, 0x4d, 0x4e, 0x15, 0xe2, 0xd1, 0x83, 0x28, 0x73, 0xcc, 0x49, 0x2a, 0xcd, 0x95, 0x42,
+	0xe1, 0x25, 0xb1, 0x81, 0xf5, 0x1a, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x4d, 0x0c, 0xfe, 0x49,
+	0x94, 0x00, 0x00, 0x00,
 }
