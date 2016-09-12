@@ -1,0 +1,17 @@
+env:
+  - PROTOBUF_VERSION=3.0.0
+
+before_install:
+  - ./install-godeps.sh
+  - ./install-protobuf.sh
+  - PATH=/home/travis/bin:$PATH protoc --version
+
+script:
+  - PATH=/home/travis/bin:$PATH make install
+  - PATH=/home/travis/bin:$PATH go test -v ./test/...
+  - echo $TRAVIS_GO_VERSION
+
+language: go
+
+go:
+  - 1.7.1
