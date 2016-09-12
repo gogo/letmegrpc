@@ -503,7 +503,10 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 	tooltip := ""
 	colon := ":"
 	if len(help) > 0 {
-		tooltip = ` <a href="#" data-toggle="tooltip" title="` + strings.Replace(help, "\n", " ", -1) + `"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>`
+		help = strings.Replace(help, "`", "'", -1)
+		help = strings.Replace(help, "'", "\\'", -1)
+		help = strings.Replace(help, "\n", " ", -1)
+		tooltip = ` <a href="#" data-toggle="tooltip" title="` + help + `"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></a>`
 		colon = ""
 	}
 	fieldname := f.GetName()
