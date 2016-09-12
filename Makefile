@@ -33,10 +33,6 @@ all:
 	make install
 	make test
 
-anchor:
-	go get github.com/awalterschulze/git-anchor
-	(cd ../../../../ && ./src/github.com/gogo/letmegrpc/anchor.sh)
-
 install:
 	go install -v ./...
 
@@ -63,12 +59,3 @@ regenerate:
 gofmt:
 	gofmt -l -s -w .
 
-drone:
-	sudo apt-get install protobuf-compiler
-	go get golang.org/x/net/context
-	go get google.golang.org/grpc
-	mkdir -p $(GOPATH)/src/github.com/gogo/protobuf
-	git clone https://github.com/gogo/protobuf $(GOPATH)/src/github.com/gogo/protobuf
-	(cd $(GOPATH)/src/github.com/gogo/protobuf && make install)
-	make install
-	go test -v ./test/...

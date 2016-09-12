@@ -2,7 +2,7 @@
 
 letmegrpc generates a web form gui from a [grpc](http://www.grpc.io/) definition.
 
-[![Build Status](https://drone.io/github.com/gogo/letmegrpc/status.png)](https://drone.io/github.com/gogo/letmegrpc/latest)
+[![Build Status](https://travis-ci.org/gogo/letmegrpc.svg?branch=master)](https://travis-ci.org/gogo/letmegrpc)
 
 ## Installation
 
@@ -11,7 +11,7 @@ letmegrpc generates a web form gui from a [grpc](http://www.grpc.io/) definition
     git clone https://github.com/gogo/letmegrpc ./src/github.com/gogo/letmegrpc
     git clone https://github.com/gogo/protobuf ./src/github.com/gogo/protobuf
     go get google.golang.org/grpc
-    go get golang.org/x/net
+    go get golang.org/x/net/context
     (cd ./src/github.com/gogo/letmegrpc && make install)
 
 ## Usage
