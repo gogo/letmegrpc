@@ -3,15 +3,15 @@
 // DO NOT EDIT!
 
 /*
-Package proto2 is a generated protocol buffer package.
+	Package proto2 is a generated protocol buffer package.
 
-It is generated from these files:
-	proto2.proto
+	It is generated from these files:
+		proto2.proto
 
-It has these top-level messages:
-	Artist
-	Song
-	Album
+	It has these top-level messages:
+		Artist
+		Song
+		Album
 */
 package proto2
 
@@ -51,6 +51,20 @@ func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]by
 	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+func Handler(conn *google_golang_org_grpc.ClientConn, stringer func(req, resp interface{}) ([]byte, error)) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	Proto2Client := NewProto2Client(conn)
+	Proto2Server := NewHTMLProto2Server(Proto2Client, stringer)
+	muxhandler.HandleFunc("/Proto2/Produce", Proto2Server.Produce)
+	return muxhandler
+}
+func DefaultHandler(conn *google_golang_org_grpc.ClientConn) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	Proto2Client := NewProto2Client(conn)
+	Proto2Server := NewHTMLProto2Server(Proto2Client, DefaultHtmlStringer)
+	muxhandler.HandleFunc("/Proto2/Produce", Proto2Server.Produce)
+	return muxhandler
 }
 
 type htmlProto2 struct {

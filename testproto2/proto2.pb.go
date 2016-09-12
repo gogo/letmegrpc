@@ -29,6 +29,10 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+const _ = proto.GoGoProtoPackageIsVersion1
+
 type Instrument int32
 
 const (
@@ -64,6 +68,7 @@ func (x *Instrument) UnmarshalJSON(data []byte) error {
 	*x = Instrument(value)
 	return nil
 }
+func (Instrument) EnumDescriptor() ([]byte, []int) { return fileDescriptorProto2, []int{0} }
 
 type Genre int32
 
@@ -112,16 +117,18 @@ func (x *Genre) UnmarshalJSON(data []byte) error {
 	*x = Genre(value)
 	return nil
 }
+func (Genre) EnumDescriptor() ([]byte, []int) { return fileDescriptorProto2, []int{1} }
 
 type Artist struct {
-	Name             *string     `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
-	Role             *Instrument `protobuf:"varint,2,opt,name=Role,enum=proto2.Instrument,def=1" json:"Role,omitempty"`
+	Name             *string     `protobuf:"bytes,1,opt,name=Name,json=name" json:"Name,omitempty"`
+	Role             *Instrument `protobuf:"varint,2,opt,name=Role,json=role,enum=proto2.Instrument,def=1" json:"Role,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
-func (m *Artist) Reset()         { *m = Artist{} }
-func (m *Artist) String() string { return proto.CompactTextString(m) }
-func (*Artist) ProtoMessage()    {}
+func (m *Artist) Reset()                    { *m = Artist{} }
+func (m *Artist) String() string            { return proto.CompactTextString(m) }
+func (*Artist) ProtoMessage()               {}
+func (*Artist) Descriptor() ([]byte, []int) { return fileDescriptorProto2, []int{0} }
 
 const Default_Artist_Role Instrument = Instrument_Guitar
 
@@ -140,17 +147,18 @@ func (m *Artist) GetRole() Instrument {
 }
 
 type Song struct {
-	Name             *string   `protobuf:"bytes,1,opt,name=Name,def=Type in a Name" json:"Name,omitempty"`
-	Track            *uint64   `protobuf:"varint,2,opt,name=Track,def=1" json:"Track,omitempty"`
-	Duration         *float64  `protobuf:"fixed64,3,opt,name=Duration,def=3.3" json:"Duration,omitempty"`
-	Composer         []*Artist `protobuf:"bytes,4,rep,name=Composer" json:"Composer,omitempty"`
-	Good             *bool     `protobuf:"varint,5,opt,name=Good,def=1" json:"Good,omitempty"`
+	Name             *string   `protobuf:"bytes,1,opt,name=Name,json=name,def=Type in a Name" json:"Name,omitempty"`
+	Track            *uint64   `protobuf:"varint,2,opt,name=Track,json=track,def=1" json:"Track,omitempty"`
+	Duration         *float64  `protobuf:"fixed64,3,opt,name=Duration,json=duration,def=3.3" json:"Duration,omitempty"`
+	Composer         []*Artist `protobuf:"bytes,4,rep,name=Composer,json=composer" json:"Composer,omitempty"`
+	Good             *bool     `protobuf:"varint,5,opt,name=Good,json=good,def=1" json:"Good,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 
-func (m *Song) Reset()         { *m = Song{} }
-func (m *Song) String() string { return proto.CompactTextString(m) }
-func (*Song) ProtoMessage()    {}
+func (m *Song) Reset()                    { *m = Song{} }
+func (m *Song) String() string            { return proto.CompactTextString(m) }
+func (*Song) ProtoMessage()               {}
+func (*Song) Descriptor() ([]byte, []int) { return fileDescriptorProto2, []int{1} }
 
 const Default_Song_Name string = "Type in a Name"
 const Default_Song_Track uint64 = 1
@@ -193,23 +201,24 @@ func (m *Song) GetGood() bool {
 }
 
 type Album struct {
-	Name             *string   `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
-	Song             []*Song   `protobuf:"bytes,2,rep,name=Song" json:"Song,omitempty"`
-	Genre            *Genre    `protobuf:"varint,3,opt,name=Genre,enum=proto2.Genre,def=1" json:"Genre,omitempty"`
-	Year             *string   `protobuf:"bytes,4,opt,name=Year,def=2015" json:"Year,omitempty"`
-	Producer         []string  `protobuf:"bytes,5,rep,name=Producer" json:"Producer,omitempty"`
-	Mediocre         *bool     `protobuf:"varint,6,opt,name=Mediocre,def=1" json:"Mediocre,omitempty"`
-	Rated            *bool     `protobuf:"varint,7,opt,name=Rated" json:"Rated,omitempty"`
-	Epilogue         *string   `protobuf:"bytes,8,opt,name=Epilogue" json:"Epilogue,omitempty"`
-	Likes            []bool    `protobuf:"varint,9,rep,name=Likes" json:"Likes,omitempty"`
-	Stars            *int64    `protobuf:"varint,10,opt,name=Stars" json:"Stars,omitempty"`
-	Serial           []float64 `protobuf:"fixed64,11,rep,name=Serial" json:"Serial,omitempty"`
+	Name             *string   `protobuf:"bytes,1,opt,name=Name,json=name" json:"Name,omitempty"`
+	Song             []*Song   `protobuf:"bytes,2,rep,name=Song,json=song" json:"Song,omitempty"`
+	Genre            *Genre    `protobuf:"varint,3,opt,name=Genre,json=genre,enum=proto2.Genre,def=1" json:"Genre,omitempty"`
+	Year             *string   `protobuf:"bytes,4,opt,name=Year,json=year,def=2015" json:"Year,omitempty"`
+	Producer         []string  `protobuf:"bytes,5,rep,name=Producer,json=producer" json:"Producer,omitempty"`
+	Mediocre         *bool     `protobuf:"varint,6,opt,name=Mediocre,json=mediocre,def=1" json:"Mediocre,omitempty"`
+	Rated            *bool     `protobuf:"varint,7,opt,name=Rated,json=rated" json:"Rated,omitempty"`
+	Epilogue         *string   `protobuf:"bytes,8,opt,name=Epilogue,json=epilogue" json:"Epilogue,omitempty"`
+	Likes            []bool    `protobuf:"varint,9,rep,name=Likes,json=likes" json:"Likes,omitempty"`
+	Stars            *int64    `protobuf:"varint,10,opt,name=Stars,json=stars" json:"Stars,omitempty"`
+	Serial           []float64 `protobuf:"fixed64,11,rep,name=Serial,json=serial" json:"Serial,omitempty"`
 	XXX_unrecognized []byte    `json:"-"`
 }
 
-func (m *Album) Reset()         { *m = Album{} }
-func (m *Album) String() string { return proto.CompactTextString(m) }
-func (*Album) ProtoMessage()    {}
+func (m *Album) Reset()                    { *m = Album{} }
+func (m *Album) String() string            { return proto.CompactTextString(m) }
+func (*Album) ProtoMessage()               {}
+func (*Album) Descriptor() ([]byte, []int) { return fileDescriptorProto2, []int{2} }
 
 const Default_Album_Genre Genre = Genre_Rock
 const Default_Album_Year string = "2015"
@@ -304,6 +313,10 @@ func init() {
 var _ context.Context
 var _ grpc.ClientConn
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion2
+
 // Client API for Proto2 service
 
 type Proto2Client interface {
@@ -337,16 +350,22 @@ func RegisterProto2Server(s *grpc.Server, srv Proto2Server) {
 	s.RegisterService(&_Proto2_serviceDesc, srv)
 }
 
-func _Proto2_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _Proto2_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Album)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(Proto2Server).Produce(ctx, in)
-	if err != nil {
-		return nil, err
+	if interceptor == nil {
+		return srv.(Proto2Server).Produce(ctx, in)
 	}
-	return out, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto2.Proto2/Produce",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(Proto2Server).Produce(ctx, req.(*Album))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _Proto2_serviceDesc = grpc.ServiceDesc{
@@ -359,4 +378,40 @@ var _Proto2_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{},
+}
+
+var fileDescriptorProto2 = []byte{
+	// 500 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x6c, 0x52, 0xd1, 0x6a, 0xdb, 0x30,
+	0x14, 0x9d, 0x63, 0xc9, 0x51, 0x6e, 0xb3, 0x60, 0xc4, 0xd8, 0x44, 0x5f, 0x66, 0xf2, 0xb2, 0x2e,
+	0xb0, 0xb0, 0xb8, 0xec, 0xc5, 0x6f, 0xa5, 0x19, 0xa1, 0xa3, 0x2b, 0x41, 0x29, 0x85, 0x3d, 0x7a,
+	0xb6, 0x08, 0x22, 0x89, 0x64, 0x64, 0xfb, 0xa1, 0xfd, 0xa4, 0x7d, 0xc0, 0xbe, 0x6f, 0x57, 0x8e,
+	0xb3, 0x75, 0xd0, 0x27, 0xfb, 0x1c, 0x1d, 0x9d, 0x7b, 0xee, 0xbd, 0x82, 0x71, 0xe5, 0x6c, 0x63,
+	0xd3, 0x79, 0xf7, 0xe1, 0xd1, 0x11, 0x4d, 0x6f, 0x21, 0xba, 0x72, 0x8d, 0xae, 0x1b, 0xce, 0x81,
+	0xdc, 0xe5, 0x07, 0x25, 0x82, 0x24, 0xb8, 0x18, 0x49, 0x62, 0xf0, 0x9f, 0xcf, 0x81, 0x48, 0xbb,
+	0x57, 0x62, 0x80, 0xdc, 0x24, 0xe5, 0xf3, 0xde, 0xe2, 0xc6, 0xd4, 0x8d, 0x6b, 0x0f, 0xca, 0x34,
+	0x59, 0xb4, 0x6a, 0x75, 0x93, 0x3b, 0x49, 0x1c, 0xea, 0xa6, 0xbf, 0x02, 0x20, 0x1b, 0x6b, 0xb6,
+	0x7c, 0xfa, 0xdc, 0x2c, 0x9b, 0xdc, 0x3f, 0x56, 0x2a, 0xd1, 0x26, 0xc9, 0x13, 0xcf, 0xf6, 0xe6,
+	0xef, 0x80, 0xde, 0xbb, 0xbc, 0xd8, 0x75, 0xee, 0x24, 0x0b, 0x16, 0x92, 0x36, 0x1e, 0xf3, 0xf7,
+	0xc0, 0x96, 0xad, 0xcb, 0x1b, 0x6d, 0x8d, 0x08, 0xf1, 0x2c, 0xc8, 0xc2, 0xcb, 0xf9, 0xa5, 0x64,
+	0x65, 0x4f, 0xf2, 0x19, 0xb0, 0x6b, 0x7b, 0xa8, 0x6c, 0xad, 0x9c, 0x20, 0x49, 0x78, 0x71, 0x96,
+	0x4e, 0x4e, 0xd1, 0x8e, 0xcd, 0x48, 0x56, 0xf4, 0xe7, 0x5c, 0x00, 0x59, 0x59, 0x5b, 0x0a, 0x8a,
+	0x46, 0x2c, 0x23, 0x98, 0x1b, 0xeb, 0x6f, 0x91, 0x99, 0xfe, 0x1e, 0x00, 0xbd, 0xda, 0xff, 0x6c,
+	0x0f, 0x2f, 0xb6, 0x9e, 0x1c, 0x3b, 0xc1, 0x70, 0xde, 0x7f, 0x7c, 0xf2, 0xf7, 0x9c, 0x24, 0xb5,
+	0xef, 0xf1, 0x23, 0xd0, 0x95, 0x32, 0x4e, 0x75, 0x19, 0x27, 0xe9, 0xeb, 0x93, 0xa4, 0x23, 0x33,
+	0x1c, 0x5c, 0xb1, 0x93, 0x74, 0xeb, 0x81, 0x0f, 0xf1, 0x43, 0xe5, 0x3e, 0xac, 0x1f, 0x07, 0x49,
+	0x3f, 0x2f, 0xbe, 0x48, 0xf2, 0x88, 0x0c, 0x3f, 0x07, 0xb6, 0x76, 0xb6, 0x6c, 0x0b, 0x6c, 0x85,
+	0x62, 0xa9, 0x91, 0x64, 0x55, 0x8f, 0x31, 0x02, 0xfb, 0xae, 0x4a, 0x6d, 0x0b, 0xac, 0x11, 0x3d,
+	0x8b, 0xcf, 0x0e, 0x3d, 0xcb, 0xdf, 0x00, 0x95, 0x79, 0xa3, 0x4a, 0x31, 0xf4, 0xc7, 0x92, 0x3a,
+	0x0f, 0xbc, 0xe7, 0xd7, 0x4a, 0xef, 0xed, 0xb6, 0x55, 0x82, 0x75, 0x2d, 0x31, 0xd5, 0x63, 0x7f,
+	0xe3, 0x56, 0xef, 0x54, 0x2d, 0x46, 0x58, 0x0c, 0x6f, 0xec, 0x3d, 0xf0, 0xec, 0x06, 0xb7, 0x58,
+	0x0b, 0x40, 0x79, 0x28, 0x69, 0xed, 0x01, 0x7f, 0x0b, 0xd1, 0x46, 0x39, 0x9d, 0xef, 0xc5, 0x19,
+	0x8a, 0x03, 0x19, 0xd5, 0x1d, 0x9a, 0x7d, 0x02, 0xf8, 0xf7, 0x02, 0xf8, 0x08, 0xe8, 0x83, 0xd5,
+	0x85, 0x8a, 0x5f, 0x71, 0x80, 0xfe, 0x39, 0xc4, 0x01, 0x67, 0x40, 0x96, 0xa8, 0x88, 0x07, 0xb3,
+	0x87, 0x7e, 0x4e, 0x7c, 0x08, 0xe1, 0xda, 0x56, 0xa8, 0x63, 0xd0, 0x4d, 0xe7, 0xa8, 0xfa, 0x96,
+	0x3f, 0x3d, 0xc5, 0x03, 0x1e, 0xc3, 0xf8, 0x4e, 0x9b, 0x46, 0x99, 0xd2, 0x5e, 0x5b, 0xa7, 0xe2,
+	0xd0, 0x1b, 0xdf, 0x98, 0x52, 0xab, 0x98, 0x78, 0xd9, 0xba, 0x35, 0xbb, 0x98, 0x7a, 0x72, 0x99,
+	0x1b, 0xac, 0x16, 0xa5, 0x0b, 0x88, 0xd6, 0xdd, 0xc4, 0xf9, 0x07, 0x18, 0xf6, 0x43, 0xe4, 0x7f,
+	0xb7, 0xd0, 0x6d, 0xf6, 0xfc, 0x7f, 0xf8, 0x27, 0x00, 0x00, 0xff, 0xff, 0x3b, 0x22, 0x00, 0xe2,
+	0x04, 0x03, 0x00, 0x00,
 }

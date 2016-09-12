@@ -3,12 +3,12 @@
 // DO NOT EDIT!
 
 /*
-Package testimport is a generated protocol buffer package.
+	Package testimport is a generated protocol buffer package.
 
-It is generated from these files:
-	import.proto
+	It is generated from these files:
+		import.proto
 
-It has these top-level messages:
+	It has these top-level messages:
 */
 package testimport
 
@@ -49,6 +49,20 @@ func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]by
 	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+func Handler(conn *google_golang_org_grpc.ClientConn, stringer func(req, resp interface{}) ([]byte, error)) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	OtherLabelClient := NewOtherLabelClient(conn)
+	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient, stringer)
+	muxhandler.HandleFunc("/OtherLabel/Produce", OtherLabelServer.Produce)
+	return muxhandler
+}
+func DefaultHandler(conn *google_golang_org_grpc.ClientConn) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	OtherLabelClient := NewOtherLabelClient(conn)
+	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient, DefaultHtmlStringer)
+	muxhandler.HandleFunc("/OtherLabel/Produce", OtherLabelServer.Produce)
+	return muxhandler
 }
 
 type htmlOtherLabel struct {

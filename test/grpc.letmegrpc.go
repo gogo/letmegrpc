@@ -3,16 +3,16 @@
 // DO NOT EDIT!
 
 /*
-Package grpc is a generated protocol buffer package.
+	Package grpc is a generated protocol buffer package.
 
-It is generated from these files:
-	grpc.proto
+	It is generated from these files:
+		grpc.proto
 
-It has these top-level messages:
-	MyRequest
-	MyResponse
-	MyMsg
-	MyMsg2
+	It has these top-level messages:
+		MyRequest
+		MyResponse
+		MyMsg
+		MyMsg2
 */
 package grpc
 
@@ -55,6 +55,26 @@ func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]by
 	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+func Handler(conn *google_golang_org_grpc.ClientConn, stringer func(req, resp interface{}) ([]byte, error)) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	MyTestClient := NewMyTestClient(conn)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient, stringer)
+	muxhandler.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
+	muxhandler.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
+	muxhandler.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
+	muxhandler.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
+	return muxhandler
+}
+func DefaultHandler(conn *google_golang_org_grpc.ClientConn) net_http.Handler {
+	muxhandler := net_http.NewServeMux()
+	MyTestClient := NewMyTestClient(conn)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient, DefaultHtmlStringer)
+	muxhandler.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
+	muxhandler.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
+	muxhandler.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
+	muxhandler.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
+	return muxhandler
 }
 
 type htmlMyTest struct {

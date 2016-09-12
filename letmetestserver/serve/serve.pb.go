@@ -31,6 +31,10 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+const _ = proto.GoGoProtoPackageIsVersion1
+
 type Instrument int32
 
 const (
@@ -53,6 +57,7 @@ var Instrument_value = map[string]int32{
 func (x Instrument) String() string {
 	return proto.EnumName(Instrument_name, int32(x))
 }
+func (Instrument) EnumDescriptor() ([]byte, []int) { return fileDescriptorServe, []int{0} }
 
 type Genre int32
 
@@ -88,28 +93,31 @@ var Genre_value = map[string]int32{
 func (x Genre) String() string {
 	return proto.EnumName(Genre_name, int32(x))
 }
+func (Genre) EnumDescriptor() ([]byte, []int) { return fileDescriptorServe, []int{1} }
 
 type Artist struct {
 	// Pick something original
-	Name string     `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
-	Role Instrument `protobuf:"varint,2,opt,name=Role,proto3,enum=serve.Instrument" json:"Role,omitempty"`
+	Name string     `protobuf:"bytes,1,opt,name=Name,json=name,proto3" json:"Name,omitempty"`
+	Role Instrument `protobuf:"varint,2,opt,name=Role,json=role,proto3,enum=serve.Instrument" json:"Role,omitempty"`
 }
 
-func (m *Artist) Reset()         { *m = Artist{} }
-func (m *Artist) String() string { return proto.CompactTextString(m) }
-func (*Artist) ProtoMessage()    {}
+func (m *Artist) Reset()                    { *m = Artist{} }
+func (m *Artist) String() string            { return proto.CompactTextString(m) }
+func (*Artist) ProtoMessage()               {}
+func (*Artist) Descriptor() ([]byte, []int) { return fileDescriptorServe, []int{0} }
 
 type Song struct {
-	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=Name,json=name,proto3" json:"Name,omitempty"`
 	// 1,2,3,4...
-	Track    uint64    `protobuf:"varint,2,opt,name=Track,proto3" json:"Track,omitempty"`
-	Duration float64   `protobuf:"fixed64,3,opt,name=Duration,proto3" json:"Duration,omitempty"`
-	Composer []*Artist `protobuf:"bytes,4,rep,name=Composer" json:"Composer,omitempty"`
+	Track    uint64    `protobuf:"varint,2,opt,name=Track,json=track,proto3" json:"Track,omitempty"`
+	Duration float64   `protobuf:"fixed64,3,opt,name=Duration,json=duration,proto3" json:"Duration,omitempty"`
+	Composer []*Artist `protobuf:"bytes,4,rep,name=Composer,json=composer" json:"Composer,omitempty"`
 }
 
-func (m *Song) Reset()         { *m = Song{} }
-func (m *Song) String() string { return proto.CompactTextString(m) }
-func (*Song) ProtoMessage()    {}
+func (m *Song) Reset()                    { *m = Song{} }
+func (m *Song) String() string            { return proto.CompactTextString(m) }
+func (*Song) ProtoMessage()               {}
+func (*Song) Descriptor() ([]byte, []int) { return fileDescriptorServe, []int{1} }
 
 func (m *Song) GetComposer() []*Artist {
 	if m != nil {
@@ -120,22 +128,23 @@ func (m *Song) GetComposer() []*Artist {
 
 type Album struct {
 	// Untitled?
-	Name  string  `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
-	Song  []*Song `protobuf:"bytes,2,rep,name=Song" json:"Song,omitempty"`
-	Genre Genre   `protobuf:"varint,3,opt,name=Genre,proto3,enum=serve.Genre" json:"Genre,omitempty"`
+	Name  string  `protobuf:"bytes,1,opt,name=Name,json=name,proto3" json:"Name,omitempty"`
+	Song  []*Song `protobuf:"bytes,2,rep,name=Song,json=song" json:"Song,omitempty"`
+	Genre Genre   `protobuf:"varint,3,opt,name=Genre,json=genre,proto3,enum=serve.Genre" json:"Genre,omitempty"`
 	// 2015
-	Year string `protobuf:"bytes,4,opt,name=Year,proto3" json:"Year,omitempty"`
+	Year string `protobuf:"bytes,4,opt,name=Year,json=year,proto3" json:"Year,omitempty"`
 	// Uhm ja
-	Producer []string `protobuf:"bytes,5,rep,name=Producer" json:"Producer,omitempty"`
-	Mediocre bool     `protobuf:"varint,6,opt,name=Mediocre,proto3" json:"Mediocre,omitempty"`
-	Rated    bool     `protobuf:"varint,7,opt,name=Rated,proto3" json:"Rated,omitempty"`
-	Epilogue string   `protobuf:"bytes,8,opt,name=Epilogue,proto3" json:"Epilogue,omitempty"`
-	Likes    []bool   `protobuf:"varint,9,rep,name=Likes" json:"Likes,omitempty"`
+	Producer []string `protobuf:"bytes,5,rep,name=Producer,json=producer" json:"Producer,omitempty"`
+	Mediocre bool     `protobuf:"varint,6,opt,name=Mediocre,json=mediocre,proto3" json:"Mediocre,omitempty"`
+	Rated    bool     `protobuf:"varint,7,opt,name=Rated,json=rated,proto3" json:"Rated,omitempty"`
+	Epilogue string   `protobuf:"bytes,8,opt,name=Epilogue,json=epilogue,proto3" json:"Epilogue,omitempty"`
+	Likes    []bool   `protobuf:"varint,9,rep,name=Likes,json=likes" json:"Likes,omitempty"`
 }
 
-func (m *Album) Reset()         { *m = Album{} }
-func (m *Album) String() string { return proto.CompactTextString(m) }
-func (*Album) ProtoMessage()    {}
+func (m *Album) Reset()                    { *m = Album{} }
+func (m *Album) String() string            { return proto.CompactTextString(m) }
+func (*Album) ProtoMessage()               {}
+func (*Album) Descriptor() ([]byte, []int) { return fileDescriptorServe, []int{2} }
 
 func (m *Album) GetSong() []*Song {
 	if m != nil {
@@ -145,12 +154,13 @@ func (m *Album) GetSong() []*Song {
 }
 
 type EndLess struct {
-	Tree *Tree `protobuf:"bytes,1,opt,name=Tree" json:"Tree,omitempty"`
+	Tree *Tree `protobuf:"bytes,1,opt,name=Tree,json=tree" json:"Tree,omitempty"`
 }
 
-func (m *EndLess) Reset()         { *m = EndLess{} }
-func (m *EndLess) String() string { return proto.CompactTextString(m) }
-func (*EndLess) ProtoMessage()    {}
+func (m *EndLess) Reset()                    { *m = EndLess{} }
+func (m *EndLess) String() string            { return proto.CompactTextString(m) }
+func (*EndLess) ProtoMessage()               {}
+func (*EndLess) Descriptor() ([]byte, []int) { return fileDescriptorServe, []int{3} }
 
 func (m *EndLess) GetTree() *Tree {
 	if m != nil {
@@ -160,14 +170,15 @@ func (m *EndLess) GetTree() *Tree {
 }
 
 type Tree struct {
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
-	Left  *Tree  `protobuf:"bytes,2,opt,name=Left" json:"Left,omitempty"`
-	Right *Tree  `protobuf:"bytes,3,opt,name=Right" json:"Right,omitempty"`
+	Value string `protobuf:"bytes,1,opt,name=Value,json=value,proto3" json:"Value,omitempty"`
+	Left  *Tree  `protobuf:"bytes,2,opt,name=Left,json=left" json:"Left,omitempty"`
+	Right *Tree  `protobuf:"bytes,3,opt,name=Right,json=right" json:"Right,omitempty"`
 }
 
-func (m *Tree) Reset()         { *m = Tree{} }
-func (m *Tree) String() string { return proto.CompactTextString(m) }
-func (*Tree) ProtoMessage()    {}
+func (m *Tree) Reset()                    { *m = Tree{} }
+func (m *Tree) String() string            { return proto.CompactTextString(m) }
+func (*Tree) ProtoMessage()               {}
+func (*Tree) Descriptor() ([]byte, []int) { return fileDescriptorServe, []int{4} }
 
 func (m *Tree) GetLeft() *Tree {
 	if m != nil {
@@ -196,6 +207,10 @@ func init() {
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion2
 
 // Client API for Label service
 
@@ -241,28 +256,40 @@ func RegisterLabelServer(s *grpc.Server, srv LabelServer) {
 	s.RegisterService(&_Label_serviceDesc, srv)
 }
 
-func _Label_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _Label_Produce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Album)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(LabelServer).Produce(ctx, in)
-	if err != nil {
-		return nil, err
+	if interceptor == nil {
+		return srv.(LabelServer).Produce(ctx, in)
 	}
-	return out, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/serve.Label/Produce",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LabelServer).Produce(ctx, req.(*Album))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-func _Label_Loop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+func _Label_Loop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EndLess)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(LabelServer).Loop(ctx, in)
-	if err != nil {
-		return nil, err
+	if interceptor == nil {
+		return srv.(LabelServer).Loop(ctx, in)
 	}
-	return out, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/serve.Label/Loop",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LabelServer).Loop(ctx, req.(*EndLess))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 var _Label_serviceDesc = grpc.ServiceDesc{
@@ -279,4 +306,40 @@ var _Label_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{},
+}
+
+var fileDescriptorServe = []byte{
+	// 497 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x6c, 0x53, 0x5d, 0x6b, 0xdb, 0x30,
+	0x14, 0x5d, 0x12, 0x2b, 0x51, 0x94, 0x2e, 0x78, 0x62, 0x0f, 0x26, 0x2f, 0xeb, 0x0c, 0x1b, 0x5d,
+	0x60, 0x7d, 0xc8, 0x7e, 0x41, 0x49, 0x4a, 0xe9, 0xc8, 0x4a, 0xd0, 0x4a, 0x61, 0x6f, 0x73, 0xec,
+	0xbb, 0xcc, 0xc4, 0x91, 0x8c, 0x2c, 0x77, 0xac, 0xbf, 0x7b, 0x3f, 0x60, 0xf7, 0xca, 0x2a, 0xa5,
+	0xa1, 0x2f, 0x89, 0xce, 0xfd, 0x38, 0xe7, 0xe8, 0xea, 0x5a, 0x4c, 0x1a, 0xb0, 0xf7, 0x70, 0x5e,
+	0x5b, 0xe3, 0x8c, 0x64, 0x1e, 0xa4, 0x4b, 0x31, 0xbc, 0xb0, 0xae, 0x6c, 0x9c, 0x94, 0x22, 0xba,
+	0xc9, 0x0e, 0x90, 0xf4, 0x4e, 0x7b, 0x67, 0x63, 0x15, 0x69, 0x3c, 0xcb, 0x0f, 0x22, 0x52, 0xa6,
+	0x82, 0xa4, 0x8f, 0xb1, 0xe9, 0xe2, 0xcd, 0x79, 0x47, 0x70, 0xad, 0x1b, 0x67, 0xdb, 0x03, 0x68,
+	0xa7, 0x22, 0x8b, 0xe9, 0xf4, 0x8f, 0x88, 0xbe, 0x1b, 0xbd, 0x7b, 0x91, 0xe2, 0xad, 0x60, 0xb7,
+	0x36, 0xcb, 0xf7, 0x9e, 0x23, 0x52, 0xcc, 0x11, 0x90, 0x33, 0xc1, 0x57, 0xad, 0xcd, 0x5c, 0x69,
+	0x74, 0x32, 0xc0, 0x44, 0x4f, 0xf1, 0x22, 0x60, 0xf9, 0x49, 0xf0, 0xa5, 0x39, 0xd4, 0x06, 0xc5,
+	0x92, 0xe8, 0x74, 0x70, 0x36, 0x59, 0xbc, 0x0e, 0xc2, 0x9d, 0x53, 0xc5, 0xf3, 0x90, 0x4e, 0xff,
+	0xf5, 0x04, 0xbb, 0xa8, 0xb6, 0xed, 0xe1, 0x45, 0xe9, 0x77, 0x9d, 0x2d, 0x54, 0x26, 0x92, 0x49,
+	0x20, 0xa1, 0x90, 0x8a, 0x1a, 0xf2, 0x9b, 0x0a, 0x76, 0x05, 0xda, 0x82, 0xb7, 0x30, 0x5d, 0x9c,
+	0x84, 0x0a, 0x1f, 0x53, 0x6c, 0x47, 0x7f, 0x44, 0xfc, 0x03, 0x32, 0x72, 0xe2, 0x89, 0xff, 0xe2,
+	0x99, 0xdc, 0x6f, 0xac, 0x29, 0xda, 0x1c, 0x1d, 0x32, 0x24, 0x1f, 0x2b, 0x5e, 0x07, 0x4c, 0xb9,
+	0x6f, 0x50, 0x94, 0x26, 0x47, 0xda, 0x21, 0xf6, 0x70, 0xc5, 0x0f, 0x01, 0xd3, 0x2c, 0x54, 0xe6,
+	0xa0, 0x48, 0x46, 0x3e, 0xc1, 0x2c, 0x01, 0xea, 0xb8, 0xac, 0xcb, 0xca, 0xec, 0x5a, 0x48, 0xb8,
+	0x57, 0xe1, 0x10, 0x30, 0x75, 0xac, 0xcb, 0x3d, 0x34, 0xc9, 0x18, 0x65, 0xb0, 0xa3, 0x22, 0x90,
+	0xce, 0xc5, 0xe8, 0x52, 0x17, 0x6b, 0x68, 0x1a, 0xba, 0xe3, 0xad, 0x85, 0xee, 0xde, 0x4f, 0x77,
+	0xa4, 0x90, 0x8a, 0x1c, 0xfe, 0xa6, 0x3f, 0xbb, 0x02, 0x62, 0xba, 0xcb, 0xaa, 0xf6, 0x71, 0x42,
+	0xec, 0x9e, 0x00, 0xb5, 0xaf, 0xe1, 0x97, 0xf3, 0x8f, 0x73, 0xdc, 0x5e, 0x61, 0x42, 0xbe, 0x47,
+	0xcb, 0xe5, 0xee, 0xb7, 0xf3, 0x23, 0x3a, 0xaa, 0x60, 0x96, 0x32, 0xf3, 0xcf, 0x42, 0x3c, 0x6d,
+	0x84, 0x1c, 0xa3, 0x8e, 0x29, 0x73, 0x88, 0x5f, 0x49, 0x21, 0x86, 0x57, 0x6d, 0xe9, 0x32, 0x1b,
+	0xf7, 0x24, 0x17, 0xd1, 0x0a, 0x2b, 0xe2, 0xfe, 0xfc, 0x2e, 0x0c, 0x5d, 0x8e, 0xc4, 0x60, 0x63,
+	0x6a, 0xac, 0xe3, 0xb4, 0x65, 0xf9, 0xbe, 0xab, 0xfa, 0x9a, 0x3d, 0x3c, 0xc4, 0x7d, 0x19, 0x8b,
+	0x93, 0x9b, 0x52, 0x3b, 0xd0, 0x85, 0x59, 0x1a, 0x0b, 0xf1, 0x80, 0x88, 0xaf, 0x75, 0x51, 0x42,
+	0x1c, 0x51, 0xd9, 0xa6, 0xd5, 0xfb, 0x98, 0x51, 0x70, 0x95, 0x69, 0x54, 0x1b, 0x2e, 0x90, 0x77,
+	0x9d, 0x6d, 0xa1, 0xc2, 0xa5, 0x1d, 0x85, 0xd7, 0x91, 0x8f, 0x2f, 0xea, 0x77, 0x64, 0xf6, 0x0c,
+	0xc9, 0x8f, 0x78, 0x75, 0x63, 0x6a, 0x39, 0x0d, 0xd1, 0x30, 0xd1, 0xd9, 0x11, 0xde, 0x0e, 0xfd,
+	0xf7, 0xf2, 0xe5, 0x7f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x70, 0xe9, 0x55, 0x35, 0x3e, 0x03, 0x00,
+	0x00,
 }
