@@ -102,7 +102,10 @@ import tmpprotos "tmpprotos"
 import "google.golang.org/grpc"
 
 func main() {
-	tmpprotos.Serve("` + *httpAddr + `", "` + *grpcAddr + `", tmpprotos.DefaultHtmlStringer, grpc.WithInsecure())
+	tmpprotos.Serve("` + *httpAddr + `", "` + *grpcAddr + `",
+		tmpprotos.DefaultHtmlStringer,
+		grpc.WithInsecure(), grpc.WithDecompressor(grpc.NewGZIPDecompressor()),
+	)
 }
 `
 	if err := ioutil.WriteFile(filepath.Join(cmdDir, "/main.go"), []byte(mainStr), 0777); err != nil {
