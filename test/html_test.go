@@ -34,6 +34,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -100,9 +101,14 @@ func setup(t testing.TB, mytest MyTestServer) (*grpc.Server, string) {
 func TestHTML(t *testing.T) {
 	server, grpcAddr := setup(t, &aServer{})
 	defer server.Stop()
-	go Serve("localhost:8080", grpcAddr, DefaultHtmlStringer, grpc.WithInsecure())
+	handler, err := NewHandler(grpcAddr, DefaultHtmlStringer, grpc.WithInsecure())
+	if err != nil {
+		t.Fatal(err)
+	}
+	httpServer := httptest.NewServer(handler)
+	defer httpServer.Close()
 	time.Sleep(1e9)
-	resp, err := http.Get("http://localhost:8080/MyTest/UnaryCall")
+	resp, err := http.Get(httpServer.URL + "/MyTest/UnaryCall")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,7 +129,7 @@ func TestHTML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp, err = http.Get(fmt.Sprintf("http://localhost:8080/MyTest/UnaryCall?json=%s", string(data)))
+	resp, err = http.Get(fmt.Sprintf(httpServer.URL+"/MyTest/UnaryCall?json=%s", string(data)))
 	if err != nil {
 		t.Fatal(err)
 	}

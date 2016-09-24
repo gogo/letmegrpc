@@ -41,16 +41,24 @@ var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
 }
 
 func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) {
-	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	handler, err := NewHandler(grpcAddr, stringer, opts...)
 	if err != nil {
-		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
+		log.Fatalf("NewHandler(%q) = %v", grpcAddr, err)
 	}
-	Proto2Client := NewProto2Client(conn)
-	Proto2Server := NewHTMLProto2Server(Proto2Client, stringer)
-	net_http.HandleFunc("/Proto2/Produce", Proto2Server.Produce)
-	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
+	if err := net_http.ListenAndServe(httpAddr, handler); err != nil {
 		log.Fatal(err)
 	}
+}
+func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) (net_http.Handler, error) {
+	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	mux := net_http.NewServeMux()
+	Proto2Client := NewProto2Client(conn)
+	Proto2Server := NewHTMLProto2Server(Proto2Client, stringer)
+	mux.HandleFunc("/Proto2/Produce", Proto2Server.Produce)
+	return mux, nil
 }
 
 type htmlProto2 struct {

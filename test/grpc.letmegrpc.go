@@ -42,19 +42,27 @@ var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
 }
 
 func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) {
-	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	handler, err := NewHandler(grpcAddr, stringer, opts...)
 	if err != nil {
-		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
+		log.Fatalf("NewHandler(%q) = %v", grpcAddr, err)
 	}
-	MyTestClient := NewMyTestClient(conn)
-	MyTestServer := NewHTMLMyTestServer(MyTestClient, stringer)
-	net_http.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
-	net_http.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
-	net_http.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
-	net_http.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
-	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
+	if err := net_http.ListenAndServe(httpAddr, handler); err != nil {
 		log.Fatal(err)
 	}
+}
+func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) (net_http.Handler, error) {
+	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	mux := net_http.NewServeMux()
+	MyTestClient := NewMyTestClient(conn)
+	MyTestServer := NewHTMLMyTestServer(MyTestClient, stringer)
+	mux.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
+	mux.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
+	mux.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
+	mux.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
+	return mux, nil
 }
 
 type htmlMyTest struct {

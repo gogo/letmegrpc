@@ -29,8 +29,8 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -62,17 +62,9 @@ func TestCreateCustom(t *testing.T) {
 	g.Reset()
 	g.SetFile(desc.File[0])
 	formStr = CreateCustom("WeirdMethod", "form", "Weird", g, CustomBuildField)
-	server := http.Server{
-		Addr:    "localhost:8080",
-		Handler: http.HandlerFunc(handle),
-	}
-	lis, err := net.Listen("tcp", "localhost:8080")
-	if err != nil {
-		t.Fatalf("Failed to listen: %v", err)
-	}
-	defer lis.Close()
-	go server.Serve(lis)
-	resp, err := http.Get("http://localhost:8080/WeirdMethod?json={%22Name%22:%22%22,%22WeirdName%22:%22another%20string%22,%22Number%22:null}")
+	testserver := httptest.NewServer(http.HandlerFunc(handle))
+	defer testserver.Close()
+	resp, err := http.Get(testserver.URL + "/WeirdMethod?json={%22Name%22:%22%22,%22WeirdName%22:%22another%20string%22,%22Number%22:null}")
 	if err != nil {
 		t.Fatal(err)
 	}

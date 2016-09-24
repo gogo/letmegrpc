@@ -39,16 +39,24 @@ var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {
 }
 
 func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) {
-	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	handler, err := NewHandler(grpcAddr, stringer, opts...)
 	if err != nil {
-		log.Fatalf("Dial(%q) = %v", grpcAddr, err)
+		log.Fatalf("NewHandler(%q) = %v", grpcAddr, err)
 	}
-	OtherLabelClient := NewOtherLabelClient(conn)
-	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient, stringer)
-	net_http.HandleFunc("/OtherLabel/Produce", OtherLabelServer.Produce)
-	if err := net_http.ListenAndServe(httpAddr, nil); err != nil {
+	if err := net_http.ListenAndServe(httpAddr, handler); err != nil {
 		log.Fatal(err)
 	}
+}
+func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...google_golang_org_grpc.DialOption) (net_http.Handler, error) {
+	conn, err := google_golang_org_grpc.Dial(grpcAddr, opts...)
+	if err != nil {
+		return nil, err
+	}
+	mux := net_http.NewServeMux()
+	OtherLabelClient := NewOtherLabelClient(conn)
+	OtherLabelServer := NewHTMLOtherLabelServer(OtherLabelClient, stringer)
+	mux.HandleFunc("/OtherLabel/Produce", OtherLabelServer.Produce)
+	return mux, nil
 }
 
 type htmlOtherLabel struct {
