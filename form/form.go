@@ -164,7 +164,24 @@ function replaceAll(str, search, replace) {
 }
 
 function escapeIllegal(str) {
-	return replaceAll(replaceAll(replaceAll(str, "%", "%25"), "&", "%26"), "#", "%23");
+	var escstr = encodeURIComponent (str);
+	escstr = replaceAll(escstr, "%2C", ",");
+	escstr = replaceAll(escstr, "%7B", "{");
+	escstr = replaceAll(escstr, "%7D", "}");	
+	escstr = replaceAll(escstr, "%21", "!");
+	escstr = replaceAll(escstr, "%24", "$");
+	escstr = replaceAll(escstr, "%28", "(");
+	escstr = replaceAll(escstr, "%29", ")");
+	escstr = replaceAll(escstr, "%2A", "*");
+	escstr = replaceAll(escstr, "%2B", "+");
+	escstr = replaceAll(escstr, "%2C", ",");
+	escstr = replaceAll(escstr, "%2F", "/");
+	escstr = replaceAll(escstr, "%3A", ":");
+	escstr = replaceAll(escstr, "%3F", "?");
+	escstr = replaceAll(escstr, "%40", "@");
+	escstr = replaceAll(escstr, "%5B", "[");
+	escstr = replaceAll(escstr, "%5D", "]");
+	return escstr
 }
 
 function getFields(node) {
