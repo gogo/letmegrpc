@@ -154,7 +154,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		p.P(origServName, `Client := New`, servName, `Client(conn)`)
 		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, stringer)`)
 		for _, m := range s.GetMethod() {
-			p.P(`mux.HandleFunc("/`, servName, `/`, m.GetName(), `", `, origServName, `Server.`, m.GetName(), `)`)
+			p.P(`mux.HandleFunc("/`, servName, `/`, generator.CamelCase(m.GetName()), `", `, origServName, `Server.`, generator.CamelCase(m.GetName()), `)`)
 		}
 	}
 	p.P(`return mux, nil`)
@@ -180,9 +180,9 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 		for _, m := range s.GetMethod() {
 			p.generateFormFunc(servName, m)
 			p.P(``)
-			p.P(`func (this *html`, servName, `) `, m.GetName(), `(w `, httpPkg.Use(), `.ResponseWriter, req *`, httpPkg.Use(), `.Request) {`)
+			p.P(`func (this *html`, servName, `) `, generator.CamelCase(m.GetName()), `(w `, httpPkg.Use(), `.ResponseWriter, req *`, httpPkg.Use(), `.Request) {`)
 			p.In()
-			p.P("w.Write([]byte(Header(`", servName, "`,`", m.GetName(), "`)))")
+			p.P("w.Write([]byte(Header(`", servName, "`,`", generator.CamelCase(m.GetName()), "`)))")
 			p.P(`jsonString := req.FormValue("json")`)
 			p.P(`someValue := false`)
 			p.RecordTypeUse(m.GetInputType())
@@ -194,18 +194,18 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`someValue = true`)
 			p.Out()
 			p.P(`}`)
-			p.P(`w.Write([]byte(Form`, servName, `_`, m.GetName(), `))`)
+			p.P(`w.Write([]byte(Form`, servName, `_`, generator.CamelCase(m.GetName()), `))`)
 			p.P(`if someValue {`)
 			p.In()
 			if !m.GetClientStreaming() {
 				if !m.GetServerStreaming() {
-					p.P(`reply, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
+					p.P(`reply, err := this.client.`, generator.CamelCase(m.GetName()), `(`, contextPkg.Use(), `.Background(), msg)`)
 					p.writeError(errString)
 					p.P(`out, err := this.stringer(msg, reply)`)
 					p.writeError(errString)
 					p.P(`w.Write(out)`)
 				} else {
-					p.P(`down, err := this.client.`, m.GetName(), `(`, contextPkg.Use(), `.Background(), msg)`)
+					p.P(`down, err := this.client.`, generator.CamelCase(m.GetName()), `(`, contextPkg.Use(), `.Background(), msg)`)
 					p.writeError(errString)
 					p.P(`for {`)
 					p.In()
