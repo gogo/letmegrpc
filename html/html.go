@@ -26,8 +26,6 @@
 package html
 
 import (
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gogo/letmegrpc/form"
@@ -80,7 +78,6 @@ func (p *html) writeError(eof string) {
 func split(method *descriptor.MethodDescriptorProto) (pkgName, msgName string) {
 	inputs := strings.Split(method.GetInputType(), ".")
 	packageName := strings.Join(inputs[1:len(inputs)-1], ".")
-	fmt.Fprintf(os.Stderr, "method <%s> packageName = %s\n", method.GetInputType(), packageName)
 	messageName := inputs[len(inputs)-1]
 	return packageName, messageName
 }
