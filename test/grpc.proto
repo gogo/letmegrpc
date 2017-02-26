@@ -25,7 +25,7 @@
 
 syntax = "proto3";
 
-package grpc;
+package com.grpc;
 
 message MyRequest {
 	int64 Value = 1;

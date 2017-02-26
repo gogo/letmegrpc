@@ -3,7 +3,7 @@
 // DO NOT EDIT!
 
 /*
-Package grpc is a generated protocol buffer package.
+Package com_grpc is a generated protocol buffer package.
 
 It is generated from these files:
 	grpc.proto
@@ -14,7 +14,7 @@ It has these top-level messages:
 	MyMsg
 	MyMsg2
 */
-package grpc
+package com_grpc
 
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
@@ -22,7 +22,7 @@ import math "math"
 
 import (
 	context "golang.org/x/net/context"
-	grpc1 "google.golang.org/grpc"
+	grpc "google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -109,51 +109,51 @@ func (m *MyMsg2) GetValue() int64 {
 }
 
 func init() {
-	proto.RegisterType((*MyRequest)(nil), "grpc.MyRequest")
-	proto.RegisterType((*MyResponse)(nil), "grpc.MyResponse")
-	proto.RegisterType((*MyMsg)(nil), "grpc.MyMsg")
-	proto.RegisterType((*MyMsg2)(nil), "grpc.MyMsg2")
+	proto.RegisterType((*MyRequest)(nil), "com.grpc.MyRequest")
+	proto.RegisterType((*MyResponse)(nil), "com.grpc.MyResponse")
+	proto.RegisterType((*MyMsg)(nil), "com.grpc.MyMsg")
+	proto.RegisterType((*MyMsg2)(nil), "com.grpc.MyMsg2")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc1.ClientConn
+var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc1.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for MyTest service
 
 type MyTestClient interface {
-	UnaryCall(ctx context.Context, in *MyRequest, opts ...grpc1.CallOption) (*MyResponse, error)
+	UnaryCall(ctx context.Context, in *MyRequest, opts ...grpc.CallOption) (*MyResponse, error)
 	// This RPC streams from the server only.
-	Downstream(ctx context.Context, in *MyRequest, opts ...grpc1.CallOption) (MyTest_DownstreamClient, error)
+	Downstream(ctx context.Context, in *MyRequest, opts ...grpc.CallOption) (MyTest_DownstreamClient, error)
 	// This RPC streams from the client.
-	Upstream(ctx context.Context, opts ...grpc1.CallOption) (MyTest_UpstreamClient, error)
+	Upstream(ctx context.Context, opts ...grpc.CallOption) (MyTest_UpstreamClient, error)
 	// This one streams in both directions.
-	Bidi(ctx context.Context, opts ...grpc1.CallOption) (MyTest_BidiClient, error)
+	Bidi(ctx context.Context, opts ...grpc.CallOption) (MyTest_BidiClient, error)
 }
 
 type myTestClient struct {
-	cc *grpc1.ClientConn
+	cc *grpc.ClientConn
 }
 
-func NewMyTestClient(cc *grpc1.ClientConn) MyTestClient {
+func NewMyTestClient(cc *grpc.ClientConn) MyTestClient {
 	return &myTestClient{cc}
 }
 
-func (c *myTestClient) UnaryCall(ctx context.Context, in *MyRequest, opts ...grpc1.CallOption) (*MyResponse, error) {
+func (c *myTestClient) UnaryCall(ctx context.Context, in *MyRequest, opts ...grpc.CallOption) (*MyResponse, error) {
 	out := new(MyResponse)
-	err := grpc1.Invoke(ctx, "/grpc.MyTest/UnaryCall", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/com.grpc.MyTest/UnaryCall", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *myTestClient) Downstream(ctx context.Context, in *MyRequest, opts ...grpc1.CallOption) (MyTest_DownstreamClient, error) {
-	stream, err := grpc1.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[0], c.cc, "/grpc.MyTest/Downstream", opts...)
+func (c *myTestClient) Downstream(ctx context.Context, in *MyRequest, opts ...grpc.CallOption) (MyTest_DownstreamClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[0], c.cc, "/com.grpc.MyTest/Downstream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -169,11 +169,11 @@ func (c *myTestClient) Downstream(ctx context.Context, in *MyRequest, opts ...gr
 
 type MyTest_DownstreamClient interface {
 	Recv() (*MyMsg, error)
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 type myTestDownstreamClient struct {
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 func (x *myTestDownstreamClient) Recv() (*MyMsg, error) {
@@ -184,8 +184,8 @@ func (x *myTestDownstreamClient) Recv() (*MyMsg, error) {
 	return m, nil
 }
 
-func (c *myTestClient) Upstream(ctx context.Context, opts ...grpc1.CallOption) (MyTest_UpstreamClient, error) {
-	stream, err := grpc1.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[1], c.cc, "/grpc.MyTest/Upstream", opts...)
+func (c *myTestClient) Upstream(ctx context.Context, opts ...grpc.CallOption) (MyTest_UpstreamClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[1], c.cc, "/com.grpc.MyTest/Upstream", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,11 +196,11 @@ func (c *myTestClient) Upstream(ctx context.Context, opts ...grpc1.CallOption) (
 type MyTest_UpstreamClient interface {
 	Send(*MyMsg) error
 	CloseAndRecv() (*MyResponse, error)
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 type myTestUpstreamClient struct {
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 func (x *myTestUpstreamClient) Send(m *MyMsg) error {
@@ -218,8 +218,8 @@ func (x *myTestUpstreamClient) CloseAndRecv() (*MyResponse, error) {
 	return m, nil
 }
 
-func (c *myTestClient) Bidi(ctx context.Context, opts ...grpc1.CallOption) (MyTest_BidiClient, error) {
-	stream, err := grpc1.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[2], c.cc, "/grpc.MyTest/Bidi", opts...)
+func (c *myTestClient) Bidi(ctx context.Context, opts ...grpc.CallOption) (MyTest_BidiClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_MyTest_serviceDesc.Streams[2], c.cc, "/com.grpc.MyTest/Bidi", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -230,11 +230,11 @@ func (c *myTestClient) Bidi(ctx context.Context, opts ...grpc1.CallOption) (MyTe
 type MyTest_BidiClient interface {
 	Send(*MyMsg) error
 	Recv() (*MyMsg2, error)
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 type myTestBidiClient struct {
-	grpc1.ClientStream
+	grpc.ClientStream
 }
 
 func (x *myTestBidiClient) Send(m *MyMsg) error {
@@ -261,11 +261,11 @@ type MyTestServer interface {
 	Bidi(MyTest_BidiServer) error
 }
 
-func RegisterMyTestServer(s *grpc1.Server, srv MyTestServer) {
+func RegisterMyTestServer(s *grpc.Server, srv MyTestServer) {
 	s.RegisterService(&_MyTest_serviceDesc, srv)
 }
 
-func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc1.UnaryServerInterceptor) (interface{}, error) {
+func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -273,9 +273,9 @@ func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, dec func(in
 	if interceptor == nil {
 		return srv.(MyTestServer).UnaryCall(ctx, in)
 	}
-	info := &grpc1.UnaryServerInfo{
+	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.MyTest/UnaryCall",
+		FullMethod: "/com.grpc.MyTest/UnaryCall",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MyTestServer).UnaryCall(ctx, req.(*MyRequest))
@@ -283,7 +283,7 @@ func _MyTest_UnaryCall_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MyTest_Downstream_Handler(srv interface{}, stream grpc1.ServerStream) error {
+func _MyTest_Downstream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(MyRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
@@ -293,29 +293,29 @@ func _MyTest_Downstream_Handler(srv interface{}, stream grpc1.ServerStream) erro
 
 type MyTest_DownstreamServer interface {
 	Send(*MyMsg) error
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 type myTestDownstreamServer struct {
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 func (x *myTestDownstreamServer) Send(m *MyMsg) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _MyTest_Upstream_Handler(srv interface{}, stream grpc1.ServerStream) error {
+func _MyTest_Upstream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(MyTestServer).Upstream(&myTestUpstreamServer{stream})
 }
 
 type MyTest_UpstreamServer interface {
 	SendAndClose(*MyResponse) error
 	Recv() (*MyMsg, error)
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 type myTestUpstreamServer struct {
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 func (x *myTestUpstreamServer) SendAndClose(m *MyResponse) error {
@@ -330,18 +330,18 @@ func (x *myTestUpstreamServer) Recv() (*MyMsg, error) {
 	return m, nil
 }
 
-func _MyTest_Bidi_Handler(srv interface{}, stream grpc1.ServerStream) error {
+func _MyTest_Bidi_Handler(srv interface{}, stream grpc.ServerStream) error {
 	return srv.(MyTestServer).Bidi(&myTestBidiServer{stream})
 }
 
 type MyTest_BidiServer interface {
 	Send(*MyMsg2) error
 	Recv() (*MyMsg, error)
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 type myTestBidiServer struct {
-	grpc1.ServerStream
+	grpc.ServerStream
 }
 
 func (x *myTestBidiServer) Send(m *MyMsg2) error {
@@ -356,16 +356,16 @@ func (x *myTestBidiServer) Recv() (*MyMsg, error) {
 	return m, nil
 }
 
-var _MyTest_serviceDesc = grpc1.ServiceDesc{
-	ServiceName: "grpc.MyTest",
+var _MyTest_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "com.grpc.MyTest",
 	HandlerType: (*MyTestServer)(nil),
-	Methods: []grpc1.MethodDesc{
+	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "UnaryCall",
 			Handler:    _MyTest_UnaryCall_Handler,
 		},
 	},
-	Streams: []grpc1.StreamDesc{
+	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Downstream",
 			Handler:       _MyTest_Downstream_Handler,
@@ -389,19 +389,19 @@ var _MyTest_serviceDesc = grpc1.ServiceDesc{
 func init() { proto.RegisterFile("grpc.proto", fileDescriptorGrpc) }
 
 var fileDescriptorGrpc = []byte{
-	// 214 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x2f, 0x2a, 0x48,
-	0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x01, 0xb1, 0x95, 0x2c, 0xb9, 0x38, 0x7d, 0x2b,
-	0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0x44, 0xb8, 0x58, 0xc3, 0x12, 0x73, 0x4a, 0x53,
-	0x25, 0x18, 0x15, 0x18, 0x35, 0x98, 0x83, 0x20, 0x1c, 0x21, 0x31, 0x2e, 0x36, 0x30, 0xc3, 0x48,
-	0x82, 0x49, 0x81, 0x51, 0x83, 0x35, 0x08, 0xca, 0x53, 0x52, 0xe2, 0xe2, 0x02, 0x69, 0x2d, 0x2e,
-	0xc8, 0xcf, 0x2b, 0x4e, 0xc5, 0xae, 0x57, 0x49, 0x96, 0x8b, 0xd5, 0xb7, 0xd2, 0xb7, 0x38, 0x1d,
-	0x87, 0xb4, 0x1c, 0x17, 0x1b, 0x58, 0xda, 0x08, 0xbb, 0xbc, 0xd1, 0x2e, 0x46, 0x90, 0x82, 0x10,
-	0x90, 0xdb, 0xf4, 0xb8, 0x38, 0x43, 0xf3, 0x12, 0x8b, 0x2a, 0x9d, 0x13, 0x73, 0x72, 0x84, 0xf8,
-	0xf5, 0xc0, 0x1e, 0x81, 0xbb, 0x5c, 0x4a, 0x00, 0x21, 0x00, 0x75, 0x8f, 0x0e, 0x17, 0x97, 0x4b,
-	0x7e, 0x79, 0x5e, 0x71, 0x49, 0x51, 0x6a, 0x62, 0x2e, 0xa6, 0x06, 0x6e, 0x98, 0x80, 0x6f, 0x71,
-	0xba, 0x01, 0xa3, 0x90, 0x36, 0x17, 0x47, 0x68, 0x01, 0x54, 0x2d, 0xb2, 0x14, 0xa6, 0xc1, 0x1a,
-	0x8c, 0x42, 0xaa, 0x5c, 0x2c, 0x4e, 0x99, 0x29, 0x99, 0xa8, 0x0a, 0x79, 0x90, 0x38, 0x46, 0x1a,
-	0x8c, 0x06, 0x8c, 0x49, 0x6c, 0xe0, 0x70, 0x36, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x22, 0x36,
-	0x9a, 0x10, 0x75, 0x01, 0x00, 0x00,
+	// 220 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x4a, 0x2f, 0x2a, 0x48,
+	0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x48, 0xce, 0xcf, 0xd5, 0x03, 0xf1, 0x95, 0x2c,
+	0xb9, 0x38, 0x7d, 0x2b, 0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0x44, 0xb8, 0x58, 0xc3,
+	0x12, 0x73, 0x4a, 0x53, 0x25, 0x18, 0x15, 0x18, 0x35, 0x98, 0x83, 0x20, 0x1c, 0x21, 0x31, 0x2e,
+	0x36, 0x30, 0xc3, 0x48, 0x82, 0x49, 0x81, 0x51, 0x83, 0x35, 0x08, 0xca, 0x53, 0x52, 0xe2, 0xe2,
+	0x02, 0x69, 0x2d, 0x2e, 0xc8, 0xcf, 0x2b, 0x4e, 0xc5, 0xae, 0x57, 0x49, 0x96, 0x8b, 0xd5, 0xb7,
+	0xd2, 0xb7, 0x38, 0x1d, 0x87, 0xb4, 0x1c, 0x17, 0x1b, 0x58, 0xda, 0x08, 0xbb, 0xbc, 0xd1, 0x2d,
+	0x46, 0x90, 0x82, 0x10, 0x90, 0xdb, 0xcc, 0xb8, 0x38, 0x43, 0xf3, 0x12, 0x8b, 0x2a, 0x9d, 0x13,
+	0x73, 0x72, 0x84, 0x84, 0xf5, 0x60, 0x1e, 0xd0, 0x83, 0xbb, 0x5e, 0x4a, 0x04, 0x55, 0x10, 0xea,
+	0x2e, 0x13, 0x2e, 0x2e, 0x97, 0xfc, 0xf2, 0xbc, 0xe2, 0x92, 0xa2, 0xd4, 0xc4, 0x5c, 0xec, 0x1a,
+	0xf9, 0x91, 0x05, 0x7d, 0x8b, 0xd3, 0x0d, 0x18, 0x85, 0x8c, 0xb9, 0x38, 0x42, 0x0b, 0xa0, 0x7a,
+	0xd0, 0xa5, 0xb1, 0x5b, 0xa4, 0xc1, 0x28, 0xa4, 0xcb, 0xc5, 0xe2, 0x94, 0x99, 0x92, 0x89, 0xa9,
+	0x41, 0x00, 0x4d, 0xc0, 0x48, 0x83, 0xd1, 0x80, 0x31, 0x89, 0x0d, 0x1c, 0x17, 0xc6, 0x80, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x27, 0xe2, 0x8d, 0x87, 0x99, 0x01, 0x00, 0x00,
 }

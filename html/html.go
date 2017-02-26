@@ -26,6 +26,8 @@
 package html
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/gogo/letmegrpc/form"
@@ -75,11 +77,17 @@ func (p *html) writeError(eof string) {
 	p.P(`}`)
 }
 
+func split(method *descriptor.MethodDescriptorProto) (pkgName, msgName string) {
+	inputs := strings.Split(method.GetInputType(), ".")
+	packageName := strings.Join(inputs[1:len(inputs)-1], ".")
+	fmt.Fprintf(os.Stderr, "method <%s> packageName = %s\n", method.GetInputType(), packageName)
+	messageName := inputs[len(inputs)-1]
+	return packageName, messageName
+}
+
 func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descriptor.DescriptorProto {
 	fileDescriptorSet := p.AllFiles()
-	inputs := strings.Split(method.GetInputType(), ".")
-	packageName := inputs[1]
-	messageName := inputs[2]
+	packageName, messageName := split(method)
 	msg := fileDescriptorSet.GetMessage(packageName, messageName)
 	if msg == nil {
 		p.Fail("could not find message ", method.GetInputType())
@@ -88,9 +96,7 @@ func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descripto
 }
 
 func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescriptorProto) {
-	inputs := strings.Split(method.GetInputType(), ".")
-	packageName := inputs[1]
-	messageName := inputs[2]
+	packageName, messageName := split(method)
 	s := `<div class="container"><div class="jumbotron">
 	<h3>` + servName + `: ` + method.GetName() + `</h3>
 	` + form.Create(method.GetName(), packageName, messageName, p.Generator) + `

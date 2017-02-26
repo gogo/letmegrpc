@@ -3,7 +3,7 @@
 // DO NOT EDIT!
 
 /*
-Package grpc is a generated protocol buffer package.
+Package com_grpc is a generated protocol buffer package.
 
 It is generated from these files:
 	grpc.proto
@@ -14,7 +14,7 @@ It has these top-level messages:
 	MyMsg
 	MyMsg2
 */
-package grpc
+package com_grpc
 
 import net_http "net/http"
 import encoding_json "encoding/json"
