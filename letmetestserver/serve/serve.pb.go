@@ -263,9 +263,12 @@ func (m *EndLess) GetTree() *Tree {
 }
 
 type Tree struct {
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
-	Left  *Tree  `protobuf:"bytes,2,opt,name=Left" json:"Left,omitempty"`
-	Right *Tree  `protobuf:"bytes,3,opt,name=Right" json:"Right,omitempty"`
+	// Types that are valid to be assigned to Stuff:
+	//	*Tree_ValueString
+	//	*Tree_ValueNum
+	Stuff isTree_Stuff `protobuf_oneof:"stuff"`
+	Left  *Tree        `protobuf:"bytes,2,opt,name=Left" json:"Left,omitempty"`
+	Right *Tree        `protobuf:"bytes,3,opt,name=Right" json:"Right,omitempty"`
 }
 
 func (m *Tree) Reset()                    { *m = Tree{} }
@@ -280,6 +283,41 @@ func (m *Tree) GetValue() string {
 	return ""
 }
 
+type isTree_Stuff interface {
+	isTree_Stuff()
+}
+
+type Tree_ValueString struct {
+	ValueString string `protobuf:"bytes,1,opt,name=ValueString,proto3,oneof"`
+}
+type Tree_ValueNum struct {
+	ValueNum uint64 `protobuf:"varint,4,opt,name=ValueNum,proto3,oneof"`
+}
+
+func (*Tree_ValueString) isTree_Stuff() {}
+func (*Tree_ValueNum) isTree_Stuff()    {}
+
+func (m *Tree) GetStuff() isTree_Stuff {
+	if m != nil {
+		return m.Stuff
+	}
+	return nil
+}
+
+func (m *Tree) GetValueString() string {
+	if x, ok := m.GetStuff().(*Tree_ValueString); ok {
+		return x.ValueString
+	}
+	return ""
+}
+
+func (m *Tree) GetValueNum() uint64 {
+	if x, ok := m.GetStuff().(*Tree_ValueNum); ok {
+		return x.ValueNum
+	}
+	return 0
+}
+
 func (m *Tree) GetLeft() *Tree {
 	if m != nil {
 		return m.Left
@@ -292,6 +330,53 @@ func (m *Tree) GetRight() *Tree {
 		return m.Right
 	}
 	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*Tree) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), []interface{}) {
+	return _Tree_OneofMarshaler, _Tree_OneofUnmarshaler, []interface{}{
+		(*Tree_ValueString)(nil),
+		(*Tree_ValueNum)(nil),
+	}
+}
+
+func _Tree_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*Tree)
+	// stuff
+	switch x := m.Stuff.(type) {
+	case *Tree_ValueString:
+		_ = b.EncodeVarint(1<<3 | proto.WireBytes)
+		_ = b.EncodeStringBytes(x.ValueString)
+	case *Tree_ValueNum:
+		_ = b.EncodeVarint(4<<3 | proto.WireVarint)
+		_ = b.EncodeVarint(uint64(x.ValueNum))
+	case nil:
+	default:
+		return fmt.Errorf("Tree.Stuff has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _Tree_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*Tree)
+	switch tag {
+	case 1: // stuff.ValueString
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeStringBytes()
+		m.Stuff = &Tree_ValueString{x}
+		return true, err
+	case 4: // stuff.ValueNum
+		if wire != proto.WireVarint {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeVarint()
+		m.Stuff = &Tree_ValueNum{x}
+		return true, err
+	default:
+		return false, nil
+	}
 }
 
 func init() {
