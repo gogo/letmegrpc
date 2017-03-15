@@ -154,7 +154,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.P(`mux := `, httpPkg.Use(), `.NewServeMux()`)
 
 	services := file.GetService()
-	if len(services)==0{
+	if len(services) == 0 {
 		log.Fatal("You have no services defined in your proto file. That's an error. ")
 	}
 	for _, s := range file.GetService() {
