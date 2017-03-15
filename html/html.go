@@ -31,7 +31,6 @@ import (
 	"github.com/gogo/letmegrpc/form"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
-	"fmt"
 	"log"
 )
 
