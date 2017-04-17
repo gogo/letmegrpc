@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 set -xe
 
-basename=protobuf-cpp-$PROTOBUF_VERSION
+basename=protoc-$PROTOBUF_VERSION-linux-x86_64
 
 cd /home/travis
 
-wget https://github.com/google/protobuf/releases/download/v$PROTOBUF_VERSION/$basename.tar.gz
-tar xzf $basename.tar.gz
+wget https://github.com/google/protobuf/releases/download/v3.2.0/$basename.zip
+unzip $basename.zip
+cp $basename/bin/protoc ./bin/
 
-cd protobuf-$PROTOBUF_VERSION
-
-./configure --prefix=/home/travis && make -j2 && make install
