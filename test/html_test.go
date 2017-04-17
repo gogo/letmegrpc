@@ -28,8 +28,6 @@ package com_grpc
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"io"
 	"io/ioutil"
 	"net"
@@ -38,6 +36,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 type aServer struct{}
@@ -54,7 +55,7 @@ func (this *aServer) Downstream(m *MyRequest, s MyTest_DownstreamServer) error {
 	}
 	return nil
 }
-func (this *aServer) Upstream(s MyTest_UpstreamServer) error {
+func (this *aServer) Upstreamy(s MyTest_UpstreamyServer) error {
 	rec, err := s.Recv()
 	sum := int64(0)
 	for err == nil {

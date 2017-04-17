@@ -44,7 +44,7 @@ func runInBack(cmd *exec.Cmd) {
 		}
 		cmd.Wait()
 	}()
-	time.Sleep(2e9)
+	time.Sleep(2 * time.Second)
 }
 
 var log *golog.Logger = golog.New(os.Stderr, "", golog.Llongfile)

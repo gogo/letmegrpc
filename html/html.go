@@ -223,7 +223,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 				}
 			} else {
 				if !m.GetServerStreaming() {
-					p.P(`up, err := this.client.Upstream(`, contextPkg.Use(), `.Background())`)
+					p.P(`up, err := this.client.`, generator.CamelCase(m.GetName()), `(`, contextPkg.Use(), `.Background())`)
 					p.writeError(errString)
 					p.P(`err = up.Send(msg)`)
 					p.writeError(errString)
@@ -233,7 +233,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 					p.writeError(errString)
 					p.P(`w.Write(out)`)
 				} else {
-					p.P(`bidi, err := this.client.Bidi(`, contextPkg.Use(), `.Background())`)
+					p.P(`bidi, err := this.client.`, generator.CamelCase(m.GetName()), `(`, contextPkg.Use(), `.Background())`)
 					p.writeError(errString)
 					p.P(`err = bidi.Send(msg)`)
 					p.writeError(errString)

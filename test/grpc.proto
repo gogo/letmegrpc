@@ -51,7 +51,7 @@ service MyTest {
   rpc Downstream(MyRequest) returns (stream MyMsg);
 
   // This RPC streams from the client.
-  rpc Upstream(stream MyMsg) returns (MyResponse);
+  rpc Upstreamy(stream MyMsg) returns (MyResponse);
 
   // This one streams in both directions.
   rpc Bidi(stream MyMsg) returns (stream MyMsg2);

@@ -60,7 +60,7 @@ func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, e
 	MyTestServer := NewHTMLMyTestServer(MyTestClient, stringer)
 	mux.HandleFunc("/MyTest/UnaryCall", MyTestServer.UnaryCall)
 	mux.HandleFunc("/MyTest/Downstream", MyTestServer.Downstream)
-	mux.HandleFunc("/MyTest/Upstream", MyTestServer.Upstream)
+	mux.HandleFunc("/MyTest/Upstreamy", MyTestServer.Upstreamy)
 	mux.HandleFunc("/MyTest/Bidi", MyTestServer.Bidi)
 	return mux, nil
 }
@@ -1101,8 +1101,8 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	w.Write([]byte(Footer))
 }
 
-var FormMyTest_Upstream string = `<div class="container"><div class="jumbotron">
-	<h3>MyTest: Upstream</h3>
+var FormMyTest_Upstreamy string = `<div class="container"><div class="jumbotron">
+	<h3>MyTest: Upstreamy</h3>
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
@@ -1510,7 +1510,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
-		window.location.assign("./Upstream?json="+j);
+		window.location.assign("./Upstreamy?json="+j);
 	});
 }
 
@@ -1568,8 +1568,8 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	
 	</div>`
 
-func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Request) {
-	w.Write([]byte(Header(`MyTest`, `Upstream`)))
+func (this *htmlMyTest) Upstreamy(w net_http.ResponseWriter, req *net_http.Request) {
+	w.Write([]byte(Header(`MyTest`, `Upstreamy`)))
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
@@ -1584,9 +1584,9 @@ func (this *htmlMyTest) Upstream(w net_http.ResponseWriter, req *net_http.Reques
 		}
 		someValue = true
 	}
-	w.Write([]byte(FormMyTest_Upstream))
+	w.Write([]byte(FormMyTest_Upstreamy))
 	if someValue {
-		up, err := this.client.Upstream(golang_org_x_net_context.Background())
+		up, err := this.client.Upstreamy(golang_org_x_net_context.Background())
 		if err != nil {
 			if err != io.EOF {
 				w.Write([]byte("<div class=\"alert alert-danger\" role=\"alert\">" + err.Error() + "</div>"))
