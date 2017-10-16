@@ -95,10 +95,10 @@ func (p *html) getInputType(method *descriptor.MethodDescriptorProto) *descripto
 func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescriptorProto) {
 	packageName, messageName := split(method)
 	s := `<div class="container"><div class="jumbotron">
-	<h3>` + servName + `: ` + method.GetName() + `</h3>
-	` + form.Create(method.GetName(), packageName, messageName, p.Generator) + `
+	<h3>` + servName + `: ` + generator.CamelCase(method.GetName()) + `</h3>
+	` + form.Create(generator.CamelCase(method.GetName()), packageName, messageName, p.Generator) + `
 	</div>`
-	p.P(`var Form`, servName, "_", method.GetName(), " string = `", s, "`")
+	p.P(`var Form`, servName, "_", generator.CamelCase(method.GetName()), " string = `", s, "`")
 }
 
 func (p *html) Generate(file *generator.FileDescriptor) {
