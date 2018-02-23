@@ -61,7 +61,7 @@ func TestCreateCustom(t *testing.T) {
 	g.BuildTypeNameMap()
 	g.Reset()
 	g.SetFile(desc.File[0])
-	formStr = CreateCustom("WeirdMethod", "form", "Weird", g, CustomBuildField)
+	formStr = CreateCustom("WeirdMethod", "weird.form", "Weird", g, CustomBuildField)
 	testserver := httptest.NewServer(http.HandlerFunc(handle))
 	defer testserver.Close()
 	resp, err := http.Get(testserver.URL + "/WeirdMethod?json={%22Name%22:%22%22,%22WeirdName%22:%22another%20string%22,%22Number%22:null}")

@@ -450,7 +450,8 @@ func isNumber(f *descriptor.FieldDescriptorProto) bool {
 
 func getMessage(f *descriptor.FieldDescriptorProto, fileDescriptorSet *descriptor.FileDescriptorSet) *descriptor.DescriptorProto {
 	typeNames := strings.Split(f.GetTypeName(), ".")
-	packageName, messageName := typeNames[1], typeNames[2]
+	messageName := typeNames[len(typeNames)-1]
+	packageName := strings.Join(typeNames[1:len(typeNames)-1], ".")
 	return fileDescriptorSet.GetMessage(packageName, messageName)
 }
 

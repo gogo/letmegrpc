@@ -25,7 +25,7 @@
 
 syntax = "proto3";
 
-package form;
+package weird.form;
 
 message Weird {
 	string Name = 1;
