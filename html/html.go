@@ -27,6 +27,7 @@ package html
 
 import (
 	"strings"
+	"regexp"
 
 	"github.com/gogo/letmegrpc/form"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
@@ -100,6 +101,15 @@ func (p *html) generateFormFunc(servName string, method *descriptor.MethodDescri
 	</div>`
 	p.P(`var Form`, servName, "_", generator.CamelCase(method.GetName()), " string = `", s, "`")
 }
+func processFileName (inStr string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		panic(err)
+	}
+	s := strings.TrimSuffix(inStr, ".proto")
+	processed := strings.Replace(strings.Title(reg.ReplaceAllString(s," ")), " ", "", -1)
+	return processed
+}
 
 func (p *html) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
@@ -112,57 +122,79 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.strconvPkg = p.NewImport("strconv")
 	logPkg := p.NewImport("log")
 	grpcPkg := p.NewImport("google.golang.org/grpc")
+	HeaderFooterName := processFileName(file.GetName())
 
-	p.P(`var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {`)
-	p.In()
-	p.P(`header := []byte("<p><div class=\"container\"><pre>")`)
-	p.P(`data, err := `, p.jsonPkg.Use(), `.MarshalIndent(resp, "", "\t")`)
-	p.P(`if err != nil {`)
-	p.In()
-	p.P(`return nil, err`)
-	p.Out()
-	p.P(`}`)
-	p.P(`footer := []byte("</pre></div></p>")`)
-	p.P(`return append(append(header, data...), footer...), nil`)
-	p.Out()
-	p.P(`}`)
+	_, genDefaults := p.Param["skip-defaults"]
+	genDefaults = !genDefaults
 
-	p.P(`func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...`, grpcPkg.Use(), `.DialOption) {`)
-	p.In()
-	p.P(`handler, err := NewHandler(grpcAddr, stringer, opts...)`)
-	p.P(`if err != nil {`)
-	p.In()
-	p.P(logPkg.Use(), `.Fatalf("NewHandler(%q) = %v", grpcAddr, err)`)
-	p.Out()
-	p.P(`}`)
-	p.P(`if err := `, httpPkg.Use(), `.ListenAndServe(httpAddr, handler); err != nil {`)
-	p.In()
-	p.P(logPkg.Use(), `.Fatal(err)`)
-	p.Out()
-	p.P(`}`)
-	p.Out()
-	p.P(`}`)
+	if genDefaults {
+		p.P(`var DefaultHtmlStringer = func(req, resp interface{}) ([]byte, error) {`)
+		p.In()
+		p.P(`header := []byte("<p><div class=\"container\"><pre>")`)
+		p.P(`data, err := `, p.jsonPkg.Use(), `.MarshalIndent(resp, "", "\t")`)
+		p.P(`if err != nil {`)
+		p.In()
+		p.P(`return nil, err`)
+		p.Out()
+		p.P(`}`)
+		p.P(`footer := []byte("</pre></div></p>")`)
+		p.P(`return append(append(header, data...), footer...), nil`)
+		p.Out()
+		p.P(`}`)
 
-	p.P(`func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...`, grpcPkg.Use(), `.DialOption) (`, httpPkg.Use(), `.Handler, error) {`)
-	p.P(`conn, err := `, grpcPkg.Use(), `.Dial(grpcAddr, opts...)`)
-	p.P(`if err != nil {`)
-	p.In()
-	p.P(`return nil, err`)
-	p.Out()
-	p.P(`}`)
-	p.P(`mux := `, httpPkg.Use(), `.NewServeMux()`)
+		p.P(`func Serve(httpAddr, grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...`, grpcPkg.Use(), `.DialOption) {`)
+		p.In()
+		p.P(`handler, err := NewHandler(grpcAddr, stringer, opts...)`)
+		p.P(`if err != nil {`)
+		p.In()
+		p.P(logPkg.Use(), `.Fatalf("NewHandler(%q) = %v", grpcAddr, err)`)
+		p.Out()
+		p.P(`}`)
+		p.P(`if err := `, httpPkg.Use(), `.ListenAndServe(httpAddr, handler); err != nil {`)
+		p.In()
+		p.P(logPkg.Use(), `.Fatal(err)`)
+		p.Out()
+		p.P(`}`)
+		p.Out()
+		p.P(`}`)
+
+		p.P(`func NewHandler(grpcAddr string, stringer func(req, resp interface{}) ([]byte, error), opts ...`, grpcPkg.Use(), `.DialOption) (`, httpPkg.Use(), `.Handler, error) {`)
+		p.P(`conn, err := `, grpcPkg.Use(), `.Dial(grpcAddr, opts...)`)
+		p.P(`if err != nil {`)
+		p.In()
+		p.P(`return nil, err`)
+		p.Out()
+		p.P(`}`)
+		p.P(`mux := `, httpPkg.Use(), `.NewServeMux()`)
+		for _, s := range file.GetService() {
+			origServName := s.GetName()
+			servName := generator.CamelCase(origServName)
+			p.P(origServName, `Client := New`, servName, `Client(conn)`)
+			p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, stringer)`)
+			for _, m := range s.GetMethod() {
+				p.P(`mux.HandleFunc("/`, servName, `/`, generator.CamelCase(m.GetName()), `", `, origServName, `Server.`, generator.CamelCase(m.GetName()), `)`)
+			}
+		}
+		p.P(`return mux, nil`)
+		p.Out()
+		p.P(`}`)
+	}
+
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
-		p.P(origServName, `Client := New`, servName, `Client(conn)`)
-		p.P(origServName, `Server := NewHTML`, servName, `Server(`, origServName, `Client, stringer)`)
+		p.P(`func Get`, origServName, `MethodMap( client `, origServName, `Client, stringer func(req, resp interface{}) ([]byte, error)) map[string]func(w http.ResponseWriter, r *http.Request) {`)
+		p.In()
+		p.P(origServName, `Server := NewHTML`, servName, `Server(client, stringer)`)
+		p.P(`methodMap := map[string]func(w http.ResponseWriter, r *http.Request) {`)
 		for _, m := range s.GetMethod() {
-			p.P(`mux.HandleFunc("/`, servName, `/`, generator.CamelCase(m.GetName()), `", `, origServName, `Server.`, generator.CamelCase(m.GetName()), `)`)
+			p.P(`"/`, servName, `/`, generator.CamelCase(m.GetName()), `": `, origServName, `Server.`, generator.CamelCase(m.GetName()), `,`)
 		}
+		p.P(`}`)
+		p.P(`return methodMap`)
+		p.Out()
+		p.P(`}`)
 	}
-	p.P(`return mux, nil`)
-	p.Out()
-	p.P(`}`)
 
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
@@ -185,7 +217,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(``)
 			p.P(`func (this *html`, servName, `) `, generator.CamelCase(m.GetName()), `(w `, httpPkg.Use(), `.ResponseWriter, req *`, httpPkg.Use(), `.Request) {`)
 			p.In()
-			p.P("w.Write([]byte(Header(`", servName, "`,`", generator.CamelCase(m.GetName()), "`)))")
+			p.P("w.Write([]byte(Header", HeaderFooterName,"(`", servName, "`,`", generator.CamelCase(m.GetName()), "`)))")
 			p.P(`jsonString := req.FormValue("json")`)
 			p.P(`someValue := false`)
 			p.RecordTypeUse(m.GetInputType())
@@ -246,7 +278,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			}
 			p.Out()
 			p.P(`}`)
-			p.P("w.Write([]byte(Footer))")
+			p.P("w.Write([]byte(Footer", HeaderFooterName,"))")
 			p.Out()
 			p.P(`}`)
 		}
@@ -269,12 +301,14 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	</html>
 	`
 
-	p.P("var Header func(servName, methodName string) string = func(servName, methodName string) string {")
+	// p.P("var Header", strings.Title(strings.TrimSuffix(file.GetName(), ".proto" )) , " func(servName, methodName string) string = func(servName, methodName string) string {")
+
+	p.P("var Header", HeaderFooterName , " func(servName, methodName string) string = func(servName, methodName string) string {")
 	p.In()
 	p.P("return `", header1, "` + servName + `:` + methodName + `", header2, "`")
 	p.Out()
 	p.P(`}`)
 
-	p.P("var Footer string = `", footer, "`")
+	p.P("var Footer", HeaderFooterName, " string = `", footer, "`")
 
 }
