@@ -423,6 +423,9 @@ func isEnum(f *descriptor.FieldDescriptorProto) bool {
 
 func getEnum(fileDescriptorSet *descriptor.FileDescriptorSet, f *descriptor.FieldDescriptorProto) *descriptor.EnumDescriptorProto {
 	typeNames := strings.Split(f.GetTypeName(), ".")
+	if len(typeNames) > 3 {
+  	return fileDescriptorSet.GetMessage(typeNames[1], typeNames[2]).GetEnumType()[0]
+  }
 	return fileDescriptorSet.GetEnum(typeNames[1], typeNames[2])
 }
 
