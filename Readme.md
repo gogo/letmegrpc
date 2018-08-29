@@ -1,3 +1,5 @@
+> We are looking for a maintainer to take over this repository, file an issue if you are interested.
+
 # letmegrpc
 
 letmegrpc generates a web form gui from a [grpc](http://www.grpc.io/) definition.
