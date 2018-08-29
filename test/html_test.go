@@ -44,11 +44,11 @@ import (
 type aServer struct{}
 
 func (this *aServer) UnaryCall(c context.Context, s *MyRequest) (*MyResponse, error) {
-	return &MyResponse{s.Value}, nil
+	return &MyResponse{Value: s.Value}, nil
 }
 func (this *aServer) Downstream(m *MyRequest, s MyTest_DownstreamServer) error {
 	for i := 0; i < int(m.Value); i++ {
-		err := s.Send(&MyMsg{int64(i)})
+		err := s.Send(&MyMsg{Value: int64(i)})
 		if err != nil {
 			return err
 		}
@@ -62,7 +62,7 @@ func (this *aServer) Upstreamy(s MyTest_UpstreamyServer) error {
 		sum += rec.Value
 		rec, err = s.Recv()
 	}
-	return s.SendAndClose(&MyResponse{sum})
+	return s.SendAndClose(&MyResponse{Value: sum})
 }
 func (this *aServer) Bidi(b MyTest_BidiServer) error {
 	var err error
@@ -72,7 +72,7 @@ func (this *aServer) Bidi(b MyTest_BidiServer) error {
 		if err != nil {
 			break
 		}
-		err = b.Send(&MyMsg2{msg.Value})
+		err = b.Send(&MyMsg2{Value: msg.Value})
 		if err != nil {
 			break
 		}
@@ -125,7 +125,7 @@ func TestHTML(t *testing.T) {
 		t.Fatal("no form")
 	}
 	want := int64(5)
-	req := &MyRequest{want, 0}
+	req := &MyRequest{Value: want, Value2: 0}
 	data, err := json.Marshal(req)
 	if err != nil {
 		t.Fatal(err)

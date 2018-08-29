@@ -60,7 +60,7 @@ func TestCreateCustom(t *testing.T) {
 	g.SetPackageNames()
 	g.BuildTypeNameMap()
 	g.Reset()
-	g.SetFile(desc.File[0])
+	g.SetFile(desc.File[0].GetName())
 	formStr = CreateCustom("WeirdMethod", "weird.form", "Weird", g, CustomBuildField)
 	testserver := httptest.NewServer(http.HandlerFunc(handle))
 	defer testserver.Close()

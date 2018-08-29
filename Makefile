@@ -34,6 +34,7 @@ all:
 	make test
 
 install:
+	go install github.com/gogo/protobuf/protoc-gen-gogo
 	go install -v ./...
 
 clean:
