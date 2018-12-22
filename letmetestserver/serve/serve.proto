@@ -70,6 +70,7 @@ message Album {
 	bool Rated = 7;
 	string Epilogue = 8;
 	repeated bool Likes = 9;
+	int64 Count = 10;
 }
 
 message EndLess {

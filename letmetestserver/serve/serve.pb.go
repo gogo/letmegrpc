@@ -6,11 +6,12 @@ package serve
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -209,12 +210,13 @@ type Album struct {
 	Genre Genre   `protobuf:"varint,3,opt,name=Genre,proto3,enum=serve.Genre" json:"Genre,omitempty"`
 	//2015
 	Year string `protobuf:"bytes,4,opt,name=Year,proto3" json:"Year,omitempty"`
-	//Uhm ja
+	// Uhm ja
 	Producer             []string `protobuf:"bytes,5,rep,name=Producer,proto3" json:"Producer,omitempty"`
 	Mediocre             bool     `protobuf:"varint,6,opt,name=Mediocre,proto3" json:"Mediocre,omitempty"`
 	Rated                bool     `protobuf:"varint,7,opt,name=Rated,proto3" json:"Rated,omitempty"`
 	Epilogue             string   `protobuf:"bytes,8,opt,name=Epilogue,proto3" json:"Epilogue,omitempty"`
 	Likes                []bool   `protobuf:"varint,9,rep,packed,name=Likes,proto3" json:"Likes,omitempty"`
+	Count                int64    `protobuf:"varint,10,opt,name=Count,proto3" json:"Count,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -305,6 +307,13 @@ func (m *Album) GetLikes() []bool {
 		return m.Likes
 	}
 	return nil
+}
+
+func (m *Album) GetCount() int64 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
 }
 
 type EndLess struct {
