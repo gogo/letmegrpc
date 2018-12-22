@@ -75,6 +75,14 @@ func (p *html) writeError(eof string) {
 	p.P(`}`)
 }
 
+func (p *html) writeErrorAndLog(pkg generator.Single, prefix string) {
+	p.P(`if err != nil {`)
+	p.In()
+	p.P(pkg.Use(), `.Printf("`, prefix, `: %s ",`, `err.Error())`)
+	p.Out()
+	p.P(`}`)
+}
+
 func split(method *descriptor.MethodDescriptorProto) (pkgName, msgName string) {
 	inputs := strings.Split(method.GetInputType(), ".")
 	packageName := strings.Join(inputs[1:len(inputs)-1], ".")
@@ -190,6 +198,28 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`someValue := false`)
 			p.RecordTypeUse(m.GetInputType())
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
+			p.P(`validateMap := make(map[string]interface{})`)
+			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), &validateMap)`)
+			p.writeErrorAndLog(logPkg, "validator")
+			p.P(`for k, v := range validateMap {`)
+			p.In()
+			p.P(`switch v.(type) {`)
+			p.In()
+			p.P(`case string:`)
+			p.P(`vInt, err := `, p.strconvPkg.Use(), `.ParseInt(v.(string), 10, 64)`)
+			p.P(`if err != nil {`)
+			p.In()
+			p.P(`continue`)
+			p.Out()
+			p.P(`}`)
+			p.P(`validateMap[k] = vInt`)
+			p.Out()
+			p.P(`}`)
+			p.Out()
+			p.P(`}`)
+			p.P(`jsonBytes, err := `, p.jsonPkg.Use(), `.Marshal(validateMap)`)
+			p.writeErrorAndLog(logPkg, "re-marshal failed")
+			p.P(`jsonString = string(jsonBytes)`)
 			p.P(`if len(jsonString) > 0 {`)
 			p.In()
 			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), msg)`)
