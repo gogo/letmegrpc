@@ -557,101 +557,101 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="` + typName + `">add ` + fieldname + `</a>` + tooltip + `';
 			s += '<div class="field form-group"></div>';
 			`
-	}
-	if !f.IsRepeated() {
-		if isBool(f) {
-			defaultBool := "\"nothing\""
-			if proto3 {
-				defaultBool = "false"
-			}
-			if f.DefaultValue != nil {
-				defaultBool = f.GetDefaultValue()
-			}
-			s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
-					`
-			s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
-					`
-			s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, false, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="false" ' + radioed(` + defaultBool + `, false, json["` + fieldname + `"]) + '/>No</label>';
-					`
-			s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, true, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="true" ' + radioed(` + defaultBool + `, true, json["` + fieldname + `"]) + '/>Yes</label>';
-					`
-			s += `s += '</div></div></div>';
-					`
-			return s
-		} else if isEnum(f) {
-			enum := getEnum(fileDescriptorSet, f)
-			defaultEnum := "\"nothing\""
-			if proto3 {
-				defaultEnum = "0"
-			}
-			if f.DefaultValue != nil {
-				for _, v := range enum.GetValue() {
-					if v.GetName() == f.GetDefaultValue() {
-						defaultEnum = strconv.Itoa(int(v.GetNumber()))
-						break
-					}
+	} else {
+		if !f.IsRepeated() {
+			if isBool(f) {
+				defaultBool := "\"nothing\""
+				if proto3 {
+					defaultBool = "false"
 				}
-			}
-			if len(enum.GetValue()) <= 4 {
+				if f.DefaultValue != nil {
+					defaultBool = f.GetDefaultValue()
+				}
 				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
 					`
 				s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					`
-				for _, v := range enum.GetValue() {
-					num := strconv.Itoa(int(v.GetNumber()))
-					s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '/> ` +
-						v.GetName() + `</label>';
-						`
-				}
+				s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, false, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="false" ' + radioed(` + defaultBool + `, false, json["` + fieldname + `"]) + '/>No</label>';
+					`
+				s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultBool + `, true, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="true" ' + radioed(` + defaultBool + `, true, json["` + fieldname + `"]) + '/>Yes</label>';
+					`
 				s += `s += '</div></div></div>';
 					`
 				return s
-			}
-			s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
+			} else if isEnum(f) {
+				enum := getEnum(fileDescriptorSet, f)
+				defaultEnum := "\"nothing\""
+				if proto3 {
+					defaultEnum = "0"
+				}
+				if f.DefaultValue != nil {
+					for _, v := range enum.GetValue() {
+						if v.GetName() == f.GetDefaultValue() {
+							defaultEnum = strconv.Itoa(int(v.GetNumber()))
+							break
+						}
+					}
+				}
+				if len(enum.GetValue()) <= 4 {
+					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label>';
+					`
+					s += `s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
+					`
+					for _, v := range enum.GetValue() {
+						num := strconv.Itoa(int(v.GetNumber()))
+						s += `s += 	'<label class="btn btn-primary ' + activeradio(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '"><input type="radio" name="` + fieldname + `" value="` + num + `" ' + radioed(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '/> ` +
+							v.GetName() + `</label>';
+						`
+					}
+					s += `s += '</div></div></div>';
+					`
+					return s
+				}
+				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="` + fieldname + `">';
 					`
-			for _, v := range enum.GetValue() {
-				num := strconv.Itoa(int(v.GetNumber()))
-				s += `s += 	'<option value="` + num + `" ' + selected(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
+				for _, v := range enum.GetValue() {
+					num := strconv.Itoa(int(v.GetNumber()))
+					s += `s += 	'<option value="` + num + `" ' + selected(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
 						`
-			}
-			s += `s += '</select></div></div>';
+				}
+				s += `s += '</select></div></div>';
 					`
-			return s
-		} else if isNumber(f) {
-			def := "\"\""
-			if proto3 {
-				def = "0"
-			}
-			if f.DefaultValue != nil {
-				def = f.GetDefaultValue()
-			}
-			return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				return s
+			} else if isNumber(f) {
+				def := "\"\""
+				if proto3 {
+					def = "0"
+				}
+				if f.DefaultValue != nil {
+					def = f.GetDefaultValue()
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="1" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
-		} else if isFloat(f) {
-			def := "\"\""
-			if proto3 {
-				def = "0"
-			}
-			if f.DefaultValue != nil {
-				def = f.GetDefaultValue()
-			}
-			return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+			} else if isFloat(f) {
+				def := "\"\""
+				if proto3 {
+					def = "0"
+				}
+				if f.DefaultValue != nil {
+					def = f.GetDefaultValue()
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="number" step="any" '+setValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
 				`
+			} else {
+				def := "undefined"
+				if proto3 {
+					def = "\"\""
+				}
+				if f.DefaultValue != nil {
+					def = strconv.Quote(f.GetDefaultValue())
+				}
+				return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
+				`
+			}
 		} else {
-			def := "undefined"
-			if proto3 {
-				def = "\"\""
-			}
-			if f.DefaultValue != nil {
-				def = strconv.Quote(f.GetDefaultValue())
-			}
-			return `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10"><input class="form-control" name="` + f.GetName() + `" type="text" '+setStrValue(` + def + `, json["` + f.GetName() + `"])+'/></div></div>';
-				`
-		}
-	} else {
-		if isBool(f) {
-			s := `
+			if isBool(f) {
+				s := `
 				s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
@@ -661,10 +661,10 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="bool">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
-			return s
-		} else if isNumber(f) || isEnum(f) {
-			s :=
-				`s += '<div class="fields" fieldname="` + fieldname + `">';
+				return s
+			} else if isNumber(f) || isEnum(f) {
+				s :=
+					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="any" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -673,10 +673,10 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="number">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
-			return s
-		} else if isFloat(f) {
-			s :=
-				`s += '<div class="fields" fieldname="` + fieldname + `">';
+				return s
+			} else if isFloat(f) {
+				s :=
+					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="number" step="1" repeated="true" '+setRepValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -685,10 +685,10 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="float">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
-			return s
-		} else {
-			s :=
-				`s += '<div class="fields" fieldname="` + fieldname + `">';
+				return s
+			} else {
+				s :=
+					`s += '<div class="fields" fieldname="` + fieldname + `">';
 				var ` + fieldname + ` = getList(json, "` + fieldname + `");
 				for (var i = 0; i < ` + fieldname + `.length; i++) {
 					s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + `: </label><div class="col-sm-8"><input class="form-control" name="` + fieldname + `" type="text" repeated="true" '+setRepStrValue(json["` + f.GetName() + `"][i])+'/></div><div class="col-sm-2"><a href="#" class="del-field btn btn-warning btn-sm" role="button">Remove</a></div></div>';
@@ -697,7 +697,8 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 				s += '<a href="#" fieldname="` + fieldname + `" class="add-elem btn btn-info btn-sm" role="button" type="text">add ` + fieldname + `</a>` + tooltip + `';
 				s += '<div class="field form-group"></div>';
 				`
-			return s
+				return s
+			}
 		}
 	}
 	panic("unreachable")
