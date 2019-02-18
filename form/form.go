@@ -547,8 +547,8 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			s += '</div>';
 		s += setLink(json, "` + typName + `", "` + fieldname + `", "` + strings.Replace(help, "\n", "\\n", -1) + `");
 		`
-		}
-		return `s += '<div class="children" type="` + typName + `">';
+		} else {
+			return `s += '<div class="children" type="` + typName + `">';
 			var ` + fieldname + ` = getList(json, "` + fieldname + `");
 			for (var i = 0; i < ` + fieldname + `.length; i++) {
 				s += build` + typName + `(` + fieldname + `[i]);
@@ -557,6 +557,7 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="` + typName + `">add ` + fieldname + `</a>` + tooltip + `';
 			s += '<div class="field form-group"></div>';
 			`
+		}
 	} else {
 		if !f.IsRepeated() {
 			if isBool(f) {
@@ -606,18 +607,19 @@ func BuildField(fileDescriptorSet *descriptor.FileDescriptorSet, msg *descriptor
 					s += `s += '</div></div></div>';
 					`
 					return s
-				}
-				s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
+				} else {
+					s := `s += '<div class="field form-group"><label class="col-sm-2 control-label">` + fieldname + tooltip + colon + ` </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="` + fieldname + `">';
 					`
-				for _, v := range enum.GetValue() {
-					num := strconv.Itoa(int(v.GetNumber()))
-					s += `s += 	'<option value="` + num + `" ' + selected(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
+					for _, v := range enum.GetValue() {
+						num := strconv.Itoa(int(v.GetNumber()))
+						s += `s += 	'<option value="` + num + `" ' + selected(` + defaultEnum + `, ` + num + `, json["` + fieldname + `"]) + '>` + v.GetName() + `</option>';
 						`
-				}
-				s += `s += '</select></div></div>';
+					}
+					s += `s += '</select></div></div>';
 					`
-				return s
+					return s
+				}
 			} else if isNumber(f) {
 				def := "\"\""
 				if proto3 {
