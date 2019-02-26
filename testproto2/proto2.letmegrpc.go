@@ -681,7 +681,7 @@ func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request
 	validateMap := make(map[string]interface{})
 	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
 	if err != nil {
-		log.Printf("validator: %s ", err.Error())
+		log.Printf("[Parse Request]: %s ", err.Error())
 	}
 	if err == nil {
 		for k, v := range validateMap {

@@ -200,7 +200,7 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 			p.P(`msg := &`, p.typeName(m.GetInputType()), `{}`)
 			p.P(`validateMap := make(map[string]interface{})`)
 			p.P(`err := `, p.jsonPkg.Use(), `.Unmarshal([]byte(jsonString), &validateMap)`)
-			p.writeErrorAndLog(logPkg, "validator")
+			p.writeErrorAndLog(logPkg, "[Parse Request]")
 			p.P(`if err == nil {`)
 			p.In()
 			p.P(`for k, v := range validateMap {`)
