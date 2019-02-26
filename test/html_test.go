@@ -145,6 +145,35 @@ func TestHTML(t *testing.T) {
 	if !strings.Contains(string(body), `"Value":`) {
 		t.Fatal("could not find json value")
 	}
+	data = []byte(`{"value":"5"}`)
+	resp, err = http.Get(fmt.Sprintf("%s/MyTest/UnaryCall?json=%s", httpServer.URL, string(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	tbody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(tbody) != string(body) {
+		t.Fatal("could not find json value")
+	}
+	data = []byte(`{"value":25921044673987072}`)
+	resp, err = http.Get(fmt.Sprintf("%s/MyTest/UnaryCall?json=%s", httpServer.URL, string(data)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%s", string(body))
+	if strings.Contains(string(body), "404") {
+		t.Fatal("404")
+	}
+	if strings.Contains(string(body), `25921044673987072`) {
+		t.Fatal("html should not support really int64 type")
+	}
+
 	data = []byte(`{"value":"25921044673987072"}`)
 	resp, err = http.Get(fmt.Sprintf("%s/MyTest/UnaryCall?json=%s", httpServer.URL, string(data)))
 	if err != nil {
@@ -158,7 +187,7 @@ func TestHTML(t *testing.T) {
 	if strings.Contains(string(body), "404") {
 		t.Fatal("404")
 	}
-	if !strings.Contains(string(body), `"Value":`) {
-		t.Fatal("could not find json value")
+	if !strings.Contains(string(body), `25921044673987072`) {
+		t.Fatal("html should support fake int64(string) type")
 	}
 }
