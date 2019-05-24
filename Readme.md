@@ -51,8 +51,8 @@ Open your webbrowser at
 letmegrpc is just another protocol buffer code generation plugin.
 Simply run:
 
-    protoc -gogo_out=. grpc.proto
-    protoc -letmegrpc_out=. grpc.proto
+    protoc --gogo_out=. grpc.proto
+    protoc --letmegrpc_out=. grpc.proto
 
 Now you can have the html generated code next to your generated message code.
 It contains a:
