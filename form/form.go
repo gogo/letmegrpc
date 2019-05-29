@@ -484,7 +484,7 @@ func Init(methodName string, fieldname string, repeated bool, msg *descriptor.De
 	}
 	$("#form > .children").html(build` + typ(fieldname, repeated, msg) + `(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["` + fieldname + `"]);
@@ -738,7 +738,7 @@ func CreateCustom(methodName, packageName, messageName string, g *generator.Gene
 	text := `
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     `
 	text += `
