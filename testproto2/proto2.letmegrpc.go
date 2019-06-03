@@ -3,15 +3,17 @@
 
 package proto2
 
-import net_http "net/http"
-import encoding_json "encoding/json"
-import io "io"
-import golang_org_x_net_context "golang.org/x/net/context"
-import log "log"
-import google_golang_org_grpc "google.golang.org/grpc"
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	encoding_json "encoding/json"
+	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	golang_org_x_net_context "golang.org/x/net/context"
+	google_golang_org_grpc "google.golang.org/grpc"
+	io "io"
+	log "log"
+	math "math"
+	net_http "net/http"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -63,7 +65,7 @@ var FormProto2_Produce string = `<div class="container"><div class="jumbotron">
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     
 	<script>
@@ -585,7 +587,7 @@ s += '<div class="fields" fieldname="Serial">';
 	}
 	$("#form > .children").html(buildAlbum_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
