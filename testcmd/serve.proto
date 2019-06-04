@@ -39,33 +39,51 @@ enum Genre {
 	Jazz = 2;
 	NintendoCore = 3;
 	Indie = 4;
-  // Punk is the definition of `fun`!
 	Punk = 5;
 	Dance = 6;
 }
 
 message Artist {
+	//Pick something original
 	string Name = 1;
 	Instrument Role = 2;
 }
 
-// Song is the piece of audio you're listening.
 message Song {
 	string Name = 1;
+	//1,2,3,4...
 	uint64 Track = 2;
 	double Duration = 3;
 	repeated Artist Composer = 4;
 }
 
 message Album {
+	//Untitled?
 	string Name = 1;
 	repeated Song Song = 2;
 	Genre Genre = 3;
-  // Year... uh... `test` 'test'
+	//2015
 	string Year = 4;
+	//Uhm ja
 	repeated string Producer = 5;
+	bool Mediocre = 6;
+	bool Rated = 7;
+	string Epilogue = 8;
+	repeated bool Likes = 9;
+	int64 Count = 10;
+}
+
+message EndLess {
+	Tree Tree = 1;
+}
+
+message Tree {
+	string Value = 1;
+	Tree Left = 2;
+	Tree Right = 3;
 }
 
 service Label {
 	rpc Produce(Album) returns (Album);
+	rpc Loop(EndLess) returns (EndLess);
 }

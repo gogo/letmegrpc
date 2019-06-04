@@ -436,7 +436,14 @@ func isBool(f *descriptor.FieldDescriptorProto) bool {
 }
 
 func isString(f *descriptor.FieldDescriptorProto) bool {
-	return f.GetType() == descriptor.FieldDescriptorProto_TYPE_STRING
+	switch f.GetType() {
+	case descriptor.FieldDescriptorProto_TYPE_STRING,
+		descriptor.FieldDescriptorProto_TYPE_UINT64,
+		descriptor.FieldDescriptorProto_TYPE_SINT64,
+		descriptor.FieldDescriptorProto_TYPE_INT64:
+		return true
+	}
+	return false
 }
 
 func isEnum(f *descriptor.FieldDescriptorProto) bool {
@@ -463,11 +470,8 @@ func isFloat(f *descriptor.FieldDescriptorProto) bool {
 func isNumber(f *descriptor.FieldDescriptorProto) bool {
 	switch f.GetType() {
 	case descriptor.FieldDescriptorProto_TYPE_INT32,
-		descriptor.FieldDescriptorProto_TYPE_INT64,
 		descriptor.FieldDescriptorProto_TYPE_SINT32,
-		descriptor.FieldDescriptorProto_TYPE_SINT64,
-		descriptor.FieldDescriptorProto_TYPE_UINT32,
-		descriptor.FieldDescriptorProto_TYPE_UINT64:
+		descriptor.FieldDescriptorProto_TYPE_UINT32:
 		return true
 	}
 	return false

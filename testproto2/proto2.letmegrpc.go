@@ -6,13 +6,15 @@ package proto2
 import (
 	encoding_json "encoding/json"
 	fmt "fmt"
-	proto "github.com/gogo/protobuf/proto"
-	golang_org_x_net_context "golang.org/x/net/context"
-	google_golang_org_grpc "google.golang.org/grpc"
 	io "io"
 	log "log"
 	math "math"
 	net_http "net/http"
+	strconv "strconv"
+
+	proto "github.com/gogo/protobuf/proto"
+	golang_org_x_net_context "golang.org/x/net/context"
+	google_golang_org_grpc "google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -62,12 +64,12 @@ func NewHTMLProto2Server(client Proto2Client, stringer func(req, resp interface{
 
 var FormProto2_Produce string = `<div class="container"><div class="jumbotron">
 	<h3>Proto2: Produce</h3>
-	
+
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
     <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
-    
+
 	<script>
 
 function addChildNode(ev) {
@@ -474,14 +476,14 @@ s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Composer</label>'
 s += '</div></div>'
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
-				
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Role: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(1, 0, json["Role"]) + '"><input type="radio" name="Role" value="0" ' + radioed(1, 0, json["Role"]) + '/> Voice</label>';
 						s += 	'<label class="btn btn-primary ' + activeradio(1, 1, json["Role"]) + '"><input type="radio" name="Role" value="1" ' + radioed(1, 1, json["Role"]) + '/> Guitar</label>';
 						s += 	'<label class="btn btn-primary ' + activeradio(1, 2, json["Role"]) + '"><input type="radio" name="Role" value="2" ' + radioed(1, 2, json["Role"]) + '/> Drum</label>';
 						s += '</div></div></div>';
-					
+
 
 		s += '</div>';
 		return s;
@@ -495,11 +497,11 @@ s += '</div><div class="col-sm-10">'
 s += '<label class="heading">Song</label>'
 s += '</div></div>'
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue("Type in a Name", json["Name"])+'/></div></div>';
-				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="number" step="1" '+setValue(1, json["Track"])+'/></div></div>';
-				
+
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Track: </label><div class="col-sm-10"><input class="form-control" name="Track" type="text" '+setStrValue("1", json["Track"])+'/></div></div>';
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Duration: </label><div class="col-sm-10"><input class="form-control" name="Duration" type="number" step="any" '+setValue(3.3, json["Duration"])+'/></div></div>';
-				
+
 s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			var Composer = getList(json, "Composer");
 			for (var i = 0; i < Composer.length; i++) {
@@ -508,13 +510,13 @@ s += '<div class="children" type="RepeatedKeyword_Artist_Composer">';
 			s += '</div>';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Artist_Composer">add Composer</a>';
 			s += '<div class="field form-group"></div>';
-			
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Good: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Good"]) + '"><input type="radio" name="Good" value="false" ' + radioed(true, false, json["Good"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Good"]) + '"><input type="radio" name="Good" value="true" ' + radioed(true, true, json["Good"]) + '/>Yes</label>';
 					s += '</div></div></div>';
-					
+
 
 		s += '</div>';
 		return s;
@@ -524,10 +526,10 @@ function buildAlbum_RootKeyword(json) {
 if (json == undefined) {
 		return "";
 	}
-	
+
 var s = '<div class="node" type="Album_RootKeyword" fieldname="RootKeyword" repeated="false">';
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Name: </label><div class="col-sm-10"><input class="form-control" name="Name" type="text" '+setStrValue(undefined, json["Name"])+'/></div></div>';
-				
+
 s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			var Song = getList(json, "Song");
 			for (var i = 0; i < Song.length; i++) {
@@ -536,7 +538,7 @@ s += '<div class="children" type="RepeatedKeyword_Song_Song">';
 			s += '</div>';
 			s += '<a href="#" class="add-child btn btn-success btn-sm" role="button" type="RepeatedKeyword_Song_Song">add Song</a>';
 			s += '<div class="field form-group"></div>';
-			
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre: </label><div class="col-sm-10">';
 					s += '<select class="form-control" name="Genre">';
 					s += 	'<option value="0" ' + selected(1, 0, json["Genre"]) + '>Pop</option>';
@@ -547,9 +549,9 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Genre:
 						s += 	'<option value="5" ' + selected(1, 5, json["Genre"]) + '>Punk</option>';
 						s += 	'<option value="6" ' + selected(1, 6, json["Genre"]) + '>Dance</option>';
 						s += '</select></div></div>';
-					
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Year: </label><div class="col-sm-10"><input class="form-control" name="Year" type="text" '+setStrValue("2015", json["Year"])+'/></div></div>';
-				
+
 s += '<div class="fields" fieldname="Producer">';
 				var Producer = getList(json, "Producer");
 				for (var i = 0; i < Producer.length; i++) {
@@ -558,21 +560,21 @@ s += '<div class="fields" fieldname="Producer">';
 				s += '</div>';
 				s += '<a href="#" fieldname="Producer" class="add-elem btn btn-info btn-sm" role="button" type="text">add Producer</a>';
 				s += '<div class="field form-group"></div>';
-				
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Mediocre: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, false, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="false" ' + radioed(true, false, json["Mediocre"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio(true, true, json["Mediocre"]) + '"><input type="radio" name="Mediocre" value="true" ' + radioed(true, true, json["Mediocre"]) + '/>Yes</label>';
 					s += '</div></div></div>';
-					
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Rated: </label>';
 					s += '<div class="col-sm-10"><div class="btn-group" data-toggle="buttons">';
 					s += 	'<label class="btn btn-primary ' + activeradio("nothing", false, json["Rated"]) + '"><input type="radio" name="Rated" value="false" ' + radioed("nothing", false, json["Rated"]) + '/>No</label>';
 					s += 	'<label class="btn btn-primary ' + activeradio("nothing", true, json["Rated"]) + '"><input type="radio" name="Rated" value="true" ' + radioed("nothing", true, json["Rated"]) + '/>Yes</label>';
 					s += '</div></div></div>';
-					
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilogue: </label><div class="col-sm-10"><input class="form-control" name="Epilogue" type="text" '+setStrValue(undefined, json["Epilogue"])+'/></div></div>';
-				
+
 
 				s += '<div class="fields" fieldname="Likes">';
 				var Likes = getList(json, "Likes");
@@ -582,9 +584,9 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Epilog
 				s += '</div>';
 				s += '<a href="#" fieldname="Likes" class="add-elem btn btn-info btn-sm" role="button" type="bool">add Likes</a>';
 				s += '<div class="field form-group"></div>';
-				
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Stars: </label><div class="col-sm-10"><input class="form-control" name="Stars" type="number" step="1" '+setValue("", json["Stars"])+'/></div></div>';
-				
+
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Stars: </label><div class="col-sm-10"><input class="form-control" name="Stars" type="text" '+setStrValue(undefined, json["Stars"])+'/></div></div>';
+
 s += '<div class="fields" fieldname="Serial">';
 				var Serial = getList(json, "Serial");
 				for (var i = 0; i < Serial.length; i++) {
@@ -593,7 +595,7 @@ s += '<div class="fields" fieldname="Serial">';
 				s += '</div>';
 				s += '<a href="#" fieldname="Serial" class="add-elem btn btn-info btn-sm" role="button" type="float">add Serial</a>';
 				s += '<div class="field form-group"></div>';
-				
+
 
 			s += '</div>';
 			var node = $(s);
@@ -668,7 +670,7 @@ s += '<div class="fields" fieldname="Serial">';
 	}
 
 	</style>
-	
+
 	</div>`
 
 func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request) {
@@ -676,6 +678,34 @@ func (this *htmlProto2) Produce(w net_http.ResponseWriter, req *net_http.Request
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &Album{}
+	validateMap := make(map[string]interface{})
+	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
+	if err != nil {
+		log.Printf("[Parse Request]: %s ", err.Error())
+	}
+	if err == nil {
+		for k, v := range validateMap {
+			switch v.(type) {
+			case string:
+				vInt, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					continue
+				}
+				validateMap[k] = vInt
+			case float64:
+				vInt := int(v.(float64))
+				if vInt > math.MaxInt32 {
+					vStr := strconv.Itoa(vInt)
+					validateMap[k] = vStr
+				}
+			}
+		}
+		jsonBytes, err := encoding_json.Marshal(validateMap)
+		if err != nil {
+			log.Printf("re-marshal failed: %s ", err.Error())
+		}
+		jsonString = string(jsonBytes)
+	}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {

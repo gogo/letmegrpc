@@ -6,13 +6,15 @@ package com_grpc
 import (
 	encoding_json "encoding/json"
 	fmt "fmt"
-	proto "github.com/gogo/protobuf/proto"
-	golang_org_x_net_context "golang.org/x/net/context"
-	google_golang_org_grpc "google.golang.org/grpc"
 	io "io"
 	log "log"
 	math "math"
 	net_http "net/http"
+	strconv "strconv"
+
+	proto "github.com/gogo/protobuf/proto"
+	golang_org_x_net_context "golang.org/x/net/context"
+	google_golang_org_grpc "google.golang.org/grpc"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -65,12 +67,12 @@ func NewHTMLMyTestServer(client MyTestClient, stringer func(req, resp interface{
 
 var FormMyTest_UnaryCall string = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: UnaryCall</h3>
-	
+
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
     <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
-    
+
 	<script>
 
 function addChildNode(ev) {
@@ -471,12 +473,12 @@ var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNu
 if (json == undefined) {
 		return "";
 	}
-	
+
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
-				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="text" '+setStrValue("", json["Value"])+'/></div></div>';
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
-				
+
 
 			s += '</div>';
 			var node = $(s);
@@ -551,7 +553,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 
 	</style>
-	
+
 	</div>`
 
 func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Request) {
@@ -559,6 +561,34 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
+	validateMap := make(map[string]interface{})
+	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
+	if err != nil {
+		log.Printf("validator: %s ", err.Error())
+	}
+	if err == nil {
+		for k, v := range validateMap {
+			switch v.(type) {
+			case string:
+				vInt, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					continue
+				}
+				validateMap[k] = vInt
+			case float64:
+				vInt := int(v.(float64))
+				if vInt > math.MaxInt32 {
+					vStr := strconv.Itoa(vInt)
+					validateMap[k] = vStr
+				}
+			}
+		}
+		jsonBytes, err := encoding_json.Marshal(validateMap)
+		if err != nil {
+			log.Printf("re-marshal failed: %s ", err.Error())
+		}
+		jsonString = string(jsonBytes)
+	}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
@@ -595,12 +625,12 @@ func (this *htmlMyTest) UnaryCall(w net_http.ResponseWriter, req *net_http.Reque
 
 var FormMyTest_Downstream string = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Downstream</h3>
-	
+
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
     <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
-    
+
 	<script>
 
 function addChildNode(ev) {
@@ -1001,12 +1031,12 @@ var nodeFactory = {"MyRequest_RootKeyword": buildMyRequest_RootKeyword(emptyIfNu
 if (json == undefined) {
 		return "";
 	}
-	
+
 var s = '<div class="node" type="MyRequest_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
-				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="text" '+setStrValue("", json["Value"])+'/></div></div>';
+
 s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2: </label><div class="col-sm-10"><input class="form-control" name="Value2" type="number" step="1" '+setValue(0, json["Value2"])+'/></div></div>';
-				
+
 
 			s += '</div>';
 			var node = $(s);
@@ -1081,7 +1111,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 
 	</style>
-	
+
 	</div>`
 
 func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Request) {
@@ -1089,6 +1119,34 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyRequest{}
+	validateMap := make(map[string]interface{})
+	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
+	if err != nil {
+		log.Printf("validator: %s ", err.Error())
+	}
+	if err == nil {
+		for k, v := range validateMap {
+			switch v.(type) {
+			case string:
+				vInt, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					continue
+				}
+				validateMap[k] = vInt
+			case float64:
+				vInt := int(v.(float64))
+				if vInt > math.MaxInt32 {
+					vStr := strconv.Itoa(vInt)
+					validateMap[k] = vStr
+				}
+			}
+		}
+		jsonBytes, err := encoding_json.Marshal(validateMap)
+		if err != nil {
+			log.Printf("re-marshal failed: %s ", err.Error())
+		}
+		jsonString = string(jsonBytes)
+	}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
@@ -1136,12 +1194,12 @@ func (this *htmlMyTest) Downstream(w net_http.ResponseWriter, req *net_http.Requ
 
 var FormMyTest_Upstreamy string = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Upstreamy</h3>
-	
+
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
     <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
-    
+
 	<script>
 
 function addChildNode(ev) {
@@ -1542,10 +1600,10 @@ var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)
 if (json == undefined) {
 		return "";
 	}
-	
+
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
-				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="text" '+setStrValue("", json["Value"])+'/></div></div>';
+
 
 			s += '</div>';
 			var node = $(s);
@@ -1620,7 +1678,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 
 	</style>
-	
+
 	</div>`
 
 func (this *htmlMyTest) Upstreamy(w net_http.ResponseWriter, req *net_http.Request) {
@@ -1628,6 +1686,34 @@ func (this *htmlMyTest) Upstreamy(w net_http.ResponseWriter, req *net_http.Reque
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
+	validateMap := make(map[string]interface{})
+	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
+	if err != nil {
+		log.Printf("validator: %s ", err.Error())
+	}
+	if err == nil {
+		for k, v := range validateMap {
+			switch v.(type) {
+			case string:
+				vInt, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					continue
+				}
+				validateMap[k] = vInt
+			case float64:
+				vInt := int(v.(float64))
+				if vInt > math.MaxInt32 {
+					vStr := strconv.Itoa(vInt)
+					validateMap[k] = vStr
+				}
+			}
+		}
+		jsonBytes, err := encoding_json.Marshal(validateMap)
+		if err != nil {
+			log.Printf("re-marshal failed: %s ", err.Error())
+		}
+		jsonString = string(jsonBytes)
+	}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
@@ -1680,12 +1766,12 @@ func (this *htmlMyTest) Upstreamy(w net_http.ResponseWriter, req *net_http.Reque
 
 var FormMyTest_Bidi string = `<div class="container"><div class="jumbotron">
 	<h3>MyTest: Bidi</h3>
-	
+
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
     <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
-    
+
 	<script>
 
 function addChildNode(ev) {
@@ -2086,10 +2172,10 @@ var nodeFactory = {"MyMsg_RootKeyword": buildMyMsg_RootKeyword(emptyIfNull(null)
 if (json == undefined) {
 		return "";
 	}
-	
+
 var s = '<div class="node" type="MyMsg_RootKeyword" fieldname="RootKeyword" repeated="false">';
-s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="number" step="1" '+setValue(0, json["Value"])+'/></div></div>';
-				
+s += '<div class="field form-group"><label class="col-sm-2 control-label">Value: </label><div class="col-sm-10"><input class="form-control" name="Value" type="text" '+setStrValue("", json["Value"])+'/></div></div>';
+
 
 			s += '</div>';
 			var node = $(s);
@@ -2164,7 +2250,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 
 	</style>
-	
+
 	</div>`
 
 func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
@@ -2172,6 +2258,34 @@ func (this *htmlMyTest) Bidi(w net_http.ResponseWriter, req *net_http.Request) {
 	jsonString := req.FormValue("json")
 	someValue := false
 	msg := &MyMsg{}
+	validateMap := make(map[string]interface{})
+	err := encoding_json.Unmarshal([]byte(jsonString), &validateMap)
+	if err != nil {
+		log.Printf("validator: %s ", err.Error())
+	}
+	if err == nil {
+		for k, v := range validateMap {
+			switch v.(type) {
+			case string:
+				vInt, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					continue
+				}
+				validateMap[k] = vInt
+			case float64:
+				vInt := int(v.(float64))
+				if vInt > math.MaxInt32 {
+					vStr := strconv.Itoa(vInt)
+					validateMap[k] = vStr
+				}
+			}
+		}
+		jsonBytes, err := encoding_json.Marshal(validateMap)
+		if err != nil {
+			log.Printf("re-marshal failed: %s ", err.Error())
+		}
+		jsonString = string(jsonBytes)
+	}
 	if len(jsonString) > 0 {
 		err := encoding_json.Unmarshal([]byte(jsonString), msg)
 		if err != nil {
