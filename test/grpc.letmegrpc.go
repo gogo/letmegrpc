@@ -3,15 +3,17 @@
 
 package com_grpc
 
-import net_http "net/http"
-import encoding_json "encoding/json"
-import io "io"
-import golang_org_x_net_context "golang.org/x/net/context"
-import log "log"
-import google_golang_org_grpc "google.golang.org/grpc"
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	encoding_json "encoding/json"
+	fmt "fmt"
+	proto "github.com/gogo/protobuf/proto"
+	golang_org_x_net_context "golang.org/x/net/context"
+	google_golang_org_grpc "google.golang.org/grpc"
+	io "io"
+	log "log"
+	math "math"
+	net_http "net/http"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -66,7 +68,7 @@ var FormMyTest_UnaryCall string = `<div class="container"><div class="jumbotron"
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     
 	<script>
@@ -139,15 +141,37 @@ function addElem(ev) {
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++)
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam)
-        {
-            return sParameterName[1];
-        }
+    return getJsonFromUrl("?"+sPageURL)[sParam];
+}
+
+// From: https://stackoverflow.com/a/8486188
+function getJsonFromUrl(url) {
+  if(!url) url = location.href;
+  var question = url.indexOf("?");
+  var hash = url.indexOf("#");
+  if(hash==-1 && question==-1) return {};
+  if(hash==-1) hash = url.length;
+  var query = question==-1 || hash==question+1 ? url.substring(hash) :
+  url.substring(question+1,hash);
+  var result = {};
+  query.split("&").forEach(function(part) {
+    if(!part) return;
+    part = part.split("+").join(" "); // replace every + with space, regexp-free version
+    var eq = part.indexOf("=");
+    var key = eq>-1 ? part.substr(0,eq) : part;
+    var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+    var from = key.indexOf("[");
+    if(from==-1) result[decodeURIComponent(key)] = val;
+    else {
+      var to = key.indexOf("]",from);
+      var index = decodeURIComponent(key.substring(from+1,to));
+      key = decodeURIComponent(key.substring(0,from));
+      if(!result[key]) result[key] = [];
+      if(!index) result[key].push(val);
+      else result[key][index] = val;
     }
+  });
+  return result;
 }
 
 function activateLinks(node) {
@@ -468,7 +492,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 	$("#form > .children").html(buildMyRequest_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
@@ -574,7 +598,7 @@ var FormMyTest_Downstream string = `<div class="container"><div class="jumbotron
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     
 	<script>
@@ -647,15 +671,37 @@ function addElem(ev) {
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++)
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam)
-        {
-            return sParameterName[1];
-        }
+    return getJsonFromUrl("?"+sPageURL)[sParam];
+}
+
+// From: https://stackoverflow.com/a/8486188
+function getJsonFromUrl(url) {
+  if(!url) url = location.href;
+  var question = url.indexOf("?");
+  var hash = url.indexOf("#");
+  if(hash==-1 && question==-1) return {};
+  if(hash==-1) hash = url.length;
+  var query = question==-1 || hash==question+1 ? url.substring(hash) :
+  url.substring(question+1,hash);
+  var result = {};
+  query.split("&").forEach(function(part) {
+    if(!part) return;
+    part = part.split("+").join(" "); // replace every + with space, regexp-free version
+    var eq = part.indexOf("=");
+    var key = eq>-1 ? part.substr(0,eq) : part;
+    var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+    var from = key.indexOf("[");
+    if(from==-1) result[decodeURIComponent(key)] = val;
+    else {
+      var to = key.indexOf("]",from);
+      var index = decodeURIComponent(key.substring(from+1,to));
+      key = decodeURIComponent(key.substring(0,from));
+      if(!result[key]) result[key] = [];
+      if(!index) result[key].push(val);
+      else result[key][index] = val;
     }
+  });
+  return result;
 }
 
 function activateLinks(node) {
@@ -976,7 +1022,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value2
 	}
 	$("#form > .children").html(buildMyRequest_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
@@ -1093,7 +1139,7 @@ var FormMyTest_Upstreamy string = `<div class="container"><div class="jumbotron"
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     
 	<script>
@@ -1166,15 +1212,37 @@ function addElem(ev) {
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++)
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam)
-        {
-            return sParameterName[1];
-        }
+    return getJsonFromUrl("?"+sPageURL)[sParam];
+}
+
+// From: https://stackoverflow.com/a/8486188
+function getJsonFromUrl(url) {
+  if(!url) url = location.href;
+  var question = url.indexOf("?");
+  var hash = url.indexOf("#");
+  if(hash==-1 && question==-1) return {};
+  if(hash==-1) hash = url.length;
+  var query = question==-1 || hash==question+1 ? url.substring(hash) :
+  url.substring(question+1,hash);
+  var result = {};
+  query.split("&").forEach(function(part) {
+    if(!part) return;
+    part = part.split("+").join(" "); // replace every + with space, regexp-free version
+    var eq = part.indexOf("=");
+    var key = eq>-1 ? part.substr(0,eq) : part;
+    var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+    var from = key.indexOf("[");
+    if(from==-1) result[decodeURIComponent(key)] = val;
+    else {
+      var to = key.indexOf("]",from);
+      var index = decodeURIComponent(key.substring(from+1,to));
+      key = decodeURIComponent(key.substring(0,from));
+      if(!result[key]) result[key] = [];
+      if(!index) result[key].push(val);
+      else result[key][index] = val;
     }
+  });
+  return result;
 }
 
 function activateLinks(node) {
@@ -1493,7 +1561,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 	$("#form > .children").html(buildMyMsg_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);
@@ -1615,7 +1683,7 @@ var FormMyTest_Bidi string = `<div class="container"><div class="jumbotron">
 	
 	<form class="form-horizontal">
 	<div id="form"><div class="children"></div></div>
-    <a href="#" id="submit" class="btn btn-primary" role="button">Submit</a>
+    <input type="submit" class="btn btn-primary" role="button" value="Submit">
     </form>
     
 	<script>
@@ -1688,15 +1756,37 @@ function addElem(ev) {
 function getUrlParameter(sParam)
 {
     var sPageURL = window.location.search.substring(1);
-    var sURLVariables = sPageURL.split('&');
-    for (var i = 0; i < sURLVariables.length; i++)
-    {
-        var sParameterName = sURLVariables[i].split('=');
-        if (sParameterName[0] == sParam)
-        {
-            return sParameterName[1];
-        }
+    return getJsonFromUrl("?"+sPageURL)[sParam];
+}
+
+// From: https://stackoverflow.com/a/8486188
+function getJsonFromUrl(url) {
+  if(!url) url = location.href;
+  var question = url.indexOf("?");
+  var hash = url.indexOf("#");
+  if(hash==-1 && question==-1) return {};
+  if(hash==-1) hash = url.length;
+  var query = question==-1 || hash==question+1 ? url.substring(hash) :
+  url.substring(question+1,hash);
+  var result = {};
+  query.split("&").forEach(function(part) {
+    if(!part) return;
+    part = part.split("+").join(" "); // replace every + with space, regexp-free version
+    var eq = part.indexOf("=");
+    var key = eq>-1 ? part.substr(0,eq) : part;
+    var val = eq>-1 ? decodeURIComponent(part.substr(eq+1)) : "";
+    var from = key.indexOf("[");
+    if(from==-1) result[decodeURIComponent(key)] = val;
+    else {
+      var to = key.indexOf("]",from);
+      var index = decodeURIComponent(key.substring(from+1,to));
+      key = decodeURIComponent(key.substring(0,from));
+      if(!result[key]) result[key] = [];
+      if(!index) result[key].push(val);
+      else result[key][index] = val;
     }
+  });
+  return result;
 }
 
 function activateLinks(node) {
@@ -2015,7 +2105,7 @@ s += '<div class="field form-group"><label class="col-sm-2 control-label">Value:
 	}
 	$("#form > .children").html(buildMyMsg_RootKeyword(json));
 	activateLinks(root);
-	$("a[id=submit]").click(function(ev) {
+	$("form").submit(function(ev) {
 		ev.preventDefault();
 		c = getChildren($("#form"));
 		j = JSON.stringify(c["RootKeyword"]);

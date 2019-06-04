@@ -12,6 +12,7 @@ letmegrpc generates a web form gui from a [grpc](http://www.grpc.io/) definition
     mkdir -p ./src/github.com/gogo/letmegrpc
     git clone https://github.com/gogo/letmegrpc ./src/github.com/gogo/letmegrpc
     git clone https://github.com/gogo/protobuf ./src/github.com/gogo/protobuf
+    go get github.com/gogo/pbparser
     go get google.golang.org/grpc
     go get golang.org/x/net/context
     (cd ./src/github.com/gogo/letmegrpc && make install)

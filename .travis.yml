@@ -1,5 +1,5 @@
 env:
-  - PROTOBUF_VERSION=3.4.0
+  - PROTOBUF_VERSION=3.7.1
 
 before_install:
   - ./install-godeps.sh
@@ -14,4 +14,4 @@ script:
 language: go
 
 go:
-  - 1.10.x
+  - 1.12.x
