@@ -31,6 +31,7 @@ import (
 	"github.com/gogo/letmegrpc/form"
 	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	"log"
 )
 
 type html struct {
@@ -159,6 +160,11 @@ func (p *html) Generate(file *generator.FileDescriptor) {
 	p.Out()
 	p.P(`}`)
 	p.P(`mux := `, httpPkg.Use(), `.NewServeMux()`)
+
+	services := file.GetService()
+	if len(services) == 0 {
+		log.Fatal("You have no services defined in your proto file. That's an error. ")
+	}
 	for _, s := range file.GetService() {
 		origServName := s.GetName()
 		servName := generator.CamelCase(origServName)
